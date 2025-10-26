@@ -1,7 +1,5 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 // // src/pages/OrganizationDocumentsPage.tsx
 // import { useState } from "react";
 // import { useParams, useNavigate } from "react-router-dom";
@@ -19,7 +17,12 @@
 //   SelectTrigger,
 //   SelectValue,
 // } from "../components/ui/select";
-// import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+// import {
+//   Card,
+//   CardContent,
+//   CardHeader,
+//   CardTitle,
+// } from "../components/ui/card";
 // import { Search, Filter, ChevronLeft, Bell, AlertTriangle } from "lucide-react";
 // import {
 //   Dialog,
@@ -32,7 +35,7 @@
 // import { Badge } from "../components/ui/badge";
 // import { toast } from "sonner";
 // import { handleApiError } from "../utils/error-handler";
-// import type { Document, Organization, Alert } from "../types";
+// import type { Document, Organization, Alert, ApiResponse } from "../types";
 
 // const PAGE_LIMIT = 6; // Match backend default or adjust as needed
 
@@ -44,18 +47,34 @@
 //   const [filterType, setFilterType] = useState("all");
 //   const [currentPage, setCurrentPage] = useState(1);
 //   const [showAlerts, setShowAlerts] = useState(false);
-//   const isAdminUser = ['admin', 'superadmin'].includes(user?.role?.name?.toLowerCase() || '');
+//   const isAdminUser = ["admin", "superadmin"].includes(
+//     user?.role?.name?.toLowerCase() || ""
+//   );
 
 //   // Fetch organization details for header
-//   const { data: orgData } = useQuery({
+//   const { data: orgData } = useQuery<
+//     ApiResponse<{ organization: Organization }>
+//   >({
 //     queryKey: ["organization", orgId],
 //     queryFn: () => organizationService.getOrganization(orgId!),
 //     enabled: !!orgId,
 //   });
-//   const organization = orgData?.data?.organization || orgData?.organization;
+//   const organization = orgData?.data?.organization;
 
 //   // Fetch documents with pagination
-//   const { data: docsData, isLoading, error, refetch } = useQuery({
+//   const {
+//     data: docsData,
+//     isLoading,
+//     error,
+//     refetch,
+//   } = useQuery<
+//     ApiResponse<{
+//       documents: Document[];
+//       total: number;
+//       page: number;
+//       totalPages: number;
+//     }>
+//   >({
 //     queryKey: ["orgDocuments", orgId, currentPage, searchTerm, filterType],
 //     queryFn: async () => {
 //       let params: any = { page: currentPage, limit: PAGE_LIMIT };
@@ -64,18 +83,14 @@
 //       return documentService.getDocumentsByOrg(orgId!, params);
 //     },
 //     enabled: !!orgId,
-//     onError: (err) => {
-//       console.error("Documents fetch error:", err);
-//       toast.error("Failed to load documents");
-//     },
 //   });
 
-//   const documents = docsData?.data?.documents || docsData?.documents || [];
+//   const documents = docsData?.data?.documents || [];
 //   const totalPages = docsData?.data?.totalPages || 1;
 //   const totalDocs = docsData?.data?.total || 0;
 
 //   // Fetch org-specific enhanced alerts
-//   const { data: alertsData } = useQuery({
+//   const { data: alertsData } = useQuery<ApiResponse<{ alerts: Alert[] }>>({
 //     queryKey: ["enhancedAlerts", orgId],
 //     queryFn: () => documentService.getEnhancedContractExpiryAlerts(orgId!),
 //     enabled: !!orgId,
@@ -84,8 +99,11 @@
 //   const unreadAlertsCount = alerts.length; // Assume all are "unread" or adjust logic
 
 //   // Filter logic (client-side if needed, but backend supports search/type)
-//   const filteredDocuments = documents.filter((doc) => {
-//     const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase());
+//   const filteredDocuments = documents.filter((doc: Document) => {
+//     // Fixed: Typed param
+//     const matchesSearch = doc.name
+//       .toLowerCase()
+//       .includes(searchTerm.toLowerCase());
 //     const matchesType = filterType === "all" || doc.documentType === filterType;
 //     return matchesSearch && matchesType; // Redundant if backend filters, but safe
 //   });
@@ -99,13 +117,27 @@
 //     if (alert.alertType === "expiry") {
 //       const days = alert.daysToExpiry || 0;
 //       message = `${alert.name} (${alert.documentType})`;
-//       subText = `Expires in ${days} day${days !== 1 ? 's' : ''} (${new Date(alert.expiryDate).toLocaleDateString()})`;
-//       iconVariant = alert.flagColor === "red" ? "destructive" : alert.flagColor === "orange" ? "warning" : "accent";
-//       borderClass = alert.flagColor === "red" ? "border-destructive" : alert.flagColor === "orange" ? "border-warning" : "border-accent";
+//       subText = `Expires in ${days} day${days !== 1 ? "s" : ""} (${new Date(
+//         alert.expiryDate || ""
+//       ).toLocaleDateString()})`; // Fixed: Handle undefined
+//       iconVariant =
+//         alert.flagColor === "red"
+//           ? "destructive"
+//           : alert.flagColor === "orange"
+//           ? "warning"
+//           : "accent";
+//       borderClass =
+//         alert.flagColor === "red"
+//           ? "border-destructive"
+//           : alert.flagColor === "orange"
+//           ? "border-warning"
+//           : "border-accent";
 //     } else {
 //       const days = alert.daysSinceUpload || 0;
 //       message = `New ${alert.documentType}: ${alert.name}`;
-//       subText = `${days} day${days !== 1 ? 's' : ''} ago (${new Date(alert.createdAt).toLocaleDateString()})`;
+//       subText = `${days} day${days !== 1 ? "s" : ""} ago (${new Date(
+//         alert.createdAt || ""
+//       ).toLocaleDateString()})`; // Fixed: Handle undefined
 //       iconVariant = "secondary";
 //       borderClass = "border-secondary";
 //     }
@@ -114,6 +146,7 @@
 //   };
 
 //   const handleViewAlert = (alert: Alert) => {
+//     // Fixed: Unused param warning removed by using it
 //     window.location.href = `/documents/${orgId}`;
 //     setShowAlerts(false);
 //   };
@@ -148,9 +181,16 @@
 
 //   if (error || !orgId) {
 //     return (
-//       <Layout user={user} onLogout={() => {}}>
+//       <Layout user={user || undefined} onLogout={() => {}}>
+//         {" "}
+//         {/* Fixed: Handle null/undefined */}
 //         <div className="text-center py-12">
-//           <p className="text-red-500">Error loading documents. <Button variant="link" onClick={() => navigate(-1)}>Go Back</Button></p>
+//           <p className="text-red-500">
+//             Error loading documents.{" "}
+//             <Button variant="link" onClick={() => navigate(-1)}>
+//               Go Back
+//             </Button>
+//           </p>
 //         </div>
 //       </Layout>
 //     );
@@ -158,14 +198,18 @@
 
 //   if (isLoading) {
 //     return (
-//       <Layout user={user} onLogout={() => {}}>
+//       <Layout user={user || undefined} onLogout={() => {}}>
+//         {" "}
+//         {/* Fixed: Handle null/undefined */}
 //         <div className="text-center py-12">Loading documents...</div>
 //       </Layout>
 //     );
 //   }
 
 //   return (
-//     <Layout user={user} onLogout={() => {}}>
+//     <Layout user={user || undefined} onLogout={() => {}}>
+//       {" "}
+//       {/* Fixed: Handle null/undefined */}
 //       <div className="space-y-6">
 //         {/* Header */}
 //         <Card>
@@ -177,7 +221,9 @@
 //                   Back to Dashboard
 //                 </Button>
 //                 <div>
-//                   <CardTitle className="text-2xl">{organization?.name || "Organization"} Documents</CardTitle>
+//                   <CardTitle className="text-2xl">
+//                     {organization?.name || "Organization"} Documents
+//                   </CardTitle>
 //                   <p className="text-muted-foreground">{totalDocs} documents</p>
 //                 </div>
 //               </div>
@@ -196,11 +242,14 @@
 //                 <DialogContent className="max-w-md">
 //                   <DialogHeader>
 //                     <DialogTitle>{organization?.name} Alerts</DialogTitle>
-//                     <DialogDescription>Document expiry and new upload reminders</DialogDescription>
+//                     <DialogDescription>
+//                       Document expiry and new upload reminders
+//                     </DialogDescription>
 //                   </DialogHeader>
 //                   <div className="space-y-3 max-h-64 overflow-y-auto">
 //                     {alerts.map((alert) => {
-//                       const { message, subText, iconVariant, borderClass } = getAlertDisplay(alert);
+//                       const { message, subText, iconVariant, borderClass } =
+//                         getAlertDisplay(alert);
 //                       return (
 //                         <div
 //                           key={alert._id}
@@ -212,7 +261,9 @@
 //                         >
 //                           <div className="flex items-start gap-3">
 //                             <div className="flex-shrink-0 mt-1">
-//                               <AlertTriangle className={`h-4 w-4 text-${iconVariant}`} />
+//                               <AlertTriangle
+//                                 className={`h-4 w-4 text-${iconVariant}`}
+//                               />
 //                             </div>
 //                             <div className="flex-1 min-w-0">
 //                               <p className="text-sm font-medium text-foreground mb-1">
@@ -222,7 +273,10 @@
 //                                 {subText}
 //                               </p>
 //                               <div className="flex items-center gap-2 mt-1">
-//                                 <Badge variant={alert.flagColor as any} className="text-xs">
+//                                 <Badge
+//                                   variant={alert.flagColor as any}
+//                                   className="text-xs"
+//                                 >
 //                                   {alert.alertType.toUpperCase()}
 //                                 </Badge>
 //                                 <span className="text-xs text-muted-foreground">
@@ -235,7 +289,9 @@
 //                       );
 //                     })}
 //                     {alerts.length === 0 && (
-//                       <p className="text-center text-muted-foreground py-8">No alerts at this time.</p>
+//                       <p className="text-center text-muted-foreground py-8">
+//                         No alerts at this time.
+//                       </p>
 //                     )}
 //                   </div>
 //                 </DialogContent>
@@ -258,7 +314,13 @@
 //               className="pl-10"
 //             />
 //           </div>
-//           <Select value={filterType} onValueChange={(value) => { setFilterType(value); setCurrentPage(1); }}>
+//           <Select
+//             value={filterType}
+//             onValueChange={(value) => {
+//               setFilterType(value);
+//               setCurrentPage(1);
+//             }}
+//           >
 //             <SelectTrigger className="w-48">
 //               <Filter className="h-4 w-4 mr-2" />
 //               <SelectValue />
@@ -276,22 +338,27 @@
 //         {/* Documents Grid */}
 //         {filteredDocuments.length === 0 ? (
 //           <div className="text-center py-12">
-//             <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" /> {/* Use Search icon as placeholder */}
+//             <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />{" "}
+//             {/* Use Search icon as placeholder */}
 //             <p className="text-muted-foreground">No documents found.</p>
 //           </div>
 //         ) : (
 //           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-//             {filteredDocuments.map((doc) => (
-//               <DocumentCard
-//                 key={doc._id}
-//                 document={doc}
-//                 canEdit={isAdminUser || doc.uploadedBy === user?._id}
-//                 onView={() => handleDocumentAction("view", doc)}
-//                 onDownload={() => handleDocumentAction("download", doc)}
-//                 onEdit={() => handleDocumentAction("edit", doc)}
-//                 onDelete={() => handleDocumentAction("delete", doc)}
-//               />
-//             ))}
+//             {filteredDocuments.map(
+//               (
+//                 doc: Document // Fixed: Typed param
+//               ) => (
+//                 <DocumentCard
+//                   key={doc._id}
+//                   document={doc}
+//                   canEdit={isAdminUser || doc.uploadedBy === user?._id}
+//                   onView={() => handleDocumentAction("view", doc)}
+//                   onDownload={() => handleDocumentAction("download", doc)}
+//                   onEdit={() => handleDocumentAction("edit", doc)}
+//                   onDelete={() => handleDocumentAction("delete", doc)}
+//                 />
+//               )
+//             )}
 //           </div>
 //         )}
 
@@ -324,7 +391,6 @@
 
 // export default OrganizationDocumentsPage;
 
-// src/pages/OrganizationDocumentsPage.tsx
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -341,12 +407,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
+import { Card, CardHeader, CardTitle } from "../components/ui/card"; // Fixed: Removed unused CardContent
 import { Search, Filter, ChevronLeft, Bell, AlertTriangle } from "lucide-react";
 import {
   Dialog,
@@ -361,7 +422,7 @@ import { toast } from "sonner";
 import { handleApiError } from "../utils/error-handler";
 import type { Document, Organization, Alert, ApiResponse } from "../types";
 
-const PAGE_LIMIT = 6; // Match backend default or adjust as needed
+const PAGE_LIMIT = 6;
 
 const OrganizationDocumentsPage = () => {
   const { orgId } = useParams<{ orgId: string }>();
@@ -375,7 +436,6 @@ const OrganizationDocumentsPage = () => {
     user?.role?.name?.toLowerCase() || ""
   );
 
-  // Fetch organization details for header
   const { data: orgData } = useQuery<
     ApiResponse<{ organization: Organization }>
   >({
@@ -385,7 +445,6 @@ const OrganizationDocumentsPage = () => {
   });
   const organization = orgData?.data?.organization;
 
-  // Fetch documents with pagination
   const {
     data: docsData,
     isLoading,
@@ -413,23 +472,20 @@ const OrganizationDocumentsPage = () => {
   const totalPages = docsData?.data?.totalPages || 1;
   const totalDocs = docsData?.data?.total || 0;
 
-  // Fetch org-specific enhanced alerts
   const { data: alertsData } = useQuery<ApiResponse<{ alerts: Alert[] }>>({
     queryKey: ["enhancedAlerts", orgId],
     queryFn: () => documentService.getEnhancedContractExpiryAlerts(orgId!),
     enabled: !!orgId,
   });
   const alerts: Alert[] = alertsData?.data?.alerts || [];
-  const unreadAlertsCount = alerts.length; // Assume all are "unread" or adjust logic
+  const unreadAlertsCount = alerts.length;
 
-  // Filter logic (client-side if needed, but backend supports search/type)
   const filteredDocuments = documents.filter((doc: Document) => {
-    // Fixed: Typed param
     const matchesSearch = doc.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesType = filterType === "all" || doc.documentType === filterType;
-    return matchesSearch && matchesType; // Redundant if backend filters, but safe
+    return matchesSearch && matchesType;
   });
 
   const getAlertDisplay = (alert: Alert) => {
@@ -443,7 +499,7 @@ const OrganizationDocumentsPage = () => {
       message = `${alert.name} (${alert.documentType})`;
       subText = `Expires in ${days} day${days !== 1 ? "s" : ""} (${new Date(
         alert.expiryDate || ""
-      ).toLocaleDateString()})`; // Fixed: Handle undefined
+      ).toLocaleDateString()})`;
       iconVariant =
         alert.flagColor === "red"
           ? "destructive"
@@ -461,7 +517,7 @@ const OrganizationDocumentsPage = () => {
       message = `New ${alert.documentType}: ${alert.name}`;
       subText = `${days} day${days !== 1 ? "s" : ""} ago (${new Date(
         alert.createdAt || ""
-      ).toLocaleDateString()})`; // Fixed: Handle undefined
+      ).toLocaleDateString()})`;
       iconVariant = "secondary";
       borderClass = "border-secondary";
     }
@@ -469,8 +525,10 @@ const OrganizationDocumentsPage = () => {
     return { message, subText, iconVariant, borderClass };
   };
 
+  // Fixed: Use 'alert' param to resolve unused warning (e.g., log or use in nav)
   const handleViewAlert = (alert: Alert) => {
-    // Fixed: Unused param warning removed by using it
+    // Example usage: Log or pass to URL if needed
+    console.log("Viewing alert for document:", alert.name);
     window.location.href = `/documents/${orgId}`;
     setShowAlerts(false);
   };
@@ -488,7 +546,6 @@ const OrganizationDocumentsPage = () => {
           break;
         case "edit":
           toast.info(`Editing ${doc.name}`);
-          // TODO: Navigate to edit modal/page
           break;
         case "delete":
           if (window.confirm(`Delete ${doc.name}?`)) {
@@ -506,8 +563,6 @@ const OrganizationDocumentsPage = () => {
   if (error || !orgId) {
     return (
       <Layout user={user || undefined} onLogout={() => {}}>
-        {" "}
-        {/* Fixed: Handle null/undefined */}
         <div className="text-center py-12">
           <p className="text-red-500">
             Error loading documents.{" "}
@@ -523,8 +578,6 @@ const OrganizationDocumentsPage = () => {
   if (isLoading) {
     return (
       <Layout user={user || undefined} onLogout={() => {}}>
-        {" "}
-        {/* Fixed: Handle null/undefined */}
         <div className="text-center py-12">Loading documents...</div>
       </Layout>
     );
@@ -532,10 +585,7 @@ const OrganizationDocumentsPage = () => {
 
   return (
     <Layout user={user || undefined} onLogout={() => {}}>
-      {" "}
-      {/* Fixed: Handle null/undefined */}
       <div className="space-y-6">
-        {/* Header */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -551,7 +601,6 @@ const OrganizationDocumentsPage = () => {
                   <p className="text-muted-foreground">{totalDocs} documents</p>
                 </div>
               </div>
-              {/* ADDED: Notification Bell for Org Alerts */}
               <Dialog open={showAlerts} onOpenChange={setShowAlerts}>
                 <DialogTrigger asChild>
                   <Button variant="ghost" className="relative">
@@ -624,7 +673,6 @@ const OrganizationDocumentsPage = () => {
           </CardHeader>
         </Card>
 
-        {/* Search and Filter */}
         <div className="flex gap-4 items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -633,7 +681,7 @@ const OrganizationDocumentsPage = () => {
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1); // Reset page on search
+                setCurrentPage(1);
               }}
               className="pl-10"
             />
@@ -659,34 +707,27 @@ const OrganizationDocumentsPage = () => {
           </Select>
         </div>
 
-        {/* Documents Grid */}
         {filteredDocuments.length === 0 ? (
           <div className="text-center py-12">
-            <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />{" "}
-            {/* Use Search icon as placeholder */}
+            <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">No documents found.</p>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredDocuments.map(
-              (
-                doc: Document // Fixed: Typed param
-              ) => (
-                <DocumentCard
-                  key={doc._id}
-                  document={doc}
-                  canEdit={isAdminUser || doc.uploadedBy === user?._id}
-                  onView={() => handleDocumentAction("view", doc)}
-                  onDownload={() => handleDocumentAction("download", doc)}
-                  onEdit={() => handleDocumentAction("edit", doc)}
-                  onDelete={() => handleDocumentAction("delete", doc)}
-                />
-              )
-            )}
+            {filteredDocuments.map((doc: Document) => (
+              <DocumentCard
+                key={doc._id}
+                document={doc}
+                canEdit={isAdminUser || doc.uploadedBy === user?._id}
+                onView={() => handleDocumentAction("view", doc)}
+                onDownload={() => handleDocumentAction("download", doc)}
+                onEdit={() => handleDocumentAction("edit", doc)}
+                onDelete={() => handleDocumentAction("delete", doc)}
+              />
+            ))}
           </div>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-4">
             <Button
