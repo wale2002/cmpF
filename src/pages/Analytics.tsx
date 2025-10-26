@@ -507,7 +507,7 @@ import { userService, organizationService, documentService } from "../lib/api";
 import { AnalyticsCharts } from "../components/AnalyticsCharts";
 import { Layout } from "../components/Layout";
 import type { User, Document, Organization, ApiResponse } from "../types";
-import { handleApiError } from "../utils/error-handler";
+// import { handleApiError } from "../utils/error-handler";
 import { toast } from "sonner";
 
 const AnalyticsPage = () => {

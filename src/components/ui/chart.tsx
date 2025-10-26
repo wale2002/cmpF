@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 
 // import * as React from "react";
 // import * as RechartsPrimitive from "recharts";
@@ -68,8 +68,9 @@
 // ChartContainer.displayName = "Chart";
 
 // const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
+//   // FIXED: Proper destructuring in filter and map
 //   const colorConfig = Object.entries(config).filter(
-//     ([key]) => config[key as keyof ChartConfig]?.theme || config[key as keyof ChartConfig]?.color
+//     ([key, itemConfig]) => itemConfig.theme || itemConfig.color
 //   );
 
 //   if (!colorConfig.length) {
@@ -86,8 +87,8 @@
 // ${colorConfig
 //   .map(([key, itemConfig]) => {
 //     const color =
-//       (itemConfig as any).theme?.[theme as keyof typeof (itemConfig as any).theme] ||
-//       (itemConfig as any).color;
+//       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+//       itemConfig.color;
 //     return color ? `  --color-${key}: ${color};` : null;
 //   })
 //   .filter(Boolean)
@@ -433,9 +434,9 @@ const ChartContainer = React.forwardRef<
 ChartContainer.displayName = "Chart";
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  // FIXED: Proper destructuring in filter and map
+  // FIXED: Proper destructuring; ignore 'key' if unused
   const colorConfig = Object.entries(config).filter(
-    ([key, itemConfig]) => itemConfig.theme || itemConfig.color
+    ([_key, itemConfig]) => itemConfig.theme || itemConfig.color // FIXED: Rename to _key (unused)
   );
 
   if (!colorConfig.length) {
@@ -469,26 +470,30 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
+// FIXED: Extend props for payload/label
+type ExtendedTooltipProps = React.ComponentProps<typeof RechartsPrimitive.Tooltip> & {
+  payload?: any[];
+  label?: any;
+  hideLabel?: boolean;
+  hideIndicator?: boolean;
+  indicator?: "line" | "dot" | "dashed";
+  nameKey?: string;
+  labelKey?: string;
+};
+
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-    React.ComponentProps<"div"> & {
-      hideLabel?: boolean;
-      hideIndicator?: boolean;
-      indicator?: "line" | "dot" | "dashed";
-      nameKey?: string;
-      labelKey?: string;
-    }
+  ExtendedTooltipProps & React.ComponentProps<"div">
 >(
   (
     {
       active,
-      payload,
+      payload, // FIXED: Now typed
+      label, // FIXED: Now typed
       className,
       indicator = "dot",
       hideLabel = false,
       hideIndicator = false,
-      label,
       labelFormatter,
       labelClassName,
       formatter,
