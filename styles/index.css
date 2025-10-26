@@ -1,0 +1,387 @@
+/* src/index.css */
+
+/* Custom Properties (from your previous index.css) */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 215 25% 27%;
+  --card: 0 0% 100%;
+  --card-foreground: 215 25% 27%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 215 25% 27%;
+  --primary: 215 83% 24%;
+  --primary-foreground: 0 0% 100%;
+  --primary-hover: 215 83% 30%;
+  --primary-light: 215 45% 85%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 215 25% 27%;
+  --secondary-hover: 210 40% 92%;
+  --success: 142 71% 45%;
+  --success-foreground: 0 0% 100%;
+  --success-light: 142 71% 95%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+  --warning-light: 38 92% 95%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 215 83% 24%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 215 83% 24%;
+  --radius: 0.75rem;
+  --doc-sla: 142 71% 45%;
+  --doc-nda: 38 92% 50%;
+  --doc-contract: 215 83% 24%;
+  --doc-other: 215 16% 47%;
+  --gradient-primary: linear-gradient(
+    135deg,
+    hsl(215 83% 24%),
+    hsl(215 83% 30%)
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    hsl(215 83% 24%) 0%,
+    hsl(215 45% 45%) 100%
+  );
+  --gradient-card: linear-gradient(
+    145deg,
+    hsl(0 0% 100%) 0%,
+    hsl(210 40% 98%) 100%
+  );
+  --shadow-soft: 0 2px 8px hsl(215 83% 24% / 0.1);
+  --shadow-medium: 0 4px 16px hsl(215 83% 24% / 0.15);
+  --shadow-strong: 0 8px 32px hsl(215 83% 24% / 0.2);
+  --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-background: 0 0% 98%;
+  --sidebar-foreground: 240 5.3% 26.1%;
+  --sidebar-primary: 240 5.9% 10%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 240 4.8% 95.9%;
+  --sidebar-accent-foreground: 240 5.9% 10%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 217.2 91.2% 59.8%;
+}
+
+.dark {
+  --background: 215 25% 8%;
+  --foreground: 210 40% 98%;
+  --card: 215 25% 10%;
+  --card-foreground: 210 40% 98%;
+  --popover: 215 25% 10%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 215 83% 34%;
+  --primary-foreground: 0 0% 100%;
+  --primary-hover: 215 83% 40%;
+  --primary-light: 215 45% 25%;
+  --secondary: 215 25% 15%;
+  --secondary-foreground: 210 40% 98%;
+  --secondary-hover: 215 25% 20%;
+  --success: 142 71% 45%;
+  --success-foreground: 0 0% 100%;
+  --success-light: 142 71% 15%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+  --warning-light: 38 92% 15%;
+  --muted: 215 25% 15%;
+  --muted-foreground: 215 16% 60%;
+  --accent: 215 83% 34%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 215 25% 20%;
+  --input: 215 25% 20%;
+  --ring: 215 83% 34%;
+  --doc-sla: 142 71% 45%;
+  --doc-nda: 38 92% 50%;
+  --doc-contract: 215 83% 34%;
+  --doc-other: 215 16% 60%;
+  --gradient-primary: linear-gradient(
+    135deg,
+    hsl(215 83% 34%),
+    hsl(215 83% 40%)
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    hsl(215 83% 34%) 0%,
+    hsl(215 45% 45%) 100%
+  );
+  --gradient-card: linear-gradient(
+    145deg,
+    hsl(215 25% 10%) 0%,
+    hsl(215 25% 12%) 100%
+  );
+  --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3);
+  --shadow-medium: 0 4px 16px hsl(0 0% 0% / 0.4);
+  --shadow-strong: 0 8px 32px hsl(0 0% 0% / 0.5);
+  --sidebar-background: 215 25% 8%;
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-primary: 215 83% 34%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 215 25% 15%;
+  --sidebar-accent-foreground: 210 40% 98%;
+  --sidebar-border: 215 25% 20%;
+  --sidebar-ring: 215 83% 34%;
+}
+
+/* Base Styles */
+* {
+  border-color: hsl(var(--border));
+}
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Root Container */
+.root-container {
+  min-height: 100vh;
+  background-image: linear-gradient(
+    135deg,
+    hsl(var(--background)),
+    hsl(var(--primary-light)) 20%,
+    hsl(var(--background))
+  );
+}
+
+/* Container */
+.container {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+/* Hero Section */
+.hero-section {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero-icon-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+.hero-icon {
+  padding: 1rem;
+  background-color: hsl(var(--primary));
+  border-radius: 9999px;
+  box-shadow: var(--shadow-strong);
+}
+.hero-icon svg {
+  width: 3rem;
+  height: 3rem;
+  color: hsl(var(--primary-foreground));
+}
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary)),
+    hsl(var(--primary-hover))
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@media (min-width: 768px) {
+  .hero-title {
+    font-size: 4rem;
+  }
+}
+.hero-description {
+  font-size: 1.25rem;
+  color: hsl(var(--muted-foreground));
+  max-width: 32rem;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.75;
+}
+@media (min-width: 768px) {
+  .hero-description {
+    font-size: 1.5rem;
+  }
+}
+.hero-button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  padding-top: 2rem;
+}
+@media (min-width: 640px) {
+  .hero-button-group {
+    flex-direction: row;
+  }
+}
+.hero-button {
+  width: 100%;
+}
+@media (min-width: 640px) {
+  .hero-button {
+    width: auto;
+  }
+}
+.hero-credentials {
+  padding-top: 2rem;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Features Section */
+.features-section {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+.features-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 1rem;
+}
+@media (min-width: 768px) {
+  .features-title {
+    font-size: 2.25rem;
+  }
+}
+.features-description {
+  font-size: 1.125rem;
+  color: hsl(var(--muted-foreground));
+  max-width: 32rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+.features-grid {
+  display: grid;
+  gap: 2rem;
+}
+@media (min-width: 768px) {
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .features-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.feature-card {
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.feature-card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-0.25rem);
+}
+.feature-card-header {
+  text-align: center;
+}
+.feature-icon-container {
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: hsl(var(--primary-light));
+  border-radius: 9999px;
+  width: fit-content;
+}
+.feature-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: hsl(var(--primary));
+}
+.feature-card-title {
+  font-size: 1.25rem;
+}
+.feature-card-description {
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: hsl(var(--card-foreground));
+}
+
+/* CTA Section */
+.cta-card {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary)),
+    hsl(var(--primary-hover))
+  );
+  color: hsl(var(--primary-foreground));
+  box-shadow: var(--shadow-strong);
+}
+.cta-content {
+  text-align: center;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+.cta-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.cta-description {
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+/* Button Styles (from Shadcn/UI Button component) */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: var(--transition-smooth);
+  outline: none;
+}
+.button:focus {
+  box-shadow: 0 0 0 2px hsl(var(--ring)), 0 0 0 4px hsl(var(--background));
+}
+.button[size="lg"] {
+  height: 3rem;
+  padding: 0.75rem 1.5rem;
+}
+.button[variant="professional"] {
+  background: var(--gradient-primary);
+  color: hsl(var(--primary-foreground));
+  box-shadow: var(--shadow-medium);
+}
+.button[variant="professional"]:hover {
+  background-color: hsl(var(--primary-hover));
+}
+.button[variant="outline"] {
+  border: 1px solid hsl(var(--primary));
+  background: transparent;
+  color: hsl(var(--primary));
+}
+.button[variant="outline"]:hover {
+  background-color: hsl(var(--primary-light));
+  color: hsl(var(--primary-foreground));
+}
+.button[variant="secondary"] {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+.button[variant="secondary"]:hover {
+  background-color: hsl(var(--secondary-hover));
+}
+.button svg {
+  margin-left: 0.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
+}

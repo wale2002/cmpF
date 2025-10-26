@@ -1,0 +1,190 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Contract Management System Design System */
+
+@layer base {
+  :root {
+    /* Core Colors - Professional Navy & White Theme */
+    --background: 0 0% 100%;
+    --foreground: 215 25% 27%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 27%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 27%;
+
+    /* Primary - Navy Blue for Trust & Authority */
+    --primary: 215 83% 24%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 215 83% 30%;
+    --primary-light: 215 45% 85%;
+
+    /* Secondary - Light Blue Accent */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 215 25% 27%;
+    --secondary-hover: 210 40% 92%;
+
+    /* Success - Green for positive actions */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 142 71% 95%;
+
+    /* Warning - Orange for important notices */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-light: 38 92% 95%;
+
+    /* Muted - For subtle elements */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent - For highlights */
+    --accent: 215 83% 24%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 215 83% 24%;
+
+    --radius: 0.75rem;
+
+    /* Document Type Colors */
+    --doc-sla: 142 71% 45%;
+    --doc-nda: 38 92% 50%;
+    --doc-contract: 215 83% 24%;
+    --doc-other: 215 16% 47%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(215 83% 24%),
+      hsl(215 83% 30%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(215 83% 24%) 0%,
+      hsl(215 45% 45%) 100%
+    );
+    --gradient-card: linear-gradient(
+      145deg,
+      hsl(0 0% 100%) 0%,
+      hsl(210 40% 98%) 100%
+    );
+
+    /* Shadows */
+    --shadow-soft: 0 2px 8px hsl(215 83% 24% / 0.1);
+    --shadow-medium: 0 4px 16px hsl(215 83% 24% / 0.15);
+    --shadow-strong: 0 8px 32px hsl(215 83% 24% / 0.2);
+
+    /* Transitions */
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 215 25% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 215 25% 10%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 215 25% 10%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 215 83% 34%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 215 83% 40%;
+    --primary-light: 215 45% 25%;
+
+    --secondary: 215 25% 15%;
+    --secondary-foreground: 210 40% 98%;
+    --secondary-hover: 215 25% 20%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 142 71% 15%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-light: 38 92% 15%;
+
+    --muted: 215 25% 15%;
+    --muted-foreground: 215 16% 60%;
+
+    --accent: 215 83% 34%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 25% 20%;
+    --input: 215 25% 20%;
+    --ring: 215 83% 34%;
+
+    --doc-sla: 142 71% 45%;
+    --doc-nda: 38 92% 50%;
+    --doc-contract: 215 83% 34%;
+    --doc-other: 215 16% 60%;
+
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(215 83% 34%),
+      hsl(215 83% 40%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(215 83% 34%) 0%,
+      hsl(215 45% 45%) 100%
+    );
+    --gradient-card: linear-gradient(
+      145deg,
+      hsl(215 25% 10%) 0%,
+      hsl(215 25% 12%) 100%
+    );
+
+    --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3);
+    --shadow-medium: 0 4px 16px hsl(0 0% 0% / 0.4);
+    --shadow-strong: 0 8px 32px hsl(0 0% 0% / 0.5);
+
+    --sidebar-background: 215 25% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 215 83% 34%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 25% 15%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 215 25% 20%;
+    --sidebar-ring: 215 83% 34%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
