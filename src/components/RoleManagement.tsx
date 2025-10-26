@@ -155,7 +155,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { userService } from "../lib/api"; // Assume API methods for roles
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { Plus, ChevronLeft, ChevronRight, Users } from "lucide-react"; // Added Users icon
+import { Plus, ChevronLeft, ChevronRight } from "lucide-react"; // Added Users icon
 import { CreateRoleModal } from "./CreateRoleModal";
 import { EditRoleModal } from "./EditRoleModal";
 import { DeleteRoleModal } from "./DeleteRoleModal";
@@ -172,7 +172,12 @@ export const RoleManagement = () => {
   const [viewRole, setViewRole] = useState<Role | null>(null); // NEW: State for view users modal
   const [currentPage, setCurrentPage] = useState(1); // NEW: Pagination state
 
-  const { data: rolesResponse, isLoading, error, refetch } = useQuery({
+  const {
+    data: rolesResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["allRoles"],
     queryFn: () => userService.getAllRoles(),
     enabled: true,
@@ -297,7 +302,8 @@ export const RoleManagement = () => {
                     </Button>
                   </div>
                   <span className="text-xs">
-                    Showing {startIndex + 1}-{Math.min(endIndex, roles.length)} of {roles.length} roles
+                    Showing {startIndex + 1}-{Math.min(endIndex, roles.length)}{" "}
+                    of {roles.length} roles
                   </span>
                 </div>
               )}
@@ -332,7 +338,8 @@ export const RoleManagement = () => {
           onClose={() => setViewRole(null)}
           role={viewRole}
         />
-      )} {/* NEW: Render ViewRoleUsersModal */}
+      )}{" "}
+      {/* NEW: Render ViewRoleUsersModal */}
     </div>
   );
 };
