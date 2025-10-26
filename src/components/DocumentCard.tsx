@@ -1,12 +1,20 @@
-
-
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Download, Eye, Edit, Trash2, Calendar, User, File, Share2 } from "lucide-react";
-import { formatDistanceToNow, format } from "date-fns";  // Import format for dates
-import { useAuthContext } from "../contexts/AuthContext";  // NEW: For RBAC checks
+import {
+  Download,
+  Eye,
+  Edit,
+  Trash2,
+  Calendar,
+  User,
+  File,
+  Share2,
+} from "lucide-react";
+import { formatDistanceToNow, format } from "date-fns"; // Import format for dates
+import { useAuthContext } from "../contexts/AuthContext"; // NEW: For RBAC checks
 import type { Document } from "../types/index";
 import {
   Dialog,
@@ -18,21 +26,27 @@ import {
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { useState } from "react";
 import { documentService } from "../lib/api";
-import { toast } from "sonner";  // Assuming sonner for notifications; adjust if using different toast lib
+import { toast } from "sonner"; // Assuming sonner for notifications; adjust if using different toast lib
 
 interface DocumentCardProps {
   document: Document;
-  canEdit?: boolean;  // DEPRECATED: Use permissions for granular control
-  canEditDocuments?: boolean;  // NEW: Specific permission prop
-  canDeleteDocuments?: boolean;  // NEW: Specific permission prop
+  canEdit?: boolean; // DEPRECATED: Use permissions for granular control
+  canEditDocuments?: boolean; // NEW: Specific permission prop
+  canDeleteDocuments?: boolean; // NEW: Specific permission prop
   onView?: (doc: Document) => void;
   onDownload?: (doc: Document) => void;
   onEdit?: (doc: Document) => void;
   onDelete?: (doc: Document) => void;
-  onUpdate?: (updatedDoc: Document) => void;  // NEW: Callback for after successful update
+  onUpdate?: (updatedDoc: Document) => void; // NEW: Callback for after successful update
 }
 
 const getDocumentTypeColor = (type: Document["documentType"]) => {
@@ -57,22 +71,33 @@ const DOCUMENT_TYPES = [
 
 export function DocumentCard({
   document,
-  canEdit = false,  // Fallback for legacy usage
-  canEditDocuments = false,  // NEW: RBAC-aware
-  canDeleteDocuments = false,  // NEW: RBAC-aware
+  canEdit = false, // Fallback for legacy usage
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  canEditDocuments = false, // NEW: RBAC-aware
+  canDeleteDocuments = false, // NEW: RBAC-aware
   onView,
   onDownload,
   onEdit,
   onDelete,
-  onUpdate,  // NEW: For parent to handle refresh after update
+  onUpdate, // NEW: For parent to handle refresh after update
 }: DocumentCardProps) {
   const { user } = useAuthContext();
-  const isSuperAdmin = user?.role?.name?.toLowerCase() === 'superadmin';
+  const isSuperAdmin = user?.role?.name?.toLowerCase() === "superadmin";
   const permissions = user?.role?.permissions || {};
-  const effectiveCanEdit = canEdit || (isSuperAdmin || permissions.DocumentManagement?.editDocuments || false);
-  const effectiveCanDelete = canDeleteDocuments || (isSuperAdmin || permissions.DocumentManagement?.deleteDocuments || false);
-  const effectiveCanView = isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false;
-  const effectiveCanDownload = isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false;  // Assuming download requires view
+  const effectiveCanEdit =
+    canEdit ||
+    isSuperAdmin ||
+    permissions.DocumentManagement?.editDocuments ||
+    false;
+  const effectiveCanDelete =
+    canDeleteDocuments ||
+    isSuperAdmin ||
+    permissions.DocumentManagement?.deleteDocuments ||
+    false;
+  const effectiveCanView =
+    isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false;
+  const effectiveCanDownload =
+    isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false; // Assuming download requires view
 
   // NEW: Modal state
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -81,14 +106,15 @@ export function DocumentCard({
 
   // FIXED: Coerce IDs to string for consistency (if needed for props)
   const docId = document._id.toString();
-  const orgId = document.organization?.toString() || '';
+  const orgId = document.organization?.toString() || "";
 
   // ENHANCED: Format dates if present
-  const formatDate = (dateStr?: string) => dateStr ? format(new Date(dateStr), 'MMM dd, yyyy') : 'N/A';
+  const formatDate = (dateStr?: string) =>
+    dateStr ? format(new Date(dateStr), "MMM dd, yyyy") : "N/A";
 
   // NEW: Format file size dynamically (kB for <1 MB, MB otherwise)
   const formatFileSize = (sizeMB?: number): string => {
-    if (!sizeMB || sizeMB <= 0) return 'N/A';
+    if (!sizeMB || sizeMB <= 0) return "N/A";
     const bytes = sizeMB * 1024 * 1024;
     if (bytes < 1024) return `${Math.round(bytes)} bytes`;
     const kb = bytes / 1024;
@@ -109,15 +135,15 @@ export function DocumentCard({
           url: document.fileUrl,
         });
       } catch (err) {
-        console.error('Error sharing document:', err);
+        console.error("Error sharing document:", err);
         // Fallback to clipboard
         await navigator.clipboard.writeText(document.fileUrl);
-        alert('Link copied to clipboard!');
+        alert("Link copied to clipboard!");
       }
     } else {
       // Fallback: copy to clipboard
       await navigator.clipboard.writeText(document.fileUrl);
-      alert('Link copied to clipboard!');
+      alert("Link copied to clipboard!");
     }
   };
 
@@ -135,20 +161,23 @@ export function DocumentCard({
     setIsUpdating(true);
     try {
       const formData = new FormData(e.currentTarget as HTMLFormElement);
-      const name = formData.get('name')?.toString().trim();
-      const documentType = formData.get('documentType')?.toString();
+      const name = formData.get("name")?.toString().trim();
+      const documentType = formData.get("documentType")?.toString();
 
       if (!name || !documentType) {
-        toast.error('Name and type are required');
+        toast.error("Name and type are required");
         return;
       }
 
       const updateData = { name, documentType };
-      const response = await documentService.updateDocument(editingDocument._id.toString(), updateData);
+      const response = await documentService.updateDocument(
+        editingDocument._id.toString(),
+        updateData
+      );
 
-      if (response.status === 'success') {
+      if (response.status === "success") {
         const updatedDoc = response.data?.document;
-        toast.success('Document updated successfully');
+        toast.success("Document updated successfully");
         setIsEditOpen(false);
         setEditingDocument(null);
 
@@ -160,18 +189,18 @@ export function DocumentCard({
           onEdit(updatedDoc);
         }
       } else {
-        toast.error(response.message || 'Failed to update document');
+        toast.error(response.message || "Failed to update document");
       }
     } catch (error) {
-      console.error('Update error:', error);
-      toast.error('Failed to update document');
+      console.error("Update error:", error);
+      toast.error("Failed to update document");
     } finally {
       setIsUpdating(false);
     }
   };
 
   if (!effectiveCanView) {
-    return null;  // NEW: Hide card entirely if no view permission
+    return null; // NEW: Hide card entirely if no view permission
   }
 
   return (
@@ -180,10 +209,14 @@ export function DocumentCard({
         <CardHeader className="pb-2">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-0">
             <div className="space-y-1 flex-1">
-              <CardTitle className="text-xs sm:text-sm lg:text-base leading-5 line-clamp-2">{document.name}</CardTitle>
+              <CardTitle className="text-xs sm:text-sm lg:text-base leading-5 line-clamp-2">
+                {document.name}
+              </CardTitle>
               <Badge
                 variant="outline"
-                className={`text-xs ${getDocumentTypeColor(document.documentType)}`}
+                className={`text-xs ${getDocumentTypeColor(
+                  document.documentType
+                )}`}
               >
                 {document.documentType}
               </Badge>
@@ -195,7 +228,9 @@ export function DocumentCard({
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-1 min-w-0 flex-1">
               <Calendar className="h-3 w-3 flex-shrink-0" />
-              <span className="truncate">{formatDistanceToNow(new Date(document.createdAt))} ago</span>
+              <span className="truncate">
+                {formatDistanceToNow(new Date(document.createdAt))} ago
+              </span>
             </div>
 
             <div className="flex items-center gap-1">
@@ -210,13 +245,17 @@ export function DocumentCard({
               {document.startDate && (
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3 flex-shrink-0" />
-                  <span className="truncate">Start: {formatDate(document.startDate)}</span>
+                  <span className="truncate">
+                    Start: {formatDate(document.startDate)}
+                  </span>
                 </div>
               )}
               {document.expiryDate && (
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3 flex-shrink-0" />
-                  <span className="truncate">Expires: {formatDate(document.expiryDate)}</span>
+                  <span className="truncate">
+                    Expires: {formatDate(document.expiryDate)}
+                  </span>
                 </div>
               )}
             </div>
@@ -224,7 +263,12 @@ export function DocumentCard({
 
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <User className="h-3 w-3 flex-shrink-0" />
-            <span className="truncate">Uploaded by {document.uploadedBy?.fullName || 'Unknown User'}</span>
+            <span className="truncate">
+              Uploaded by{" "}
+              {typeof document.uploadedBy === "string"
+                ? document.uploadedBy
+                : (document.uploadedBy as any)?.fullName || "Unknown User"}
+            </span>
           </div>
 
           <div className="flex flex-wrap gap-1 pt-1">
@@ -306,14 +350,19 @@ export function DocumentCard({
               <Input
                 id="name"
                 name="name"
-                defaultValue={editingDocument?.name || ''}
+                defaultValue={editingDocument?.name || ""}
                 required
                 disabled={isUpdating}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="documentType">Document Type</Label>
-              <Select name="documentType" defaultValue={editingDocument?.documentType || ''} required disabled={isUpdating}>
+              <Select
+                name="documentType"
+                defaultValue={editingDocument?.documentType || ""}
+                required
+                disabled={isUpdating}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select document type" />
                 </SelectTrigger>
@@ -327,11 +376,16 @@ export function DocumentCard({
               </Select>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)} disabled={isUpdating}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditOpen(false)}
+                disabled={isUpdating}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isUpdating}>
-                {isUpdating ? 'Updating...' : 'Update'}
+                {isUpdating ? "Updating..." : "Update"}
               </Button>
             </DialogFooter>
           </form>

@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -9,14 +9,25 @@ import { DocumentUpload } from "../components/DocumentUpload";
 import { Layout } from "../components/Layout";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import { Search, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Document, Organization, Permissions } from "../types";
 import { toast } from "sonner";
 import { handleApiError } from "../utils/error-handler";
 
 const DocumentsPage = () => {
-  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuthContext();
+  const {
+    user,
+    isAuthenticated,
+    isLoading: authLoading,
+    logout,
+  } = useAuthContext();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [showUpload, setShowUpload] = useState(false);
@@ -29,19 +40,28 @@ const DocumentsPage = () => {
 
   const isSuperAdmin = user?.role?.name?.toLowerCase() === "superadmin";
   const permissions: Permissions = user?.role?.permissions || {};
-  const canViewDocuments = isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false;
-  const canUploadDocuments = isSuperAdmin || permissions.DocumentManagement?.uploadDocuments || false;
-  const canEditDocuments = isSuperAdmin || permissions.DocumentManagement?.editDocuments || false;
-  const canDeleteDocuments = isSuperAdmin || permissions.DocumentManagement?.deleteDocuments || false;
-  const canViewOrganizations = isSuperAdmin || permissions.OrganizationManagement?.viewOrganizations || false;
+  const canViewDocuments =
+    isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false;
+  const canUploadDocuments =
+    isSuperAdmin || permissions.DocumentManagement?.uploadDocuments || false;
+  const canEditDocuments =
+    isSuperAdmin || permissions.DocumentManagement?.editDocuments || false;
+  const canDeleteDocuments =
+    isSuperAdmin || permissions.DocumentManagement?.deleteDocuments || false;
+  const canViewOrganizations =
+    isSuperAdmin ||
+    permissions.OrganizationManagement?.viewOrganizations ||
+    false;
 
-  const { data: organizationsData, isLoading: orgsLoading } = useQuery({
+  const { data: organizationsData, isLoading: orgsLoading } = useQuery<{
+    data?: { organizations: Organization[] };
+    organizations?: Organization[];
+  }>({
     queryKey: ["organizations"],
     queryFn: () => organizationService.getOrganizations(),
     enabled: !!user && canViewOrganizations,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
-    onError: (err) => {
+    onError: (err: any) => {
       console.error("DocumentsPage orgs error:", err);
       toast.error("Failed to load organizations");
     },
@@ -54,16 +74,24 @@ const DocumentsPage = () => {
   } = useQuery({
     queryKey: ["documents", user?.organization, user?.role?.name],
     queryFn: async () => {
-      console.log("DocumentsPage docs fetch:", { role: user?.role?.name, org: user?.organization });
+      console.log("DocumentsPage docs fetch:", {
+        role: user?.role?.name,
+        org: user?.organization,
+      });
       if (canViewOrganizations && isSuperAdmin) {
         const orgsResponse = await organizationService.getOrganizations();
-        const orgs = orgsResponse.data?.organizations || orgsResponse.organizations || [];
+        const orgs =
+          orgsResponse.data?.organizations || orgsResponse.organizations || [];
         console.log("DocumentsPage admin orgs:", orgs.length);
         const allDocs = await Promise.all(
           orgs.map(async (org: Organization) => {
             try {
-              const docsResponse = await documentService.getDocumentsByOrg(org._id.toString());
-              return docsResponse.data?.documents || docsResponse.documents || [];
+              const docsResponse = await documentService.getDocumentsByOrg(
+                org._id.toString()
+              );
+              return (
+                docsResponse.data?.documents || docsResponse.documents || []
+              );
             } catch (err) {
               console.error(`DocumentsPage org ${org._id} docs error:`, err);
               return [];
@@ -72,7 +100,9 @@ const DocumentsPage = () => {
         );
         return allDocs.flat();
       } else if (user?.organization && canViewDocuments) {
-        const docsResponse = await documentService.getDocumentsByOrg(user.organization.toString());
+        const docsResponse = await documentService.getDocumentsByOrg(
+          user.organization.toString()
+        );
         return docsResponse.data?.documents || docsResponse.documents || [];
       }
       console.warn("DocumentsPage no org or no view permission");
@@ -80,8 +110,8 @@ const DocumentsPage = () => {
     },
     enabled: !!user && canViewDocuments,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
-    onError: (err) => {
+    gcTime: 10 * 60 * 1000,
+    onError: (err: any) => {
       console.error("DocumentsPage docs error:", err);
       toast.error("Failed to load documents");
     },
@@ -91,14 +121,48 @@ const DocumentsPage = () => {
   const organizations = useMemo(() => {
     if (!canViewOrganizations) {
       return user?.organization
-        ? [{ _id: user.organization, name: "Current Organization", organizationType: "tech" }]
+        ? [
+            {
+              _id: user.organization,
+              name: "Current Organization",
+              organizationType: "tech",
+            },
+          ]
         : [];
     }
-    return organizationsData?.data?.organizations || organizationsData?.organizations || [];
+
+    if (!organizationsData) return [];
+
+    // If the query returned a direct array of organizations
+    if (Array.isArray(organizationsData)) {
+      return organizationsData as Organization[];
+    }
+
+    // Narrow the shape safely before accessing properties
+    if (typeof organizationsData === "object" && organizationsData !== null) {
+      // data?.organizations shape
+      if (
+        "data" in organizationsData &&
+        (organizationsData as any).data?.organizations
+      ) {
+        return (organizationsData as any).data.organizations as Organization[];
+      }
+      // organizations direct key
+      if (
+        "organizations" in organizationsData &&
+        (organizationsData as any).organizations
+      ) {
+        return (organizationsData as any).organizations as Organization[];
+      }
+    }
+
+    return [];
   }, [organizationsData, user?.organization, canViewOrganizations]);
 
   const filteredDocuments = documents.filter((doc) => {
-    const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = doc.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     const matchesType = filterType === "all" || doc.documentType === filterType;
     return matchesSearch && matchesType;
   });
@@ -120,12 +184,26 @@ const DocumentsPage = () => {
     }
   };
 
-  const handleUpload = async (file: File, name: string, type: string, organizationId: string, startDate?: string, expiryDate?: string) => {
+  const handleUpload = async (
+    file: File,
+    name: string,
+    type: string,
+    organizationId: string,
+    startDate?: string,
+    expiryDate?: string
+  ) => {
     setUploadLoading(true);
     setUploadError("");
     setUploadSuccess("");
     try {
-      await documentService.uploadDocument(organizationId.toString(), file, name, type, startDate, expiryDate);
+      await documentService.uploadDocument(
+        organizationId.toString(),
+        file,
+        name,
+        type,
+        startDate,
+        expiryDate
+      );
       refetch();
       setUploadSuccess("Document uploaded successfully!");
       toast.success("Document uploaded successfully!");
@@ -166,7 +244,7 @@ const DocumentsPage = () => {
 
   if (authLoading || docsLoading || (canViewOrganizations && orgsLoading)) {
     return (
-      <Layout user={user} onLogout={logout}>
+      <Layout user={user ?? undefined} onLogout={logout}>
         <div className="text-center py-12">Loading documents...</div>
       </Layout>
     );
@@ -192,7 +270,10 @@ const DocumentsPage = () => {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-foreground">Documents</h1>
           {canUploadDocuments && (
-            <Button onClick={() => setShowUpload(!showUpload)} variant="professional">
+            <Button
+              onClick={() => setShowUpload(!showUpload)}
+              variant="professional"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Upload Document
             </Button>
@@ -202,7 +283,7 @@ const DocumentsPage = () => {
           <DocumentUpload
             onUpload={handleUpload}
             organizations={organizations}
-            currentUserOrg={user.organization}
+            currentUserOrg={user.organization ?? undefined}
             loading={uploadLoading}
             error={uploadError}
             success={uploadSuccess}
@@ -235,7 +316,10 @@ const DocumentsPage = () => {
           <div className="text-center py-12">
             {canUploadDocuments ? (
               <p className="text-muted-foreground">
-                No documents found. <Button variant="link" onClick={() => setShowUpload(true)}>Upload one</Button>
+                No documents found.{" "}
+                <Button variant="link" onClick={() => setShowUpload(true)}>
+                  Upload one
+                </Button>
               </p>
             ) : (
               <p className="text-muted-foreground">No documents found.</p>
@@ -248,8 +332,12 @@ const DocumentsPage = () => {
                 <DocumentCard
                   key={doc._id}
                   document={doc}
-                  canEditDocuments={canEditDocuments || doc.uploadedBy === user._id}
-                  canDeleteDocuments={canDeleteDocuments || doc.uploadedBy === user._id}
+                  canEditDocuments={
+                    canEditDocuments || doc.uploadedBy === user._id
+                  }
+                  canDeleteDocuments={
+                    canDeleteDocuments || doc.uploadedBy === user._id
+                  }
                   onView={() => handleDocumentAction("view", doc)}
                   onDownload={() => handleDocumentAction("download", doc)}
                   onEdit={() => handleDocumentAction("edit", doc)}
@@ -269,7 +357,8 @@ const DocumentsPage = () => {
                   Previous
                 </Button>
                 <span className="text-sm text-muted-foreground">
-                  Page {currentPage} of {totalPages} ({filteredDocuments.length} documents)
+                  Page {currentPage} of {totalPages} ({filteredDocuments.length}{" "}
+                  documents)
                 </span>
                 <Button
                   variant="outline"

@@ -1,4 +1,5 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -78,7 +79,7 @@ const FolderManagement = ({
 
   // FIXED: Group documents by organization ID (coerce to string for matching)
   const documentsByOrg = documents.reduce((acc, doc) => {
-    const docOrgId = doc.organization?.toString() || '';
+    const docOrgId = doc.organization?.toString() || "";
     if (!acc[docOrgId]) {
       acc[docOrgId] = [];
     }
@@ -87,18 +88,25 @@ const FolderManagement = ({
   }, {} as Record<string, Document[]>);
 
   // Filter organizations based on user role (all for admin)
-  const isAdminUser = ['admin', 'superadmin'].includes(currentUser?.role.name?.toLowerCase() || '');
-  const visibleOrganizations =
-    isAdminUser
-      ? organizations
-      : organizations.filter((org) => org._id.toString() === (currentUser?.organization || '').toString());
+  const isAdminUser = ["admin", "superadmin"].includes(
+    currentUser?.role.name?.toLowerCase() || ""
+  );
+  const visibleOrganizations = isAdminUser
+    ? organizations
+    : organizations.filter(
+        (org) =>
+          org._id.toString() === (currentUser?.organization || "").toString()
+      );
 
   // Pagination logic
   const totalOrgs = visibleOrganizations.length;
   const totalPages = Math.ceil(totalOrgs / PAGE_SIZE);
   const startIndex = (currentPage - 1) * PAGE_SIZE;
   const endIndex = startIndex + PAGE_SIZE;
-  const paginatedOrganizations = visibleOrganizations.slice(startIndex, endIndex);
+  const paginatedOrganizations = visibleOrganizations.slice(
+    startIndex,
+    endIndex
+  );
 
   // Enhanced Debug log
   console.log("FolderManagement Debug:", {
@@ -106,7 +114,10 @@ const FolderManagement = ({
     currentPage,
     totalPages,
     visibleOrgs: paginatedOrganizations.length,
-    visibleOrgNames: paginatedOrganizations.map(o => ({ id: o._id.toString(), name: o.name })),
+    visibleOrgNames: paginatedOrganizations.map((o) => ({
+      id: o._id.toString(),
+      name: o.name,
+    })),
     isAdmin: isAdminUser,
     docsPerOrg: Object.fromEntries(
       Object.entries(documentsByOrg).map(([key, docs]) => [key, docs.length])
@@ -287,7 +298,11 @@ const FolderManagement = ({
                       </Button>
                       <Button
                         onClick={handleCreateFolder}
-                        disabled={!newFolderName.trim() || !newFolderType.trim() || isCreating}
+                        disabled={
+                          !newFolderName.trim() ||
+                          !newFolderType.trim() ||
+                          isCreating
+                        }
                       >
                         {isCreating ? "Creating..." : "Create Folder"}
                       </Button>
@@ -355,17 +370,28 @@ const FolderManagement = ({
                                         setEditFolderName("");
                                       }
                                     }}
-                                    onBlur={() => handleRenameFolder(org._id.toString())}
+                                    onBlur={() =>
+                                      handleRenameFolder(org._id.toString())
+                                    }
                                     autoFocus
                                     className="h-8"
                                   />
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-3 flex-1">
-                                  <span className="font-medium">{org.name}</span>
-                                  <Badge variant="secondary" className="text-xs">
-                                    {(org.documentCount || orgDocuments.length)} document
-                                    {(org.documentCount || orgDocuments.length) !== 1 ? "s" : ""}
+                                  <span className="font-medium">
+                                    {org.name}
+                                  </span>
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    {org.documentCount || orgDocuments.length}{" "}
+                                    document
+                                    {(org.documentCount ||
+                                      orgDocuments.length) !== 1
+                                      ? "s"
+                                      : ""}
                                   </Badge>
                                 </div>
                               )}
@@ -421,7 +447,8 @@ const FolderManagement = ({
                               <div className="text-center py-6 border-2 border-dashed border-muted-foreground/20 rounded-lg">
                                 <ExternalLink className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                                 <p className="text-sm text-muted-foreground">
-                                  Click the link icon to view documents in this folder
+                                  Click the link icon to view documents in this
+                                  folder
                                 </p>
                               </div>
                             </div>

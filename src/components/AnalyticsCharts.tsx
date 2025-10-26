@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/components/AnalyticsCharts.tsx
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -125,19 +127,20 @@ export function AnalyticsCharts({
       ? [
           {
             name: "Admin Users",
-            value: allUsers.filter((u) => u.role === "admin").length,
+            value: allUsers.filter((u) => String(u.role) === "admin").length,
           },
           {
             name: "Regular Users",
-            value: allUsers.filter((u) => u.role !== "admin").length,
+            value: allUsers.filter((u) => String(u.role) !== "admin").length,
           },
         ]
       : userMetrics
       ? [
-          { name: "Admin Users", value: userMetrics.adminUsers },
+          { name: "Admin Users", value: userMetrics.adminUsers ?? 0 },
           {
             name: "Regular Users",
-            value: userMetrics.totalUsers - userMetrics.adminUsers,
+            value:
+              (userMetrics.totalUsers ?? 0) - (userMetrics.adminUsers ?? 0),
           },
         ]
       : [];
@@ -182,7 +185,8 @@ export function AnalyticsCharts({
     };
     allDocuments.forEach((doc) => {
       const ageDays = Math.floor(
-        (now - new Date(doc.uploadDate || doc.createdAt).getTime()) / (24 * 60 * 60 * 1000)
+        (now - new Date(doc.uploadDate || doc.createdAt).getTime()) /
+          (24 * 60 * 60 * 1000)
       );
       if (ageDays <= 30) buckets["0-30 days"]++;
       else if (ageDays <= 60) buckets["31-60 days"]++;
@@ -192,15 +196,19 @@ export function AnalyticsCharts({
     return Object.entries(buckets).map(([name, value]) => ({ name, value }));
   })();
 
-  const orgTypeData = allOrganizations.length > 0
-    ? allOrganizations.reduce((acc, org) => {
-        const type = org.organizationType || "Unknown";
-        acc[type] = (acc[type] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>)
-    : orgMetrics
-    ? Object.entries(orgMetrics).map(([type, count]) => ({ name: type, value: count }))
-    : [];
+  const orgTypeData =
+    allOrganizations.length > 0
+      ? allOrganizations.reduce((acc, org) => {
+          const type = org.organizationType || "Unknown";
+          acc[type] = (acc[type] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>)
+      : orgMetrics
+      ? Object.entries(orgMetrics).map(([type, count]) => ({
+          name: type,
+          value: count,
+        }))
+      : [];
 
   const orgTypeChartData = Object.entries(orgTypeData).map(([name, value]) => ({
     name,
@@ -208,28 +216,34 @@ export function AnalyticsCharts({
   }));
 
   // NEW: Audit Logs Processing
-  const actionData = auditLogs.length > 0
-    ? Object.entries(
-        auditLogs.reduce((acc, log) => {
-          const action = log.action || "Unknown";
-          acc[action] = (acc[action] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>)
-      ).map(([name, value]) => ({ name, value }))
-    : [];
+  const actionData =
+    auditLogs.length > 0
+      ? Object.entries(
+          auditLogs.reduce((acc, log) => {
+            const action = log.action || "Unknown";
+            acc[action] = (acc[action] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>)
+        ).map(([name, value]) => ({ name, value }))
+      : [];
 
-  const resourceData = auditLogs.length > 0
-    ? Object.entries(
-        auditLogs.reduce((acc, log) => {
-          const resource = log.resource || "Unknown";
-          acc[resource] = (acc[resource] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>)
-      ).map(([name, value]) => ({ name, value }))
-    : [];
+  const resourceData =
+    auditLogs.length > 0
+      ? Object.entries(
+          auditLogs.reduce((acc, log) => {
+            const resource = log.resource || "Unknown";
+            acc[resource] = (acc[resource] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>)
+        ).map(([name, value]) => ({ name, value }))
+      : [];
 
   const recentAuditData = auditLogs
-    .filter((log) => new Date(log.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)) // Last 30 days
+    .filter(
+      (log) =>
+        new Date(log.createdAt) >
+        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    ) // Last 30 days
     .reduce((acc, log) => {
       const date = new Date(log.createdAt).toLocaleDateString();
       acc[date] = (acc[date] || 0) + 1;
@@ -250,11 +264,11 @@ export function AnalyticsCharts({
       }
       acc[userId].count += 1;
       return acc;
-    }, {} as Record<string, {name: string, count: number}>);
-    return Object.values(userActions)
+    }, {} as Record<string, { name: string; count: number }>);
+    return (Object.values(userActions) as { name: string; count: number }[])
       .sort((a, b) => b.count - a.count)
       .slice(0, 10)
-      .map(({name: user, count}) => ({user, count}));
+      .map(({ name: user, count }) => ({ user, count }));
   })();
 
   return (
@@ -273,9 +287,13 @@ export function AnalyticsCharts({
                 cx="50%"
                 cy="50%"
                 labelLine={true}
-                label={({ name, percent }) =>
-                  `${name} ${((percent * 100).toFixed(0))}%`
-                }
+                label={({
+                  name = "Unknown",
+                  percent = 0,
+                }: {
+                  name?: string;
+                  percent?: number;
+                }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 outerRadius={80}
                 innerRadius={40}
                 dataKey="value"
@@ -287,14 +305,14 @@ export function AnalyticsCharts({
                   />
                 ))}
               </Pie>
-              <Tooltip formatter={(value) => [`${value}`]} />
+              <Tooltip formatter={(value: any) => [`${value}`]} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
-      {user?.role === "admin" && (
+      {user?.role?.toString() === "admin" && (
         <>
           {/* User Role Distribution - Enhanced Bar */}
           <Card className="col-span-1">
@@ -310,9 +328,9 @@ export function AnalyticsCharts({
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar 
-                    dataKey="value" 
-                    fill="url(#roleGradient)" 
+                  <Bar
+                    dataKey="value"
+                    fill="url(#roleGradient)"
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
@@ -328,15 +346,24 @@ export function AnalyticsCharts({
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={orgDocumentData} layout="vertical" margin={{ right: 30 }}>
+                <BarChart
+                  data={orgDocumentData}
+                  layout="vertical"
+                  margin={{ right: 30 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
                   <XAxis type="number" />
-                  <YAxis dataKey="organization" type="category" width={150} tick={{ fontSize: 11 }} />
+                  <YAxis
+                    dataKey="organization"
+                    type="category"
+                    width={150}
+                    tick={{ fontSize: 11 }}
+                  />
                   <Tooltip />
                   <Legend />
-                  <Bar 
-                    dataKey="documentCount" 
-                    fill="url(#orgGradient)" 
+                  <Bar
+                    dataKey="documentCount"
+                    fill="url(#orgGradient)"
                     radius={[4, 4, 4, 4]}
                   />
                 </BarChart>
@@ -359,9 +386,13 @@ export function AnalyticsCharts({
                       cx="50%"
                       cy="50%"
                       labelLine={true}
-                      label={({ name, percent }) =>
-                        `${name} ${((percent * 100).toFixed(0))}%`
-                      }
+                      label={({
+                        name,
+                        percent,
+                      }: {
+                        name: string;
+                        percent: number;
+                      }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       outerRadius={80}
                       innerRadius={40}
                       dataKey="value"
@@ -396,9 +427,13 @@ export function AnalyticsCharts({
                       cx="50%"
                       cy="50%"
                       labelLine={true}
-                      label={({ name, percent }) =>
-                        `${name} ${((percent * 100).toFixed(0))}%`
-                      }
+                      label={({
+                        name,
+                        percent,
+                      }: {
+                        name: string;
+                        percent: number;
+                      }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       outerRadius={80}
                       innerRadius={40}
                       dataKey="value"
@@ -427,17 +462,22 @@ export function AnalyticsCharts({
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={resourceData} layout="horizontal" margin={{ right: 30 }}>
+                  <BarChart
+                    data={resourceData}
+                    layout="horizontal"
+                    margin={{ right: 30 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
                     <XAxis type="number" />
-                    <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 11 }} />
+                    <YAxis
+                      dataKey="name"
+                      type="category"
+                      width={150}
+                      tick={{ fontSize: 11 }}
+                    />
                     <Tooltip />
                     <Legend />
-                    <Bar 
-                      dataKey="value" 
-                      fill="#3B82F6" 
-                      radius={[4, 4, 4, 4]}
-                    />
+                    <Bar dataKey="value" fill="#3B82F6" radius={[4, 4, 4, 4]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -453,17 +493,22 @@ export function AnalyticsCharts({
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={topUsersData} layout="vertical" margin={{ right: 30 }}>
+                  <BarChart
+                    data={topUsersData}
+                    layout="vertical"
+                    margin={{ right: 30 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
                     <XAxis type="number" />
-                    <YAxis dataKey="user" type="category" width={150} tick={{ fontSize: 11 }} />
+                    <YAxis
+                      dataKey="user"
+                      type="category"
+                      width={150}
+                      tick={{ fontSize: 11 }}
+                    />
                     <Tooltip />
                     <Legend />
-                    <Bar 
-                      dataKey="count" 
-                      fill="#10B981" 
-                      radius={[4, 4, 4, 4]}
-                    />
+                    <Bar dataKey="count" fill="#10B981" radius={[4, 4, 4, 4]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -480,16 +525,19 @@ export function AnalyticsCharts({
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={uploadsTimelineData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <LineChart
+              data={uploadsTimelineData}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
               <XAxis dataKey="date" tick={{ fontSize: 11 }} />
               <YAxis />
               <Tooltip labelStyle={{ fontSize: 12 }} />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="uploads" 
-                stroke="#3B82F6" 
+              <Line
+                type="monotone"
+                dataKey="uploads"
+                stroke="#3B82F6"
                 strokeWidth={3}
                 dot={{ fill: "#3B82F6", strokeWidth: 2, r: 4 }}
                 activeDot={{ r: 6 }}
@@ -509,16 +557,19 @@ export function AnalyticsCharts({
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={auditTimelineData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <LineChart
+                data={auditTimelineData}
+                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                 <YAxis />
                 <Tooltip labelStyle={{ fontSize: 12 }} />
                 <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="actions" 
-                  stroke="#EF4444" 
+                <Line
+                  type="monotone"
+                  dataKey="actions"
+                  stroke="#EF4444"
                   strokeWidth={3}
                   dot={{ fill: "#EF4444", strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6 }}
@@ -544,10 +595,10 @@ export function AnalyticsCharts({
               <YAxis />
               <Tooltip />
               <Legend />
-              <Area 
-                type="monotone" 
-                dataKey="value" 
-                stroke="#10B981" 
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="#10B981"
                 fill="url(#ageGradient)"
                 strokeWidth={2}
               />
@@ -564,23 +615,39 @@ export function AnalyticsCharts({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-            <span className="text-sm text-muted-foreground">Total Documents</span>
-            <span className="font-bold text-2xl text-primary">{allDocuments.length}</span>
+            <span className="text-sm text-muted-foreground">
+              Total Documents
+            </span>
+            <span className="font-bold text-2xl text-primary">
+              {allDocuments.length}
+            </span>
           </div>
           <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-            <span className="text-sm text-muted-foreground">Total Organizations</span>
-            <span className="font-bold text-2xl text-primary">{allOrganizations.length}</span>
+            <span className="text-sm text-muted-foreground">
+              Total Organizations
+            </span>
+            <span className="font-bold text-2xl text-primary">
+              {allOrganizations.length}
+            </span>
           </div>
-          {user?.role === "admin" && (
+          {user?.role?.toString() === "admin" && (
             <>
               <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                <span className="text-sm text-muted-foreground">Total Users</span>
-                <span className="font-bold text-2xl text-primary">{allUsers.length}</span>
+                <span className="text-sm text-muted-foreground">
+                  Total Users
+                </span>
+                <span className="font-bold text-2xl text-primary">
+                  {allUsers.length}
+                </span>
               </div>
               {/* NEW: Total Audit Logs */}
               <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                <span className="text-sm text-muted-foreground">Total Audit Logs</span>
-                <span className="font-bold text-2xl text-primary">{auditLogs.length}</span>
+                <span className="text-sm text-muted-foreground">
+                  Total Audit Logs
+                </span>
+                <span className="font-bold text-2xl text-primary">
+                  {auditLogs.length}
+                </span>
               </div>
             </>
           )}

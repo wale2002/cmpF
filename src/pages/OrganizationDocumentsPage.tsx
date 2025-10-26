@@ -1,4 +1,6 @@
-
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 // // src/pages/OrganizationDocumentsPage.tsx
 // import { useState } from "react";
@@ -203,7 +205,7 @@
 //                         <div
 //                           key={alert._id}
 //                           className={`
-//                             bg-background rounded-lg p-3 cursor-pointer transition-all 
+//                             bg-background rounded-lg p-3 cursor-pointer transition-all
 //                             hover:bg-muted border ${borderClass}/30 shadow-sm
 //                           `}
 //                           onClick={() => handleViewAlert(alert)}
@@ -322,8 +324,6 @@
 
 // export default OrganizationDocumentsPage;
 
-
-
 // src/pages/OrganizationDocumentsPage.tsx
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -341,7 +341,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Search, Filter, ChevronLeft, Bell, AlertTriangle } from "lucide-react";
 import {
   Dialog,
@@ -366,10 +371,14 @@ const OrganizationDocumentsPage = () => {
   const [filterType, setFilterType] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [showAlerts, setShowAlerts] = useState(false);
-  const isAdminUser = ['admin', 'superadmin'].includes(user?.role?.name?.toLowerCase() || '');
+  const isAdminUser = ["admin", "superadmin"].includes(
+    user?.role?.name?.toLowerCase() || ""
+  );
 
   // Fetch organization details for header
-  const { data: orgData } = useQuery<ApiResponse<{ organization: Organization }>>({
+  const { data: orgData } = useQuery<
+    ApiResponse<{ organization: Organization }>
+  >({
     queryKey: ["organization", orgId],
     queryFn: () => organizationService.getOrganization(orgId!),
     enabled: !!orgId,
@@ -377,7 +386,19 @@ const OrganizationDocumentsPage = () => {
   const organization = orgData?.data?.organization;
 
   // Fetch documents with pagination
-  const { data: docsData, isLoading, error, refetch } = useQuery<ApiResponse<{ documents: Document[]; total: number; page: number; totalPages: number; }>>({
+  const {
+    data: docsData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<
+    ApiResponse<{
+      documents: Document[];
+      total: number;
+      page: number;
+      totalPages: number;
+    }>
+  >({
     queryKey: ["orgDocuments", orgId, currentPage, searchTerm, filterType],
     queryFn: async () => {
       let params: any = { page: currentPage, limit: PAGE_LIMIT };
@@ -402,8 +423,11 @@ const OrganizationDocumentsPage = () => {
   const unreadAlertsCount = alerts.length; // Assume all are "unread" or adjust logic
 
   // Filter logic (client-side if needed, but backend supports search/type)
-  const filteredDocuments = documents.filter((doc: Document) => { // Fixed: Typed param
-    const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredDocuments = documents.filter((doc: Document) => {
+    // Fixed: Typed param
+    const matchesSearch = doc.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     const matchesType = filterType === "all" || doc.documentType === filterType;
     return matchesSearch && matchesType; // Redundant if backend filters, but safe
   });
@@ -417,13 +441,27 @@ const OrganizationDocumentsPage = () => {
     if (alert.alertType === "expiry") {
       const days = alert.daysToExpiry || 0;
       message = `${alert.name} (${alert.documentType})`;
-      subText = `Expires in ${days} day${days !== 1 ? 's' : ''} (${new Date(alert.expiryDate || '').toLocaleDateString()})`; // Fixed: Handle undefined
-      iconVariant = alert.flagColor === "red" ? "destructive" : alert.flagColor === "orange" ? "warning" : "accent";
-      borderClass = alert.flagColor === "red" ? "border-destructive" : alert.flagColor === "orange" ? "border-warning" : "border-accent";
+      subText = `Expires in ${days} day${days !== 1 ? "s" : ""} (${new Date(
+        alert.expiryDate || ""
+      ).toLocaleDateString()})`; // Fixed: Handle undefined
+      iconVariant =
+        alert.flagColor === "red"
+          ? "destructive"
+          : alert.flagColor === "orange"
+          ? "warning"
+          : "accent";
+      borderClass =
+        alert.flagColor === "red"
+          ? "border-destructive"
+          : alert.flagColor === "orange"
+          ? "border-warning"
+          : "border-accent";
     } else {
       const days = alert.daysSinceUpload || 0;
       message = `New ${alert.documentType}: ${alert.name}`;
-      subText = `${days} day${days !== 1 ? 's' : ''} ago (${new Date(alert.createdAt || '').toLocaleDateString()})`; // Fixed: Handle undefined
+      subText = `${days} day${days !== 1 ? "s" : ""} ago (${new Date(
+        alert.createdAt || ""
+      ).toLocaleDateString()})`; // Fixed: Handle undefined
       iconVariant = "secondary";
       borderClass = "border-secondary";
     }
@@ -467,9 +505,16 @@ const OrganizationDocumentsPage = () => {
 
   if (error || !orgId) {
     return (
-      <Layout user={user || undefined} onLogout={() => {}}> {/* Fixed: Handle null/undefined */}
+      <Layout user={user || undefined} onLogout={() => {}}>
+        {" "}
+        {/* Fixed: Handle null/undefined */}
         <div className="text-center py-12">
-          <p className="text-red-500">Error loading documents. <Button variant="link" onClick={() => navigate(-1)}>Go Back</Button></p>
+          <p className="text-red-500">
+            Error loading documents.{" "}
+            <Button variant="link" onClick={() => navigate(-1)}>
+              Go Back
+            </Button>
+          </p>
         </div>
       </Layout>
     );
@@ -477,14 +522,18 @@ const OrganizationDocumentsPage = () => {
 
   if (isLoading) {
     return (
-      <Layout user={user || undefined} onLogout={() => {}}> {/* Fixed: Handle null/undefined */}
+      <Layout user={user || undefined} onLogout={() => {}}>
+        {" "}
+        {/* Fixed: Handle null/undefined */}
         <div className="text-center py-12">Loading documents...</div>
       </Layout>
     );
   }
 
   return (
-    <Layout user={user || undefined} onLogout={() => {}}> {/* Fixed: Handle null/undefined */}
+    <Layout user={user || undefined} onLogout={() => {}}>
+      {" "}
+      {/* Fixed: Handle null/undefined */}
       <div className="space-y-6">
         {/* Header */}
         <Card>
@@ -496,7 +545,9 @@ const OrganizationDocumentsPage = () => {
                   Back to Dashboard
                 </Button>
                 <div>
-                  <CardTitle className="text-2xl">{organization?.name || "Organization"} Documents</CardTitle>
+                  <CardTitle className="text-2xl">
+                    {organization?.name || "Organization"} Documents
+                  </CardTitle>
                   <p className="text-muted-foreground">{totalDocs} documents</p>
                 </div>
               </div>
@@ -515,11 +566,14 @@ const OrganizationDocumentsPage = () => {
                 <DialogContent className="max-w-md">
                   <DialogHeader>
                     <DialogTitle>{organization?.name} Alerts</DialogTitle>
-                    <DialogDescription>Document expiry and new upload reminders</DialogDescription>
+                    <DialogDescription>
+                      Document expiry and new upload reminders
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-3 max-h-64 overflow-y-auto">
                     {alerts.map((alert) => {
-                      const { message, subText, iconVariant, borderClass } = getAlertDisplay(alert);
+                      const { message, subText, iconVariant, borderClass } =
+                        getAlertDisplay(alert);
                       return (
                         <div
                           key={alert._id}
@@ -531,7 +585,9 @@ const OrganizationDocumentsPage = () => {
                         >
                           <div className="flex items-start gap-3">
                             <div className="flex-shrink-0 mt-1">
-                              <AlertTriangle className={`h-4 w-4 text-${iconVariant}`} />
+                              <AlertTriangle
+                                className={`h-4 w-4 text-${iconVariant}`}
+                              />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-foreground mb-1">
@@ -541,7 +597,10 @@ const OrganizationDocumentsPage = () => {
                                 {subText}
                               </p>
                               <div className="flex items-center gap-2 mt-1">
-                                <Badge variant={alert.flagColor as any} className="text-xs">
+                                <Badge
+                                  variant={alert.flagColor as any}
+                                  className="text-xs"
+                                >
                                   {alert.alertType.toUpperCase()}
                                 </Badge>
                                 <span className="text-xs text-muted-foreground">
@@ -554,7 +613,9 @@ const OrganizationDocumentsPage = () => {
                       );
                     })}
                     {alerts.length === 0 && (
-                      <p className="text-center text-muted-foreground py-8">No alerts at this time.</p>
+                      <p className="text-center text-muted-foreground py-8">
+                        No alerts at this time.
+                      </p>
                     )}
                   </div>
                 </DialogContent>
@@ -577,7 +638,13 @@ const OrganizationDocumentsPage = () => {
               className="pl-10"
             />
           </div>
-          <Select value={filterType} onValueChange={(value) => { setFilterType(value); setCurrentPage(1); }}>
+          <Select
+            value={filterType}
+            onValueChange={(value) => {
+              setFilterType(value);
+              setCurrentPage(1);
+            }}
+          >
             <SelectTrigger className="w-48">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue />
@@ -595,22 +662,27 @@ const OrganizationDocumentsPage = () => {
         {/* Documents Grid */}
         {filteredDocuments.length === 0 ? (
           <div className="text-center py-12">
-            <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" /> {/* Use Search icon as placeholder */}
+            <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />{" "}
+            {/* Use Search icon as placeholder */}
             <p className="text-muted-foreground">No documents found.</p>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredDocuments.map((doc: Document) => ( // Fixed: Typed param
-              <DocumentCard
-                key={doc._id}
-                document={doc}
-                canEdit={isAdminUser || doc.uploadedBy === user?._id}
-                onView={() => handleDocumentAction("view", doc)}
-                onDownload={() => handleDocumentAction("download", doc)}
-                onEdit={() => handleDocumentAction("edit", doc)}
-                onDelete={() => handleDocumentAction("delete", doc)}
-              />
-            ))}
+            {filteredDocuments.map(
+              (
+                doc: Document // Fixed: Typed param
+              ) => (
+                <DocumentCard
+                  key={doc._id}
+                  document={doc}
+                  canEdit={isAdminUser || doc.uploadedBy === user?._id}
+                  onView={() => handleDocumentAction("view", doc)}
+                  onDownload={() => handleDocumentAction("download", doc)}
+                  onEdit={() => handleDocumentAction("edit", doc)}
+                  onDelete={() => handleDocumentAction("delete", doc)}
+                />
+              )
+            )}
           </div>
         )}
 

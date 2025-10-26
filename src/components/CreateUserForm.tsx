@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 // src/components/CreateUserForm.tsx
 import { useState } from "react";
@@ -39,7 +41,7 @@ const createUserSchema = z.object({
       /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
       "Password must contain at least one letter and one number"
     ),
-  role: z.string().min(1, "Role is required"),  // FIXED: Dynamic string (ID)
+  role: z.string().min(1, "Role is required"), // FIXED: Dynamic string (ID)
   organization: z.string().min(1, "Organization is required"),
   Department: z.string().min(1, "Department is required"),
   phoneNumber: z.string().min(1, "Phone number is required"),
@@ -68,16 +70,22 @@ export const CreateUserForm = ({
   const { data: rolesResponse, isLoading: rolesLoading } = useQuery({
     queryKey: ["roles"],
     queryFn: () => userService.getAllRoles(),
-    onError: (err) => {
+    onError: (err: unknown) => {
       console.error("CreateUserForm roles error:", err); // Debug
       toast.error("Failed to load roles");
     },
   });
 
-  const organizations = organizationsResponse?.data?.organizations || organizationsResponse?.organizations || [];
+  const organizations =
+    organizationsResponse?.data?.organizations ||
+    organizationsResponse?.organizations ||
+    [];
   const roles = rolesResponse?.data?.roles || [];
 
-  console.log("CreateUserForm data:", { orgs: organizations.length, roles: roles.length }); // Debug
+  console.log("CreateUserForm data:", {
+    orgs: organizations.length,
+    roles: roles.length,
+  }); // Debug
 
   const form = useForm<CreateUserFormData>({
     resolver: zodResolver(createUserSchema),

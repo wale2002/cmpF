@@ -51,7 +51,12 @@ const permissionGroups = [
   },
 ] as const;
 
-export const EditRoleModal = ({ isOpen, onClose, role, onSuccess }: EditRoleModalProps) => {
+export const EditRoleModal = ({
+  isOpen,
+  onClose,
+  role,
+  onSuccess,
+}: EditRoleModalProps) => {
   const [formData, setFormData] = useState({
     name: role.name,
     description: role.description,
@@ -59,7 +64,8 @@ export const EditRoleModal = ({ isOpen, onClose, role, onSuccess }: EditRoleModa
   });
 
   const updateRoleMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: typeof formData }) => userService.updateRole(id, data),
+    mutationFn: ({ id, data }: { id: string; data: typeof formData }) =>
+      userService.updateRole(id, data),
     onSuccess,
     onError: (error) => {
       handleApiError(error, "Failed to update role");
@@ -75,7 +81,11 @@ export const EditRoleModal = ({ isOpen, onClose, role, onSuccess }: EditRoleModa
     updateRoleMutation.mutate({ id: role._id, data: formData });
   };
 
-  const updatePermission = (group: string, perm: string, checked: boolean) => {
+  const updatePermission = (
+    group: keyof Role["permissions"],
+    perm: string,
+    checked: boolean
+  ) => {
     setFormData({
       ...formData,
       permissions: {
@@ -100,7 +110,9 @@ export const EditRoleModal = ({ isOpen, onClose, role, onSuccess }: EditRoleModa
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               required
             />
           </div>
@@ -109,22 +121,35 @@ export const EditRoleModal = ({ isOpen, onClose, role, onSuccess }: EditRoleModa
             <Input
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               required
             />
           </div>
           <div className="space-y-4">
             <Label>Permissions</Label>
             {permissionGroups.map((group) => (
-              <div key={group.group} className="space-y-2 border p-4 rounded-md">
+              <div
+                key={group.group}
+                className="space-y-2 border p-4 rounded-md"
+              >
                 <h3 className="font-semibold">{group.group}</h3>
                 <div className="grid grid-cols-2 gap-2">
                   {group.permissions.map((perm) => (
                     <div key={perm} className="flex items-center space-x-2">
                       <Checkbox
                         id={`${group.group}-${perm}`}
-                        checked={formData.permissions[group.group as keyof typeof formData.permissions]?.[perm as keyof typeof formData.permissions[typeof group.group]] || false}
-                        onCheckedChange={(checked) => updatePermission(group.group, perm, !!checked)}
+                        checked={
+                          formData.permissions[
+                            group.group as keyof typeof formData.permissions
+                          ]?.[
+                            perm as keyof (typeof formData.permissions)[typeof group.group]
+                          ] || false
+                        }
+                        onCheckedChange={(checked) =>
+                          updatePermission(group.group, perm, !!checked)
+                        }
                       />
                       <Label htmlFor={`${group.group}-${perm}`}>{perm}</Label>
                     </div>

@@ -1,5 +1,5 @@
-
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 // import { useState, useEffect, useMemo } from "react";
 // import { useNavigate } from "react-router-dom";
@@ -224,7 +224,7 @@
 //   // NEW: Pagination logic
 //   const totalPages = useMemo(() => Math.ceil(filteredDocuments.length / DOCS_PAGE_SIZE), [filteredDocuments.length]);
 //   const startIndex = useMemo(() => (currentPage - 1) * DOCS_PAGE_SIZE, [currentPage]);
-//   const paginatedDocuments = useMemo(() => 
+//   const paginatedDocuments = useMemo(() =>
 //     filteredDocuments.slice(startIndex, startIndex + DOCS_PAGE_SIZE),
 //     [filteredDocuments, startIndex]
 //   );
@@ -284,8 +284,8 @@
 
 //   const handleCreateFolder = async (folderName: string, folderType: string) => {
 //     try {
-//       await organizationService.createOrganization({ 
-//         name: folderName, 
+//       await organizationService.createOrganization({
+//         name: folderName,
 //         organizationType: folderType || 'tech'
 //       });
 //       toast.success(`Folder "${folderName}" created successfully`);
@@ -632,8 +632,6 @@
 
 // export default Dashboard;
 
-
-
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnalyticsCharts } from "../components/AnalyticsCharts";
@@ -695,7 +693,9 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
-  const [viewMode, setViewMode] = useState<"grid" | "folders" | "management">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "folders" | "management">(
+    "grid"
+  );
   const [activeTab, setActiveTab] = useState("documents");
   const [uploadLoading, setUploadLoading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -716,16 +716,28 @@ const Dashboard = () => {
     setCurrentPage(1);
   }, [searchTerm, filterType]);
 
-  const isSuperAdmin = user?.role?.name?.toLowerCase() === 'superadmin';
+  const isSuperAdmin = user?.role?.name?.toLowerCase() === "superadmin";
   const permissions = user?.role?.permissions || {};
-  const canViewDocuments = isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false;
-  const canUploadDocuments = isSuperAdmin || permissions.DocumentManagement?.uploadDocuments || false;
-  const canEditDocuments = isSuperAdmin || permissions.DocumentManagement?.editDocuments || false;
-  const canDeleteDocuments = isSuperAdmin || permissions.DocumentManagement?.deleteDocuments || false;
-  const canViewUsers = isSuperAdmin || permissions.UserManagement?.viewUsers || false;
-  const canManageUserRoles = isSuperAdmin || permissions.UserManagement?.manageUserRoles || false;
-  const canViewOrganizations = isSuperAdmin || permissions.OrganizationManagement?.viewOrganizations || false;
-  const canCreateOrganizations = isSuperAdmin || permissions.OrganizationManagement?.createOrganizations || false;
+  const canViewDocuments =
+    isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false;
+  const canUploadDocuments =
+    isSuperAdmin || permissions.DocumentManagement?.uploadDocuments || false;
+  const canEditDocuments =
+    isSuperAdmin || permissions.DocumentManagement?.editDocuments || false;
+  const canDeleteDocuments =
+    isSuperAdmin || permissions.DocumentManagement?.deleteDocuments || false;
+  const canViewUsers =
+    isSuperAdmin || permissions.UserManagement?.viewUsers || false;
+  const canManageUserRoles =
+    isSuperAdmin || permissions.UserManagement?.manageUserRoles || false;
+  const canViewOrganizations =
+    isSuperAdmin ||
+    permissions.OrganizationManagement?.viewOrganizations ||
+    false;
+  const canCreateOrganizations =
+    isSuperAdmin ||
+    permissions.OrganizationManagement?.createOrganizations ||
+    false;
   const canViewAnalytics = isSuperAdmin || canViewOrganizations || canViewUsers;
 
   // Fetch notifications
@@ -736,7 +748,7 @@ const Dashboard = () => {
   });
 
   const notifications = notificationsData?.data?.notifications || [];
-  const unreadCount = notifications.filter(notif => !notif.read).length;
+  const unreadCount = notifications.filter((notif) => !notif.read).length;
 
   const { data: userMetricsData } = useQuery<ApiResponse<{ metrics: any }>>({
     queryKey: ["userMetrics"],
@@ -756,41 +768,49 @@ const Dashboard = () => {
     enabled: !!user && canViewUsers,
   });
 
-  const { data: singleOrgData, isLoading: singleOrgLoading } = useQuery<Organization | null>({
-    queryKey: ["singleOrganization", user?.organization],
-    queryFn: async () => {
-      if (!user?.organization) return null;
-      const response = await organizationService.getOrganization(user.organization.toString());
-      return response.data?.organization || null;
-    },
-    enabled: !!user?.organization && canViewOrganizations && !isSuperAdmin,
-    retry: false,
-  });
+  const { data: singleOrgData, isLoading: singleOrgLoading } =
+    useQuery<Organization | null>({
+      queryKey: ["singleOrganization", user?.organization],
+      queryFn: async () => {
+        if (!user?.organization) return null;
+        const response = await organizationService.getOrganization(
+          user.organization.toString()
+        );
+        return response.data?.organization || null;
+      },
+      enabled: !!user?.organization && canViewOrganizations && !isSuperAdmin,
+      retry: false,
+    });
 
-  const {
-    data: organizationsData,
-    isLoading: organizationsLoading,
-  } = useQuery<ApiResponse<{ organizations: Organization[] }>>({
+  const { data: organizationsData, isLoading: organizationsLoading } = useQuery<
+    ApiResponse<{ organizations: Organization[] }>
+  >({
     queryKey: ["organizations"],
-    queryFn: () => organizationService.getOrganizations({ page: 1, limit: PAGE_LIMIT }),
+    queryFn: () =>
+      organizationService.getOrganizations({ page: 1, limit: PAGE_LIMIT }),
     enabled: !!user && canViewOrganizations,
     retry: false,
     gcTime: 10 * 60 * 1000, // Fixed: cacheTime -> gcTime
   });
 
-  const {
-    data: allDocumentsData,
-    isLoading: allDocsLoading,
-  } = useQuery<Document[]>({
+  const { data: allDocumentsData, isLoading: allDocsLoading } = useQuery<
+    Document[]
+  >({
     queryKey: ["allDocuments"],
     queryFn: async () => {
       if (canViewOrganizations) {
-        const orgsResponse = await organizationService.getOrganizations({ page: 1, limit: PAGE_LIMIT });
+        const orgsResponse = await organizationService.getOrganizations({
+          page: 1,
+          limit: PAGE_LIMIT,
+        });
         const orgs = orgsResponse.data?.organizations || [];
         const allDocs = await Promise.all(
           orgs.map(async (org: Organization) => {
             try {
-              const docsResponse = await documentService.getDocumentsByOrg(org._id, { page: 1, limit: 9999 });
+              const docsResponse = await documentService.getDocumentsByOrg(
+                org._id,
+                { page: 1, limit: 9999 }
+              );
               return docsResponse.data?.documents || [];
             } catch (err) {
               console.error(`Org ${org._id} docs error:`, err);
@@ -801,7 +821,10 @@ const Dashboard = () => {
         return allDocs.flat();
       } else {
         if (!user?.organization) return [];
-        const docsResponse = await documentService.getDocumentsByOrg(user.organization, { page: 1, limit: PAGE_LIMIT });
+        const docsResponse = await documentService.getDocumentsByOrg(
+          user.organization,
+          { page: 1, limit: PAGE_LIMIT }
+        );
         return docsResponse.data?.documents || [];
       }
     },
@@ -816,33 +839,54 @@ const Dashboard = () => {
       } else if (singleOrgData) {
         return [singleOrgData];
       } else if (user?.organization) {
-        return [{ _id: user.organization, name: "Current Organization", organizationType: "tech" }];
+        return [
+          {
+            _id: user.organization,
+            name: "Current Organization",
+            organizationType: "tech",
+          },
+        ];
       }
     }
     return [];
-  }, [organizationsData, singleOrgData, user?.organization, canViewOrganizations, isSuperAdmin]);
+  }, [
+    organizationsData,
+    singleOrgData,
+    user?.organization,
+    canViewOrganizations,
+    isSuperAdmin,
+  ]);
 
   const documents = allDocumentsData || [];
   const allUsers = allUsersData?.data?.users || [];
   const userMetrics = userMetricsData?.data?.metrics || { totalUsers: 0 };
   const orgMetrics = orgMetricsData?.data?.metrics || { totalOrganizations: 0 };
 
-  const filteredDocuments = useMemo(() => 
-    documents.filter((doc: Document) => { // Fixed: Typed param
-      const matchesSearch = doc.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const matchesType = filterType === "all" || doc.documentType === filterType;
-      return matchesSearch && matchesType;
-    }), 
+  const filteredDocuments = useMemo(
+    () =>
+      documents.filter((doc: Document) => {
+        // Fixed: Typed param
+        const matchesSearch = doc.name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const matchesType =
+          filterType === "all" || doc.documentType === filterType;
+        return matchesSearch && matchesType;
+      }),
     [documents, searchTerm, filterType]
   );
 
   // NEW: Pagination logic
-  const totalPages = useMemo(() => Math.ceil(filteredDocuments.length / DOCS_PAGE_SIZE), [filteredDocuments.length]);
-  const startIndex = useMemo(() => (currentPage - 1) * DOCS_PAGE_SIZE, [currentPage]);
-  const paginatedDocuments = useMemo(() => 
-    filteredDocuments.slice(startIndex, startIndex + DOCS_PAGE_SIZE),
+  const totalPages = useMemo(
+    () => Math.ceil(filteredDocuments.length / DOCS_PAGE_SIZE),
+    [filteredDocuments.length]
+  );
+  const startIndex = useMemo(
+    () => (currentPage - 1) * DOCS_PAGE_SIZE,
+    [currentPage]
+  );
+  const paginatedDocuments = useMemo(
+    () => filteredDocuments.slice(startIndex, startIndex + DOCS_PAGE_SIZE),
     [filteredDocuments, startIndex]
   );
 
@@ -858,7 +902,14 @@ const Dashboard = () => {
     setUploadError("");
     setUploadSuccess("");
     try {
-      await documentService.uploadDocument(organizationId, file, name, type, startDate, expiryDate);
+      await documentService.uploadDocument(
+        organizationId,
+        file,
+        name,
+        type,
+        startDate,
+        expiryDate
+      );
       // Refetch via invalidation if needed, or manual refetch
       toast.success("Document uploaded successfully!");
       setUploadSuccess("Document uploaded successfully!");
@@ -900,9 +951,9 @@ const Dashboard = () => {
 
   const handleCreateFolder = async (folderName: string, folderType: string) => {
     try {
-      await organizationService.createOrganization({ 
-        name: folderName, 
-        organizationType: folderType || 'tech'
+      await organizationService.createOrganization({
+        name: folderName,
+        organizationType: folderType || "tech",
       });
       toast.success(`Folder "${folderName}" created successfully`);
       // Refetch organizations
@@ -944,7 +995,10 @@ const Dashboard = () => {
     }
   };
 
-  if (authLoading || (canViewOrganizations && (organizationsLoading || singleOrgLoading))) {
+  if (
+    authLoading ||
+    (canViewOrganizations && (organizationsLoading || singleOrgLoading))
+  ) {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground text-base">Loading...</p>
@@ -958,9 +1012,13 @@ const Dashboard = () => {
 
   if (allDocsLoading && canViewDocuments) {
     return (
-      <Layout user={user || undefined} onLogout={handleLogout}> {/* Fixed: Handle null/undefined */}
+      <Layout user={user || undefined} onLogout={handleLogout}>
+        {" "}
+        {/* Fixed: Handle null/undefined */}
         <div className="text-center py-12">
-          <p className="text-muted-foreground text-base">Loading documents...</p>
+          <p className="text-muted-foreground text-base">
+            Loading documents...
+          </p>
         </div>
       </Layout>
     );
@@ -969,12 +1027,16 @@ const Dashboard = () => {
   const hasAdminAccess = canViewUsers || canManageUserRoles;
 
   return (
-    <Layout user={user || undefined} onLogout={handleLogout}> {/* Fixed: Handle null/undefined */}
+    <Layout user={user || undefined} onLogout={handleLogout}>
+      {" "}
+      {/* Fixed: Handle null/undefined */}
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2 flex-1">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+                Dashboard
+              </h1>
               <p className="text-muted-foreground text-sm sm:text-base">
                 Manage your contracts and documents
               </p>
@@ -989,7 +1051,9 @@ const Dashboard = () => {
           totalDocuments={documents.length}
           recentUploads={
             documents.filter(
-              (d: Document) => // Fixed: Typed param
+              (
+                d: Document // Fixed: Typed param
+              ) =>
                 new Date(d.createdAt) >
                 new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
             ).length
@@ -999,32 +1063,51 @@ const Dashboard = () => {
           isAdmin={hasAdminAccess}
         />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-4"
+        >
           <TabsList className="flex flex-col sm:flex-row w-full justify-start gap-2 p-2 border rounded-md bg-muted">
-            <TabsTrigger value="documents" className="flex-1 min-w-[100px] text-sm">
+            <TabsTrigger
+              value="documents"
+              className="flex-1 min-w-[100px] text-sm"
+            >
               <FileText className="h-4 w-4 mr-2" />
               Documents
             </TabsTrigger>
             {canUploadDocuments && (
-              <TabsTrigger value="upload" className="flex-1 min-w-[100px] text-sm">
+              <TabsTrigger
+                value="upload"
+                className="flex-1 min-w-[100px] text-sm"
+              >
                 <Upload className="h-4 w-4 mr-2" />
                 Upload
               </TabsTrigger>
             )}
             {canViewAnalytics && (
-              <TabsTrigger value="analytics" className="flex-1 min-w-[100px] text-sm">
+              <TabsTrigger
+                value="analytics"
+                className="flex-1 min-w-[100px] text-sm"
+              >
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Analytics
               </TabsTrigger>
             )}
             {canViewUsers && (
-              <TabsTrigger value="users" className="flex-1 min-w-[100px] text-sm">
+              <TabsTrigger
+                value="users"
+                className="flex-1 min-w-[100px] text-sm"
+              >
                 <Users className="h-4 w-4 mr-2" />
                 Users
               </TabsTrigger>
             )}
             {canManageUserRoles && (
-              <TabsTrigger value="roles" className="flex-1 min-w-[100px] text-sm">
+              <TabsTrigger
+                value="roles"
+                className="flex-1 min-w-[100px] text-sm"
+              >
                 <Shield className="h-4 w-4 mr-2" />
                 Roles
               </TabsTrigger>
@@ -1051,7 +1134,11 @@ const Dashboard = () => {
                 <Filter className="h-4 w-4 mr-2" />
                 Filter
               </Button>
-              <div className={`${isFilterOpen ? 'block' : 'hidden'} sm:block w-full sm:w-48`}>
+              <div
+                className={`${
+                  isFilterOpen ? "block" : "hidden"
+                } sm:block w-full sm:w-48`}
+              >
                 <Select value={filterType} onValueChange={setFilterType}>
                   <SelectTrigger className="w-full text-sm">
                     <Filter className="h-4 w-4 mr-2" />
@@ -1101,7 +1188,9 @@ const Dashboard = () => {
 
             {allDocsLoading ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground text-base">Loading documents...</p>
+                <p className="text-muted-foreground text-base">
+                  Loading documents...
+                </p>
               </div>
             ) : viewMode === "management" ? (
               <FolderManagement
@@ -1123,31 +1212,42 @@ const Dashboard = () => {
             ) : (
               <>
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {paginatedDocuments.map((doc: Document) => ( // Fixed: Typed param
-                    <DocumentCard
-                      key={doc._id}
-                      document={doc}
-                      canEditDocuments={canEditDocuments}
-                      canDeleteDocuments={canDeleteDocuments}
-                      onView={() => handleDocumentAction("view", doc)}
-                      onDownload={() => handleDocumentAction("download", doc)}
-                      onEdit={() => handleDocumentAction("edit", doc)}
-                      onDelete={() => handleDocumentAction("delete", doc)}
-                    />
-                  ))}
+                  {paginatedDocuments.map(
+                    (
+                      doc: Document // Fixed: Typed param
+                    ) => (
+                      <DocumentCard
+                        key={doc._id}
+                        document={doc}
+                        canEditDocuments={canEditDocuments}
+                        canDeleteDocuments={canDeleteDocuments}
+                        onView={() => handleDocumentAction("view", doc)}
+                        onDownload={() => handleDocumentAction("download", doc)}
+                        onEdit={() => handleDocumentAction("edit", doc)}
+                        onDelete={() => handleDocumentAction("delete", doc)}
+                      />
+                    )
+                  )}
                 </div>
 
                 {/* NEW: Pagination Controls */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between mt-6">
                     <div className="text-sm text-muted-foreground">
-                      Showing {startIndex + 1} to {Math.min(startIndex + DOCS_PAGE_SIZE, filteredDocuments.length)} of {filteredDocuments.length} documents
+                      Showing {startIndex + 1} to{" "}
+                      {Math.min(
+                        startIndex + DOCS_PAGE_SIZE,
+                        filteredDocuments.length
+                      )}{" "}
+                      of {filteredDocuments.length} documents
                     </div>
                     <div className="flex gap-1">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        onClick={() =>
+                          setCurrentPage((p) => Math.max(1, p - 1))
+                        }
                         disabled={currentPage === 1}
                       >
                         <ChevronLeft className="h-4 w-4 mr-1" />
@@ -1156,7 +1256,9 @@ const Dashboard = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        onClick={() =>
+                          setCurrentPage((p) => Math.min(totalPages, p + 1))
+                        }
                         disabled={currentPage === totalPages}
                       >
                         Next
@@ -1180,7 +1282,10 @@ const Dashboard = () => {
                       No documents found matching your criteria.
                     </p>
                     {canUploadDocuments && (
-                      <Button onClick={() => setActiveTab("upload")} className="mt-4 text-sm">
+                      <Button
+                        onClick={() => setActiveTab("upload")}
+                        className="mt-4 text-sm"
+                      >
                         Upload one
                       </Button>
                     )}

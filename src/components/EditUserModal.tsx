@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/components/EditUserModal.tsx (Updated: Fetch roles dynamically for select)
 import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -12,10 +13,16 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { userService } from "../lib/api";
 import { toast } from "sonner";
-import type { User, Role } from "../types"; // Assume Role type is defined in types
+import type { User, Role, CreateUserRequest } from "../types"; // Assume Role type is defined in types
 
 interface EditUserModalProps {
   isOpen: boolean;
@@ -24,7 +31,12 @@ interface EditUserModalProps {
   onSuccess: () => void;
 }
 
-export const EditUserModal = ({ isOpen, onClose, user, onSuccess }: EditUserModalProps) => {
+export const EditUserModal = ({
+  isOpen,
+  onClose,
+  user,
+  onSuccess,
+}: EditUserModalProps) => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     fullName: user.fullName,
@@ -43,7 +55,7 @@ export const EditUserModal = ({ isOpen, onClose, user, onSuccess }: EditUserModa
     enabled: isOpen,
   });
 
-  const roles: Role[] = rolesData?.data?.roles || rolesData?.roles || [];
+  const roles: Role[] = rolesData?.data?.roles || [];
 
   // Reset form when user changes
   useEffect(() => {
@@ -61,7 +73,8 @@ export const EditUserModal = ({ isOpen, onClose, user, onSuccess }: EditUserModa
   }, [isOpen, user]);
 
   const updateMutation = useMutation({
-    mutationFn: (updates: Partial<User>) => userService.updateUser(user._id, updates),
+    mutationFn: (updates: Partial<CreateUserRequest>) =>
+      userService.updateUser(user._id, updates),
     onSuccess: () => {
       toast.success("User updated successfully");
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
@@ -84,12 +97,22 @@ export const EditUserModal = ({ isOpen, onClose, user, onSuccess }: EditUserModa
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const updates: Partial<User> = {};
+    const updates: Partial<CreateUserRequest> = {};
     // Compare with original user data
     Object.entries(formData).forEach(([key, value]) => {
-      const originalValue = user[key as keyof User];
+      const originalValue =
+        key === "role" ? user.role._id : user[key as keyof User];
       if (value !== originalValue && value !== "") {
-        updates[key as keyof User] = value;
+        if (key === "status") {
+          updates[key] = value as "Active" | "InActive";
+        } else {
+          updates[key as keyof CreateUserRequest] =
+            key === "status"
+              ? value === "Active"
+                ? "Active"
+                : "InActive"
+              : value;
+        }
       }
     });
     if (Object.keys(updates).length === 0) {
@@ -109,23 +132,49 @@ export const EditUserModal = ({ isOpen, onClose, user, onSuccess }: EditUserModa
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="fullName">Full Name</Label>
-            <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleInputChange} required />
+            <Input
+              id="fullName"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} required />
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="Department">Department</Label>
-            <Input id="Department" name="Department" value={formData.Department} onChange={handleInputChange} />
+            <Input
+              id="Department"
+              name="Department"
+              value={formData.Department}
+              onChange={handleInputChange}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="phoneNumber">Phone Number</Label>
-            <Input id="phoneNumber" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} />
+            <Input
+              id="phoneNumber"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleInputChange}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
-            <Select value={formData.status} onValueChange={(val) => handleSelectChange("status", val)}>
+            <Select
+              value={formData.status}
+              onValueChange={(val) => handleSelectChange("status", val)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -137,7 +186,10 @@ export const EditUserModal = ({ isOpen, onClose, user, onSuccess }: EditUserModa
           </div>
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
-            <Select value={formData.role} onValueChange={(val) => handleSelectChange("role", val)}>
+            <Select
+              value={formData.role}
+              onValueChange={(val) => handleSelectChange("role", val)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -152,7 +204,13 @@ export const EditUserModal = ({ isOpen, onClose, user, onSuccess }: EditUserModa
           </div>
           <div className="space-y-2">
             <Label htmlFor="organization">Organization ID</Label>
-            <Input id="organization" name="organization" value={formData.organization} onChange={handleInputChange} placeholder="Enter organization ID" />
+            <Input
+              id="organization"
+              name="organization"
+              value={formData.organization}
+              onChange={handleInputChange}
+              placeholder="Enter organization ID"
+            />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>

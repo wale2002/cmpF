@@ -6,7 +6,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { toast } from "sonner";
 import { handleApiError } from "../utils/error-handler";
 import type { Role } from "../types";
@@ -17,8 +23,21 @@ interface CreateUserModalProps {
   onSuccess: () => void;
 }
 
-export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalProps) => {
-  const [formData, setFormData] = useState({
+export const CreateUserModal = ({
+  isOpen,
+  onClose,
+  onSuccess,
+}: CreateUserModalProps) => {
+  const [formData, setFormData] = useState<{
+    fullName: string;
+    Department: string;
+    email: string;
+    password: string;
+    role: string;
+    phoneNumber: string;
+    status?: "Active" | "InActive";
+    organization?: string;
+  }>({
     fullName: "",
     Department: "",
     email: "",
@@ -41,7 +60,15 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
     onSuccess: () => {
       onSuccess();
       onClose();
-      setFormData({ fullName: "", Department: "", email: "", password: "", role: "", phoneNumber: "", status: "Active" });
+      setFormData({
+        fullName: "",
+        Department: "",
+        email: "",
+        password: "",
+        role: "",
+        phoneNumber: "",
+        status: "Active",
+      });
     },
     onError: (error) => {
       handleApiError(error, "Failed to create user");
@@ -50,7 +77,14 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.Department || !formData.email || !formData.password || !formData.phoneNumber || !formData.role) {
+    if (
+      !formData.fullName ||
+      !formData.Department ||
+      !formData.email ||
+      !formData.password ||
+      !formData.phoneNumber ||
+      !formData.role
+    ) {
       toast.error("Please fill all required fields");
       return;
     }
@@ -71,7 +105,9 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
             <Input
               id="fullName"
               value={formData.fullName}
-              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, fullName: e.target.value })
+              }
               required
             />
           </div>
@@ -80,7 +116,9 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
             <Input
               id="Department"
               value={formData.Department}
-              onChange={(e) => setFormData({ ...formData, Department: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, Department: e.target.value })
+              }
               required
             />
           </div>
@@ -90,7 +128,9 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
               required
             />
           </div>
@@ -100,7 +140,9 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
               id="password"
               type="password"
               value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
               required
             />
           </div>
@@ -109,13 +151,20 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
             <Input
               id="phoneNumber"
               value={formData.phoneNumber}
-              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, phoneNumber: e.target.value })
+              }
               required
             />
           </div>
           <div>
             <Label htmlFor="role">Role *</Label>
-            <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+            <Select
+              value={formData.role}
+              onValueChange={(value) =>
+                setFormData({ ...formData, role: value })
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
@@ -130,7 +179,12 @@ export const CreateUserModal = ({ isOpen, onClose, onSuccess }: CreateUserModalP
           </div>
           <div>
             <Label htmlFor="status">Status</Label>
-            <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+            <Select
+              value={formData.status}
+              onValueChange={(value: "Active" | "InActive") =>
+                setFormData({ ...formData, status: value })
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>

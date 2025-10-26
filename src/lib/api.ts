@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/lib/api.ts
 import type {
   ApiResponse,
@@ -34,7 +35,10 @@ const apiFetch = async (
   const response = await fetch(`${BASE_URL}${url}`, config);
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    console.error("API Error:", { status: response.status, message: error.message }); // Debug
+    console.error("API Error:", {
+      status: response.status,
+      message: error.message,
+    }); // Debug
     throw new Error(
       error.message || `HTTP ${response.status}: API request failed`
     );
@@ -91,7 +95,10 @@ export const authService = {
     if (token && userData) {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(userData));
-      console.log("Login success:", { token: token.substring(0, 20) + "...", userRole: userData.role?.name || userData.role }); // Debug, handle populated role
+      console.log("Login success:", {
+        token: token.substring(0, 20) + "...",
+        userRole: userData.role?.name || userData.role,
+      }); // Debug, handle populated role
     } else {
       throw new Error("Invalid response from server");
     }
@@ -122,6 +129,7 @@ export const authService = {
       statusCode: 200,
       message: "Logged out",
       data: null,
+      documents: [],
     };
   },
 
@@ -167,9 +175,26 @@ export const authService = {
     });
   },
 
-  getAuditLogs: async (params?: { page?: number; limit?: number; startDate?: string; endDate?: string }): Promise<ApiResponse<{ auditLogs: any[]; pagination: { page: number; limit: number; total: number; totalPages: number; hasNext: boolean; hasPrev: boolean } }>> => {
+  getAuditLogs: async (params?: {
+    page?: number;
+    limit?: number;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<
+    ApiResponse<{
+      auditLogs: any[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+        hasNext: boolean;
+        hasPrev: boolean;
+      };
+    }>
+  > => {
     const query = new URLSearchParams(params as any).toString();
-    return apiFetch(`/auth${query ? `?${query}` : ''}`);
+    return apiFetch(`/auth${query ? `?${query}` : ""}`);
   },
 
   getToken: (): string | null => {
@@ -189,11 +214,38 @@ export const authService = {
 // User Service
 export const userService = {
   createUser: async (
-    data: Omit<CreateUserRequest, 'firstName' | 'lastName'> & { fullName: string; Department: string; email: string; password: string; role: string; phoneNumber: string; status?: string; organization?: string }
+    data: Omit<CreateUserRequest, "firstName" | "lastName"> & {
+      fullName: string;
+      Department: string;
+      email: string;
+      password: string;
+      role: string;
+      phoneNumber: string;
+      status?: string;
+      organization?: string;
+    }
   ): Promise<ApiResponse<CreateUserResponse>> => {
     // FIXED: Match backend exactly - send only required fields, derive firstName in backend
-    const { fullName, Department, email, password, role, phoneNumber, status, organization } = data;
-    const payload = { fullName, Department, email, password, role, phoneNumber, status, organization };  // Omit firstName/lastName
+    const {
+      fullName,
+      Department,
+      email,
+      password,
+      role,
+      phoneNumber,
+      status,
+      organization,
+    } = data;
+    const payload = {
+      fullName,
+      Department,
+      email,
+      password,
+      role,
+      phoneNumber,
+      status,
+      organization,
+    }; // Omit firstName/lastName
 
     const response = await apiFetch("/users", {
       method: "POST",
@@ -398,8 +450,9 @@ export const documentService = {
     return apiFetch(`/documents/enhanced-alerts/${orgId}`);
   },
 
-  getGlobalExpiryAlerts: async (
-  ): Promise<ApiResponse<{ alerts: Alert[] }>> => {
+  getGlobalExpiryAlerts: async (): Promise<
+    ApiResponse<{ alerts: Alert[] }>
+  > => {
     return apiFetch(`/documents/global-alerts`);
   },
 };

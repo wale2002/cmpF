@@ -1,12 +1,18 @@
-
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Folder, FolderOpen, ChevronLeft, ChevronRight, ChevronDown, ExternalLink } from "lucide-react";
+import {
+  Folder,
+  FolderOpen,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ExternalLink,
+} from "lucide-react";
 import type { Document, Organization, Permissions } from "../types";
 import { useAuthContext } from "../contexts/AuthContext";
 
@@ -25,15 +31,21 @@ const OrganizationFolders = ({
 }: OrganizationFoldersProps) => {
   const navigate = useNavigate();
   const { user } = useAuthContext();
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    new Set()
+  );
   const [currentPage, setCurrentPage] = useState(1);
 
   const PAGE_SIZE = 3;
 
   const isSuperAdmin = user?.role?.name?.toLowerCase() === "superadmin";
   const permissions: Permissions = user?.role?.permissions || {};
-  const canViewDocuments = isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false;
-  const canViewOrganizations = isSuperAdmin || permissions.OrganizationManagement?.viewOrganizations || false;
+  const canViewDocuments =
+    isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false;
+  const canViewOrganizations =
+    isSuperAdmin ||
+    permissions.OrganizationManagement?.viewOrganizations ||
+    false;
 
   const toggleFolder = (orgId: string) => {
     const newExpanded = new Set(expandedFolders);
@@ -57,24 +69,35 @@ const OrganizationFolders = ({
   const isAdminUser = isSuperAdmin || canViewOrganizations;
   const relevantOrganizations = isAdminUser
     ? organizations
-    : organizations.filter((org) => org._id.toString() === (currentUser?.organization || "").toString());
+    : organizations.filter(
+        (org) =>
+          org._id.toString() === (currentUser?.organization || "").toString()
+      );
 
   const totalOrgs = relevantOrganizations.length;
   const totalPages = Math.ceil(totalOrgs / PAGE_SIZE);
   const startIndex = (currentPage - 1) * PAGE_SIZE;
   const endIndex = startIndex + PAGE_SIZE;
-  const paginatedOrganizations = relevantOrganizations.slice(startIndex, endIndex);
+  const paginatedOrganizations = relevantOrganizations.slice(
+    startIndex,
+    endIndex
+  );
 
   console.log("OrganizationFolders Debug:", {
     totalOrgs,
     currentPage,
     totalPages,
     relevantOrgs: paginatedOrganizations.length,
-    relevantOrgNames: paginatedOrganizations.map((o) => ({ id: o._id.toString(), name: o.name })),
+    relevantOrgNames: paginatedOrganizations.map((o) => ({
+      id: o._id.toString(),
+      name: o.name,
+    })),
     userOrg: currentUser?.organization,
     isAdmin: isAdminUser,
     docsByOrgKeys: Object.keys(documentsByOrg),
-    docsPerOrg: Object.fromEntries(Object.entries(documentsByOrg).map(([key, docs]) => [key, docs.length])),
+    docsPerOrg: Object.fromEntries(
+      Object.entries(documentsByOrg).map(([key, docs]) => [key, docs.length])
+    ),
   });
 
   const handlePageChange = (page: number) => {
@@ -90,7 +113,9 @@ const OrganizationFolders = ({
   if (!canViewDocuments) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">You do not have permission to view documents.</p>
+        <p className="text-muted-foreground">
+          You do not have permission to view documents.
+        </p>
       </div>
     );
   }
@@ -98,7 +123,9 @@ const OrganizationFolders = ({
   if (!isAdminUser) {
     const userOrgId = (currentUser?.organization || "").toString();
     const userOrgDocs = documentsByOrg[userOrgId] || [];
-    const userOrg = organizations.find((org) => org._id.toString() === userOrgId);
+    const userOrg = organizations.find(
+      (org) => org._id.toString() === userOrgId
+    );
 
     return (
       <div className="space-y-4">
@@ -110,9 +137,12 @@ const OrganizationFolders = ({
                   <Folder className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">{userOrg?.name || "Your Organization"}</CardTitle>
+                  <CardTitle className="text-lg">
+                    {userOrg?.name || "Your Organization"}
+                  </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    {userOrgDocs.length} document{userOrgDocs.length !== 1 ? "s" : ""}
+                    {userOrgDocs.length} document
+                    {userOrgDocs.length !== 1 ? "s" : ""}
                   </p>
                 </div>
               </div>
@@ -130,7 +160,9 @@ const OrganizationFolders = ({
           <CardContent>
             <div className="text-center py-8">
               <ExternalLink className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">Click "View Documents" to see your files</p>
+              <p className="text-muted-foreground">
+                Click "View Documents" to see your files
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -143,8 +175,12 @@ const OrganizationFolders = ({
       {totalOrgs === 0 ? (
         <div className="text-center py-12">
           <Folder className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-lg font-medium text-muted-foreground">No organizations found</p>
-          <p className="text-sm text-muted-foreground">Organizations will appear here</p>
+          <p className="text-lg font-medium text-muted-foreground">
+            No organizations found
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Organizations will appear here
+          </p>
         </div>
       ) : (
         <>
@@ -164,7 +200,11 @@ const OrganizationFolders = ({
                         onClick={() => toggleFolder(orgId)}
                         className="p-1 h-auto"
                       >
-                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        {isExpanded ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
                       </Button>
                       <div className="p-2 rounded-lg bg-secondary/50">
                         {isExpanded ? (
@@ -176,7 +216,10 @@ const OrganizationFolders = ({
                       <div>
                         <CardTitle className="text-lg">{org.name}</CardTitle>
                         <p className="text-sm text-muted-foreground">
-                          {(org.documentCount || orgDocs.length)} document{(org.documentCount || orgDocs.length) !== 1 ? "s" : ""}
+                          {org.documentCount || orgDocs.length} document
+                          {(org.documentCount || orgDocs.length) !== 1
+                            ? "s"
+                            : ""}
                         </p>
                       </div>
                     </div>
@@ -190,8 +233,10 @@ const OrganizationFolders = ({
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Button>
-                      <Badge variant={orgDocs.length > 0 ? "default" : "secondary"}>
-                        {(org.documentCount || orgDocs.length)} files
+                      <Badge
+                        variant={orgDocs.length > 0 ? "default" : "secondary"}
+                      >
+                        {org.documentCount || orgDocs.length} files
                       </Badge>
                     </div>
                   </div>
@@ -201,7 +246,8 @@ const OrganizationFolders = ({
                     <div className="text-center py-8">
                       <ExternalLink className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                       <p className="text-muted-foreground">
-                        Click the link icon to view documents in this organization
+                        Click the link icon to view documents in this
+                        organization
                       </p>
                     </div>
                   </CardContent>

@@ -1,7 +1,14 @@
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 // src/components/AppSidebar.tsx
-import { FileText, Building2, Users, BarChart3, Home, Folder } from "lucide-react";
+import {
+  FileText,
+  Building2,
+  Users,
+  BarChart3,
+  Home,
+  Folder,
+} from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuthContext } from "../contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +26,7 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "./ui/sidebar";
+import { Badge } from "./ui/badge";
 
 const baseItems = [
   { title: "Dashboard", url: "/", icon: Home },
@@ -39,14 +47,21 @@ export function AppSidebar() {
   // FIXED: Fetch orgs with documentCount from backend (no need for multi-fetch docs)
   const { data: orgsResponse, isLoading: orgsLoading } = useQuery({
     queryKey: ["sidebarOrgs"],
-    queryFn: () => organizationService.getOrganizations({ limit: 20 }),  // Reasonable limit
-    enabled: !!user && ['admin', 'superadmin'].includes(user?.role.name?.toLowerCase() || ''),
+    queryFn: () => organizationService.getOrganizations({ limit: 20 }), // Reasonable limit
+    enabled:
+      !!user &&
+      ["admin", "superadmin"].includes(user?.role.name?.toLowerCase() || ""),
   });
 
-  const organizations: Organization[] = orgsResponse?.data?.organizations || orgsResponse?.organizations || [];
+  const organizations: Organization[] = orgsResponse?.data?.organizations || [];
 
-  const isAdminUser = ['admin', 'superadmin'].includes(user?.role.name?.toLowerCase() || '');
-  console.log("AppSidebar orgs:", { count: organizations.length, sample: organizations[0] }); // Debug
+  const isAdminUser = ["admin", "superadmin"].includes(
+    user?.role.name?.toLowerCase() || ""
+  );
+  console.log("AppSidebar orgs:", {
+    count: organizations.length,
+    sample: organizations[0],
+  }); // Debug
 
   const allItems = isAdminUser ? [...baseItems, ...adminItems] : baseItems;
 
@@ -86,15 +101,20 @@ export function AppSidebar() {
               <SidebarGroupLabel>Organizations</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {organizations.slice(0, 5).map((org) => {  // Limit to top 5; add "View All" if needed
-                    const orgId = org._id.toString();  // Ensure string
-                    const docCount = org.documentCount || 0;  // From backend
+                  {organizations.slice(0, 5).map((org) => {
+                    // Limit to top 5; add "View All" if needed
+                    const orgId = org._id.toString(); // Ensure string
+                    const docCount = org.documentCount || 0; // From backend
                     return (
                       <SidebarMenuItem key={org._id}>
-                        <NavLink 
-                          to={`/organizations/${orgId}`}  // Or dashboard with org filter
-                          className={({ isActive }) => 
-                            `pl-8 ${isActive ? "bg-accent text-accent-foreground font-medium" : "hover:bg-accent/50"}`
+                        <NavLink
+                          to={`/organizations/${orgId}`} // Or dashboard with org filter
+                          className={({ isActive }) =>
+                            `pl-8 ${
+                              isActive
+                                ? "bg-accent text-accent-foreground font-medium"
+                                : "hover:bg-accent/50"
+                            }`
                           }
                           title={`${org.name} (${docCount} docs)`}
                         >
@@ -103,7 +123,10 @@ export function AppSidebar() {
                             <span className="flex items-center justify-between w-full">
                               <span className="truncate">{org.name}</span>
                               {docCount > 0 && (
-                                <Badge variant="secondary" className="ml-2 text-xs">
+                                <Badge
+                                  variant="secondary"
+                                  className="ml-2 text-xs"
+                                >
                                   {docCount}
                                 </Badge>
                               )}
@@ -117,7 +140,9 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                       <NavLink to="/organizations" className={getNavCls}>
                         <Building2 className="mr-2 h-4 w-4" />
-                        {state !== "collapsed" && <span>View All ({organizations.length})</span>}
+                        {state !== "collapsed" && (
+                          <span>View All ({organizations.length})</span>
+                        )}
                       </NavLink>
                     </SidebarMenuItem>
                   )}

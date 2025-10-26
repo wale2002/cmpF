@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/components/DocumentUpload.tsx
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -11,7 +12,14 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Alert, AlertDescription } from "./ui/alert";
-import { Upload, File, AlertCircle, CheckCircle, Building, Calendar } from "lucide-react";
+import {
+  Upload,
+  File,
+  AlertCircle,
+  CheckCircle,
+  Building,
+  Calendar,
+} from "lucide-react";
 import type { Organization } from "../types";
 
 interface DocumentUploadProps {
@@ -75,13 +83,20 @@ export function DocumentUpload({
           // Handle invalid date error
           return;
         }
-        if (startDate && expiryDateObj <= startDateObj) {
+        if (startDate && startDateObj && expiryDateObj <= startDateObj) {
           // Handle invalid date order error
           return;
         }
       }
       try {
-        await onUpload(file, name, documentType, selectedOrganization, startDate || undefined, expiryDate || undefined);
+        await onUpload(
+          file,
+          name,
+          documentType,
+          selectedOrganization,
+          startDate || undefined,
+          expiryDate || undefined
+        );
         // Reset form immediately after successful upload
         setFile(null);
         setName("");
