@@ -1,4 +1,4 @@
-// src/components/RoleCard.tsx (New card component for roles, inspired by DocumentCard logic)
+// src/components/RoleCard.tsx (UPDATED: Replace Eye icon with Users icon)
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Users, Shield, Edit, Trash2 } from "lucide-react";
@@ -10,6 +10,7 @@ interface RoleCardProps {
   canDelete?: boolean;
   onEdit?: (role: Role) => void;
   onDelete?: (role: Role) => void;
+  onViewUsers?: (role: Role) => void;
 }
 
 export function RoleCard({
@@ -18,6 +19,7 @@ export function RoleCard({
   canDelete = false,
   onEdit,
   onDelete,
+  onViewUsers,
 }: RoleCardProps) {
   return (
     <Card className="w-full hover:shadow-md transition-all duration-200 hover:-translate-y-1 shadow-sm rounded-xl">
@@ -57,6 +59,19 @@ export function RoleCard({
               className="h-8 px-2 text-xs flex-1 sm:flex-none"
             >
               <Trash2 className="h-3 w-3 mr-1" />
+            </Button>
+          )}
+          {/* UPDATED: View Users Button with Users icon */}
+          {onViewUsers && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onViewUsers(role)}
+              aria-label={`View users for ${role.name}`}
+              className="h-8 px-2 text-xs flex-1 sm:flex-none"
+            >
+              <Users className="h-3 w-3 mr-1" />
+              View Users
             </Button>
           )}
         </div>

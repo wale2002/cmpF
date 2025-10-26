@@ -190,7 +190,6 @@ import {
   LogOut,
   Shield,
   User as UserIcon,
-  Upload,
   Menu,
   X,
 } from "lucide-react";
@@ -228,7 +227,6 @@ export function Layout({
   const currentUser = user || authUser;
   const isSuperAdmin = currentUser?.role?.name?.toLowerCase() === 'superadmin';
   const permissions = currentUser?.role?.permissions || {};
-  const canUploadDocuments = isSuperAdmin || permissions.DocumentManagement?.uploadDocuments || false;
   const canViewAnalytics = isSuperAdmin || permissions.OrganizationManagement?.viewOrganizations || permissions.UserManagement?.viewUsers || false;
   const canViewUsers = isSuperAdmin || permissions.UserManagement?.viewUsers || false;
   const canManageUserRoles = isSuperAdmin || permissions.UserManagement?.manageUserRoles || false;
@@ -271,6 +269,30 @@ export function Layout({
             Close
           </Button>
         </div>
+        {/* NEW: Profile section for mobile sidebar */}
+        <div className="p-4 border-b bg-muted/30">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <UserIcon className="h-5 w-5 text-primary" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-sm truncate">{currentUser.fullName}</p>
+              <p className="text-xs text-muted-foreground truncate">{currentUser.role?.name}</p>
+            </div>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="w-full"
+            onClick={() => {
+              setShowProfileModal(true);
+              setIsMobileMenuOpen(false);
+            }}
+          >
+            <UserIcon className="h-4 w-4 mr-2" />
+            Edit Profile
+          </Button>
+        </div>
         <nav className="p-4 space-y-2">
           <NavLink
             to="/dashboard"
@@ -302,23 +324,6 @@ export function Layout({
             Documents
           </NavLink>
 
-          {canUploadDocuments && (
-            <NavLink
-              to="/upload"
-              className={({ isActive }) =>
-                `w-full flex items-center px-3 py-2 rounded-md transition ${
-                  isActive
-                    ? "bg-accent text-accent-foreground font-medium"
-                    : "hover:bg-accent/50"
-                }`
-              }
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <Upload className="h-4 w-4 mr-3" />
-              Upload
-            </NavLink>
-          )}
-
           {canViewAnalytics && (
             <NavLink
               to="/analytics"
@@ -343,23 +348,6 @@ export function Layout({
                   Admin
                 </h3>
               </div>
-
-              {canViewOrganizations && (
-                <NavLink
-                  to="/organizations"
-                  className={({ isActive }) =>
-                    `w-full flex items-center px-3 py-2 rounded-md transition ${
-                      isActive
-                        ? "bg-accent text-accent-foreground font-medium"
-                        : "hover:bg-accent/50"
-                    }`
-                  }
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Building className="h-4 w-4 mr-3" />
-                  Organizations
-                </NavLink>
-              )}
 
               {canViewUsers && (
                 <NavLink
@@ -533,22 +521,6 @@ export function Layout({
                 Documents
               </NavLink>
 
-              {canUploadDocuments && (
-                <NavLink
-                  to="/upload"
-                  className={({ isActive }) =>
-                    `w-full flex items-center px-3 py-2 rounded-md transition ${
-                      isActive
-                        ? "bg-accent text-accent-foreground font-medium"
-                        : "hover:bg-accent/50"
-                    }`
-                  }
-                >
-                  <Upload className="h-4 w-4 mr-3" />
-                  Upload
-                </NavLink>
-              )}
-
               {canViewAnalytics && (
                 <NavLink
                   to="/analytics"
@@ -572,22 +544,6 @@ export function Layout({
                       Admin
                     </h3>
                   </div>
-
-                  {canViewOrganizations && (
-                    <NavLink
-                      to="/organizations"
-                      className={({ isActive }) =>
-                        `w-full flex items-center px-3 py-2 rounded-md transition ${
-                          isActive
-                            ? "bg-accent text-accent-foreground font-medium"
-                            : "hover:bg-accent/50"
-                        }`
-                      }
-                    >
-                      <Building className="h-4 w-4 mr-3" />
-                      Organizations
-                    </NavLink>
-                  )}
 
                   {canViewUsers && (
                     <NavLink

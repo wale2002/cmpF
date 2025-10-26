@@ -1,3 +1,5 @@
+
+
 // // src/components/OrganizationProfileModal.tsx
 // import { useState, useEffect } from "react";
 // import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -105,7 +107,7 @@
 
 //   // Mutation for updating user profile
 //   const updateUserMutation = useMutation({
-//     mutationFn: (updates: Partial<User>) => userService.updateUser(updates), // Assume this calls /users/:id or /users/me
+//     mutationFn: (updates: Partial<User>) => userService.updateUser(user!._id, updates), // FIXED: Pass user._id to updateUser
 //     onSuccess: () => {
 //       toast.success("Profile updated successfully!");
 //       queryClient.invalidateQueries({ queryKey: ["user"] }); // Refetch user data
@@ -425,9 +427,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Textarea } from "../components/ui/textarea";
 import { Badge } from "../components/ui/badge";
 import { toast } from "sonner";
-import { Building, Save, X, User, Mail, Phone, MapPin, Briefcase, Globe, Calendar, Settings, Plus } from "lucide-react";
+import { Building, Save, X, User, Mail, Phone, MapPin, Briefcase, Globe, Calendar, Settings, Plus, FileText } from "lucide-react"; // ADDED: FileText for potential document icon if needed
 import { userService, organizationService } from "../lib/api";
-import type { User, Organization } from "../types";
+import type { User, Organization, Document } from "../types"; // UPDATED: Added Document to import for clarity (even if not directly used yet)
 
 interface OrganizationProfileModalProps {
   user: User | null;
@@ -462,9 +464,9 @@ export const OrganizationProfileModal = ({ user, isOpen, onClose, onSuccess }: O
   // Assume this modal is for self-update; adjust if used elsewhere for admin updates
   const isSelfUpdate = true;
 
-  // Fetch organizations for dropdown
+  // Fetch organizations for dropdown (invalidate on open to ensure fresh data)
   const { data: orgsData } = useQuery({
-    queryKey: ["orgsForProfile"],
+    queryKey: ["orgsForProfile", isOpen],  // UPDATED: Key includes isOpen to refetch on modal open
     queryFn: () => organizationService.getOrganizations({ page: 1, limit: 100 }),
     enabled: isOpen && !!user,
   });
@@ -499,9 +501,10 @@ export const OrganizationProfileModal = ({ user, isOpen, onClose, onSuccess }: O
   // Mutation for creating new org
   const createOrgMutation = useMutation({
     mutationFn: (data: { name: string; organizationType: string }) => organizationService.createOrganization(data),
-    onSuccess: (newOrg) => {
-      toast.success(`Organization "${newOrg.name}" created successfully!`);
-      setFormData((prev) => ({ ...prev, organization: newOrg._id }));
+    onSuccess: (response) => {
+      const newOrg = response.data?.organization || response.organization;
+      toast.success(`Organization "${newOrg?.name}" created successfully!`);
+      setFormData((prev) => ({ ...prev, organization: newOrg?._id }));
       queryClient.invalidateQueries({ queryKey: ["orgsForProfile"] });
       setIsCreatingOrg(false);
     },
@@ -513,10 +516,10 @@ export const OrganizationProfileModal = ({ user, isOpen, onClose, onSuccess }: O
 
   // Mutation for updating user profile
   const updateUserMutation = useMutation({
-    mutationFn: (updates: Partial<User>) => userService.updateUser(user!._id, updates), // FIXED: Pass user._id to updateUser
+    mutationFn: (updates: Partial<User>) => userService.updateUser(user!._id, updates),
     onSuccess: () => {
       toast.success("Profile updated successfully!");
-      queryClient.invalidateQueries({ queryKey: ["user"] }); // Refetch user data
+      queryClient.invalidateQueries({ queryKey: ["user"] });
       onSuccess?.();
       onClose();
     },
@@ -559,6 +562,13 @@ export const OrganizationProfileModal = ({ user, isOpen, onClose, onSuccess }: O
   };
 
   if (!user) return null;
+
+  // UPDATED: Helper for current org display with fallback and type coercion
+  const userOrgId = user.organization?.toString();
+  const currentOrg = organizations.find(o => o._id.toString() === userOrgId);
+  const currentOrgDisplay = currentOrg 
+    ? `${currentOrg.name} (${currentOrg.organizationType}) - ${currentOrg.documentCount || 0} document${(currentOrg.documentCount || 0) !== 1 ? 's' : ''}`
+    : "No organization assigned";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -705,7 +715,7 @@ export const OrganizationProfileModal = ({ user, isOpen, onClose, onSuccess }: O
             </div>
           </div>
 
-          {/* Organization Section */}
+          {/* Organization Section - UPDATED with documentCount integration */}
           <div className="space-y-4 border rounded-lg p-4">
             <h3 className="font-semibold flex items-center gap-2">
               <Building className="h-4 w-4" />
@@ -716,14 +726,18 @@ export const OrganizationProfileModal = ({ user, isOpen, onClose, onSuccess }: O
                 <Label htmlFor="organization">Select Organization</Label>
                 <Select value={formData.organization} onValueChange={(val) => handleSelectChange("organization", val)}>
                   <SelectTrigger>
-                    <SelectValue placeholder={user.organization ? "Current: " + organizations.find(o => o._id === user.organization)?.name : "Select organization"} />
+                    <SelectValue placeholder={userOrgId ? `Current: ${currentOrgDisplay}` : "Select organization"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {organizations.map((org) => (
-                      <SelectItem key={org._id} value={org._id}>
-                        {org.name} ({org.organizationType})
-                      </SelectItem>
-                    ))}
+                    {organizations.map((org) => {
+                      const orgId = org._id.toString();
+                      const docCount = org.documentCount || 0;
+                      return (
+                        <SelectItem key={orgId} value={orgId}>
+                          {org.name} ({org.organizationType}) - {docCount} document{docCount !== 1 ? 's' : ''}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>

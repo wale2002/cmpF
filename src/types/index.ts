@@ -190,7 +190,7 @@ export interface AuthResponse {
   user: User;
 }
 
-// NEW: Define Permissions interface for strict typing
+// Define Permissions interface for strict typing
 export interface Permissions {
   DocumentManagement?: {
     viewDocuments?: boolean;
@@ -214,13 +214,40 @@ export interface Permissions {
   };
 }
 
+// UPDATED: Simplified User interface for role users (without full role object, as it's for display)
+export interface RoleUser {
+  _id: string;
+  fullName: string;
+  email: string;
+  Department: string;
+  organization: string | null;
+}
+
+// NEW: Role interface with users array
+export interface Role {
+  _id: string;
+  name: string;
+  description: string;
+  permissions: Permissions;
+  createdBy?: string | null;
+  createdAt: string;
+  __v: number;
+  usersAssigned: number;
+  users: RoleUser[]; // Array of users assigned to this role
+  totalPermissions: number;
+}
+
+// UPDATED: User interface (role is populated with full Role details)
 export interface User {
   _id: string;
   fullName: string;
   email: string;
-  role: { _id: string; name: string; permissions: Permissions };
+  role: Role; // UPDATED: Use full Role type
   organization: string | null;
   status: "Active" | "InActive";
+  Department?: string; // ADDED: For consistency with backend
+  phoneNumber?: string;
+  // Add other fields as needed
 }
 
 export interface Document {
@@ -229,7 +256,7 @@ export interface Document {
   documentType: "Contract" | "SLA" | "NDA" | "Other";
   fileUrl: string;
   organization: string;
-  uploadedBy: string; // CHANGED: Clarify this is a user ID
+  uploadedBy: string; // Clarified: This is a user ID
   accessCount?: number;
   createdAt: string;
   isApproved: boolean;

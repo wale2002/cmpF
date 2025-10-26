@@ -104,24 +104,26 @@
 //   );
 // };
 
-// src/components/UserManagement.tsx (Updated with pagination: 6 users per page)
+// src/components/UserManagement.tsx (Updated: Use the fixed EditUserModal with dynamic roles)
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query"; // Added useMutation for potential delete
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { userService } from "../lib/api";
-import { CreateUserModal } from "./CreateUserModal"; // New modal component
+import { CreateUserModal } from "./CreateUserModal";
+import { EditUserModal } from "./EditUserModal";
+import { DeleteUserModal } from "./DeleteUserModal";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { Plus, ChevronLeft, ChevronRight } from "lucide-react"; // Added pagination icons
-import { UserCard } from "./UserCard"; // NEW: Import UserCard
+import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { UserCard } from "./UserCard";
 import { toast } from "sonner";
 import type { User } from "../types";
 import { handleApiError } from "../utils/error-handler";
 
 export const UserManagement = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editUser, setEditUser] = useState<User | null>(null); // NEW: For edit modal (placeholder)
-  const [deleteUser, setDeleteUser] = useState<User | null>(null); // NEW: For delete modal (placeholder)
-  const [currentPage, setCurrentPage] = useState(1); // NEW: Pagination state
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [deleteUser, setDeleteUser] = useState<User | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: usersResponse, isLoading, error, refetch } = useQuery({
     queryKey: ["allUsers"],
@@ -134,26 +136,24 @@ export const UserManagement = () => {
   });
 
   const users = usersResponse?.data?.users || usersResponse?.users || [];
-  const itemsPerPage = 6; // NEW: Items per page
+  const itemsPerPage = 6;
   const totalPages = Math.ceil(users.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentUsers = users.slice(startIndex, endIndex); // NEW: Slice for current page
+  const currentUsers = users.slice(startIndex, endIndex);
 
-  // NEW: Handle page change
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
-  // NEW: Placeholder mutations for edit/delete (implement as needed)
   const deleteMutation = useMutation({
-    mutationFn: (userId: string) => userService.deleteUser(userId), // Assume API method
+    mutationFn: (userId: string) => userService.deleteUser(userId),
     onSuccess: () => {
       refetch();
       setDeleteUser(null);
-      setCurrentPage(1); // NEW: Reset to first page after delete
+      setCurrentPage(1);
       toast.success("User deleted successfully");
     },
     onError: (error) => {
@@ -161,15 +161,13 @@ export const UserManagement = () => {
     },
   });
 
-  // Placeholder for edit success
   const handleEditSuccess = () => {
     refetch();
-    setCurrentPage(1); // NEW: Reset to first page
+    setCurrentPage(1);
     setEditUser(null);
     toast.success("User updated successfully");
   };
 
-  // NEW: Success handler for create
   const handleCreateSuccess = () => {
     refetch();
     setCurrentPage(1);
@@ -211,14 +209,13 @@ export const UserManagement = () => {
                   <UserCard
                     key={user._id}
                     user={user}
-                    canEdit={true} // Enable if implementing EditUserModal
-                    canDelete={true} // Enable if implementing DeleteUserModal
+                    canEdit={true}
+                    canDelete={true}
                     onEdit={setEditUser}
                     onDelete={setDeleteUser}
                   />
                 ))}
               </div>
-              {/* NEW: Pagination Controls */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <div className="flex items-center gap-2">
@@ -256,18 +253,23 @@ export const UserManagement = () => {
       <CreateUserModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onSuccess={handleCreateSuccess} // UPDATED: Use new handler
+        onSuccess={handleCreateSuccess}
       />
-      {/* NEW: Placeholder modals; implement EditUserModal and DeleteUserModal as needed */}
       {editUser && (
-        <div> {/* Replace with <EditUserModal isOpen={!!editUser} onClose={() => setEditUser(null)} user={editUser} onSuccess={handleEditSuccess} /> */}
-          {/* Edit modal placeholder */}
-        </div>
+        <EditUserModal
+          isOpen={!!editUser}
+          onClose={() => setEditUser(null)}
+          user={editUser}
+          onSuccess={handleEditSuccess}
+        />
       )}
       {deleteUser && (
-        <div> {/* Replace with <DeleteUserModal isOpen={!!deleteUser} onClose={() => setDeleteUser(null)} user={deleteUser} onDelete={(id) => deleteMutation.mutate(id)} /> */}
-          {/* Delete modal placeholder */}
-        </div>
+        <DeleteUserModal
+          isOpen={!!deleteUser}
+          onClose={() => setDeleteUser(null)}
+          user={deleteUser}
+          onDelete={deleteMutation.mutate}
+        />
       )}
     </div>
   );

@@ -149,16 +149,17 @@
 //   );
 // };
 
-// src/components/RoleManagement.tsx (Updated with pagination: 6 roles per page)
+// src/components/RoleManagement.tsx (Updated with ViewRoleUsersModal integration)
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { userService } from "../lib/api"; // Assume API methods for roles
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { Plus, ChevronLeft, ChevronRight } from "lucide-react"; // Added pagination icons
+import { Plus, ChevronLeft, ChevronRight, Users } from "lucide-react"; // Added Users icon
 import { CreateRoleModal } from "./CreateRoleModal";
 import { EditRoleModal } from "./EditRoleModal";
 import { DeleteRoleModal } from "./DeleteRoleModal";
+import { ViewRoleUsersModal } from "./ViewRoleUsersModal"; // NEW: Import ViewRoleUsersModal
 import { RoleCard } from "./RoleCard"; // NEW: Import RoleCard
 import { toast } from "sonner";
 import type { Role } from "../types";
@@ -168,6 +169,7 @@ export const RoleManagement = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editRole, setEditRole] = useState<Role | null>(null);
   const [deleteRole, setDeleteRole] = useState<Role | null>(null);
+  const [viewRole, setViewRole] = useState<Role | null>(null); // NEW: State for view users modal
   const [currentPage, setCurrentPage] = useState(1); // NEW: Pagination state
 
   const { data: rolesResponse, isLoading, error, refetch } = useQuery({
@@ -192,6 +194,11 @@ export const RoleManagement = () => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  // NEW: Handle view users
+  const handleViewUsers = (role: Role) => {
+    setViewRole(role);
   };
 
   const deleteMutation = useMutation({
@@ -259,6 +266,7 @@ export const RoleManagement = () => {
                     canDelete={true}
                     onEdit={setEditRole}
                     onDelete={setDeleteRole}
+                    onViewUsers={handleViewUsers} // NEW: Pass onViewUsers prop
                   />
                 ))}
               </div>
@@ -318,6 +326,13 @@ export const RoleManagement = () => {
           onDelete={deleteMutation.mutate}
         />
       )}
+      {viewRole && (
+        <ViewRoleUsersModal
+          isOpen={!!viewRole}
+          onClose={() => setViewRole(null)}
+          role={viewRole}
+        />
+      )} {/* NEW: Render ViewRoleUsersModal */}
     </div>
   );
 };
