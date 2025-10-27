@@ -7,6 +7,22 @@
     }
   ],
   "routes": [
-    { "src": "/.*", "dest": "/index.html" }
+    {
+      "src": "/favicon-16x16.png",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "image/png"
+      }
+    },
+    {
+      "src": "/assets/(.*)",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/.*",
+      "dest": "/index.html"
+    }
   ]
 }
