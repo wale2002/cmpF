@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// src/components/EditUserModal.tsx (Updated: Fetch roles dynamically for select)
 import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -22,7 +20,7 @@ import {
 } from "./ui/select";
 import { userService } from "../lib/api";
 import { toast } from "sonner";
-import type { User, Role, CreateUserRequest } from "../types"; // Assume Role type is defined in types
+import type { User, Role, CreateUserRequest } from "../types";
 
 interface EditUserModalProps {
   isOpen: boolean;
@@ -43,7 +41,7 @@ export const EditUserModal = ({
     email: user.email,
     role: user.role._id,
     organization: user.organization || "",
-    status: user.status,
+    status: user.status as "Active" | "InActive" | undefined,
     Department: user.Department || "",
     phoneNumber: user.phoneNumber || "",
   });
@@ -65,7 +63,7 @@ export const EditUserModal = ({
         email: user.email,
         role: user.role._id,
         organization: user.organization || "",
-        status: user.status,
+        status: user.status as "Active" | "InActive" | undefined,
         Department: user.Department || "",
         phoneNumber: user.phoneNumber || "",
       });
@@ -81,6 +79,10 @@ export const EditUserModal = ({
       onSuccess();
       onClose();
     },
+    onError: (error: Error) => {
+      toast.error("Failed to update user");
+      console.error(error);
+    },
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +91,10 @@ export const EditUserModal = ({
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "status" ? (value as "Active" | "InActive") : value,
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -100,12 +105,16 @@ export const EditUserModal = ({
       const originalValue =
         key === "role" ? user.role._id : user[key as keyof User];
       if (value !== originalValue && value !== "") {
-        // In handleSubmit
         if (key === "status") {
-          updates[key as keyof CreateUserRequest] =
-            (value as "Active" | "InActive") || undefined;
+          if (value === "Active" || value === "InActive") {
+            updates[key as keyof CreateUserRequest] = value as
+              | "Active"
+              | "InActive";
+          } else {
+            updates[key as keyof CreateUserRequest] = undefined;
+          }
         } else {
-          updates[key as keyof CreateUserRequest] = value;
+          updates[key as keyof CreateUserRequest] = value as any; // Use `any` to avoid further type issues, or refine further based on `CreateUserRequest`
         }
       }
     });
