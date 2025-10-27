@@ -1,5 +1,252 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+// /* eslint-disable @typescript-eslint/no-explicit-any */
+// /* eslint-disable @typescript-eslint/no-unused-vars */
+// // // // export default AnalyticsPage;
+
+// // // // src/pages/AnalyticsPage.tsx
+// // // import { useQuery } from "@tanstack/react-query";
+// // // import { useMemo } from "react";
+// // // import { useAuthContext } from "../contexts/AuthContext";
+// // // import { userService, organizationService, documentService } from "../lib/api";
+// // // import { AnalyticsCharts } from "../components/AnalyticsCharts";
+// // // import { Layout } from "../components/Layout";
+// // // import type { User, Document, Organization } from "../types";
+// // // import { handleApiError } from "../utils/error-handler";
+// // // import { toast } from "sonner";
+
+// // // const AnalyticsPage = () => {
+// // //   const {
+// // //     user,
+// // //     isAuthenticated,
+// // //     isLoading: authLoading,
+// // //     logout,
+// // //   } = useAuthContext();
+
+// // //   const isSuperAdmin = user?.role?.name?.toLowerCase() === "superadmin";
+// // //   const permissions = user?.role?.permissions || {};
+// // //   const canViewUsers =
+// // //     isSuperAdmin || permissions.UserManagement?.viewUsers || false;
+// // //   const canViewOrganizations =
+// // //     isSuperAdmin ||
+// // //     permissions.OrganizationManagement?.viewOrganizations ||
+// // //     false;
+// // //   const canViewDocuments =
+// // //     isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false;
+// // //   const canViewAnalytics =
+// // //     isSuperAdmin || (canViewUsers && canViewOrganizations && canViewDocuments);
+
+// // //   const {
+// // //     data: userMetrics,
+// // //     isLoading: userMetricsLoading,
+// // //     error: userMetricsError,
+// // //   } = useQuery({
+// // //     queryKey: ["userMetrics"],
+// // //     queryFn: () => userService.getUserMetrics(),
+// // //     enabled: !!user && canViewUsers,
+// // //     onError: (err: any) => {
+// // //       console.error("Analytics userMetrics error:", err);
+// // //       toast.error("Failed to load user metrics");
+// // //     },
+// // //   });
+
+// // //   const {
+// // //     data: orgMetrics,
+// // //     isLoading: orgMetricsLoading,
+// // //     error: orgMetricsError,
+// // //   } = useQuery({
+// // //     queryKey: ["organizationMetrics"],
+// // //     queryFn: () => organizationService.getOrganizationMetrics(),
+// // //     enabled: !!user && canViewOrganizations,
+// // //     onError: (err: any) => {
+// // //       console.error("Analytics orgMetrics error:", err);
+// // //       toast.error("Failed to load organization metrics");
+// // //     },
+// // //   });
+
+// // //   const {
+// // //     data: allUsersData,
+// // //     isLoading: usersLoading,
+// // //     error: usersError,
+// // //   } = useQuery<{ data?: { users?: User[] }; users?: User[] }>({
+// // //     queryKey: ["allUsers"],
+// // //     queryFn: () => userService.getAllUsers(),
+// // //     enabled: !!user && canViewUsers,
+// // //     onError: (err: any) => {
+// // //       console.error("Analytics allUsers error:", err);
+// // //       toast.error("Failed to load users");
+// // //     },
+// // //   });
+
+// // //   const {
+// // //     data: organizationsData,
+// // //     isLoading: orgsLoading,
+// // //     error: orgsError,
+// // //   } = useQuery({
+// // //     queryKey: ["organizations"],
+// // //     queryFn: () => organizationService.getOrganizations(),
+// // //     enabled: !!user && canViewOrganizations,
+// // //     onError: (err: any) => {
+// // //       console.error("Analytics orgs error:", err);
+// // //       toast.error("Failed to load organizations");
+// // //     },
+// // //   });
+
+// // //   const {
+// // //     data: allDocumentsData,
+// // //     isLoading: docsLoading,
+// // //     error: docsError,
+// // //   } = useQuery<{ data?: { documents: Document[] }; documents?: Document[] }>({
+// // //     queryKey: ["allDocumentsAnalytics"],
+// // //     queryFn: async () => {
+// // //       if (!user) return [];
+// // //       if (canViewOrganizations) {
+// // //         const orgsResponse = await organizationService.getOrganizations();
+// // //         const orgs =
+// // //           orgsResponse.data?.organizations || orgsResponse.organizations || [];
+// // //         console.log("Analytics admin orgs:", orgs.length);
+// // //         const allDocs = await Promise.all(
+// // //           orgs.map(async (org: Organization) => {
+// // //             try {
+// // //               const docsResponse = await documentService.getDocumentsByOrg(
+// // //                 org._id.toString()
+// // //               );
+// // //   useQuery<{ data?: { auditLogs: any[]; }; auditLogs?: any[]; }>({
+// // //                 queryKey: ["auditLogs"],
+// // //                 queryFn: () => userService.getAuditLogs(),
+// // //                 enabled: !!user && canViewUsers,
+// // //                 onError: (err: any) => {
+// // //                   console.error("Analytics auditLogs error:", err);
+// // //                   toast.error("Failed to load audit logs");
+// // //                 },
+// // //               });
+// // //         );
+// // //         return allDocs.flat();
+// // //       } else {
+// // //         if (!user.organization) {
+// // //           console.warn("Analytics no org for non-admin");
+// // //           return [];
+// // //         }
+// // //         const docsResponse = await documentService.getDocumentsByOrg(
+// // //           user.organization.toString()
+// // //         );
+// // //         return docsResponse.data?.documents || docsResponse.documents || [];
+// // //       }
+// // //     },
+// // //     enabled: !!user && canViewDocuments,
+// // //     onError: (err: any) => {
+// // //       console.error("Analytics allDocuments error:", err);
+// // //       toast.error("Failed to load documents");
+// // //     },
+// // //   });
+
+// // //   // NEW: Audit Logs Query
+// // //   const {
+// // //     data: auditLogsData,
+// // //     isLoading: auditLogsLoading,
+// // //     error: auditLogsError,
+// // //   } = useQuery({
+// // //     queryKey: ["auditLogs"],
+// // //     queryFn: () => userService.getAuditLogs(),
+// // //     enabled: !!user && canViewUsers,
+// // //     onError: (err: any) => {
+// // //       console.error("Analytics auditLogs error:", err);
+// // //       toast.error("Failed to load audit logs");
+// // //     },
+// // //   });
+
+// // //   const organizations = useMemo(() => {
+// // //     if (canViewOrganizations) {
+// // //       return (
+// // //         organizationsData?.data?.organizations ||
+// // //         organizationsData?.organizations ||
+// // //         []
+// // //       );
+// // //     } else if (user?.organization) {
+// // //       return [
+// // //         {
+// // //           _id: user.organization,
+// // //           name: "Current Organization",
+// // //           organizationType: "tech",
+// // //         },
+// // //       ];
+// // //     }
+// // //     return [];
+// // //   }, [organizationsData, user?.organization, canViewOrganizations]);
+
+// // //   if (
+// // //     authLoading ||
+// // //     (canViewAnalytics &&
+// // //       (userMetricsLoading ||
+// // //         orgMetricsLoading ||
+// // //         usersLoading ||
+// // //         orgsLoading ||
+// // //         docsLoading ||
+// // //         auditLogsLoading))
+// // //   ) {
+// // //     return (
+// // //       <Layout user={user} onLogout={logout}>
+// // //         <div className="text-center py-12">Loading analytics...</div>
+// // //       </Layout>
+// // //     );
+// // //   }
+
+// // //   if (!isAuthenticated || !user) {
+// // //     return null;
+// // //   }
+
+// // //   if (!canViewAnalytics) {
+// // //     return (
+// // //       <Layout user={user} onLogout={logout}>
+// // //         <div className="text-center py-12 text-muted-foreground">
+// // //           You do not have permission to view analytics.
+// // //         </div>
+// // //       </Layout>
+// // //     );
+// // //   }
+
+// // //   if (
+// // //     userMetricsError ||
+// // //     orgMetricsError ||
+// // //     usersError ||
+// // //     (orgsError && canViewOrganizations) ||
+// // //     (docsError && canViewDocuments) ||
+// // //     (auditLogsError && canViewUsers)
+// // //   ) {
+// // //     console.error("Analytics errors:", {
+// // //       userMetricsError,
+// // //       orgMetricsError,
+// // //       usersError,
+// // //       orgsError,
+// // //       docsError,
+// // //       auditLogsError,
+// // //     });
+// // //     return (
+// // //       <Layout user={user} onLogout={logout}>
+// // //         <div className="text-center py-12 text-destructive">
+// // //           Error loading analytics data. Check console for details.
+// // //         </div>
+// // //       </Layout>
+// // //     );
+// // //   }
+
+// // //   return (
+// // //     <Layout user={user} onLogout={logout}>
+// // //       <div className="space-y-6">
+// // //         <h1 className="text-3xl font-bold text-foreground">
+// // //           Analytics Dashboard
+// // //         </h1>
+// // //         <AnalyticsCharts
+// // //           allUsers={allUsersData?.data?.users || allUsersData?.users || []}
+// // //           allDocuments={allDocumentsData?.data?.documents || allDocumentsData?.documents || []}
+// // //           allOrganizations={organizations}
+// // //           userMetrics={userMetrics?.data?.metrics || userMetrics?.metrics}
+// // //           orgMetrics={orgMetrics?.data?.metrics || orgMetrics?.metrics}
+// // //           auditLogs={auditLogsData?.data?.auditLogs || []} // NEW
+// // //         />
+// // //       </div>
+// // //     </Layout>
+// // //   );
+// // // };
+
 // // // export default AnalyticsPage;
 
 // // // src/pages/AnalyticsPage.tsx
@@ -109,15 +356,14 @@
 // //               const docsResponse = await documentService.getDocumentsByOrg(
 // //                 org._id.toString()
 // //               );
-// //   useQuery<{ data?: { auditLogs: any[]; }; auditLogs?: any[]; }>({
-// //                 queryKey: ["auditLogs"],
-// //                 queryFn: () => userService.getAuditLogs(),
-// //                 enabled: !!user && canViewUsers,
-// //                 onError: (err: any) => {
-// //                   console.error("Analytics auditLogs error:", err);
-// //                   toast.error("Failed to load audit logs");
-// //                 },
-// //               });
+// //               return (
+// //                 docsResponse.data?.documents || docsResponse.documents || []
+// //               );
+// //             } catch (err) {
+// //               console.error(`Failed to fetch docs for org ${org._id}:`, err);
+// //               return [];
+// //             }
+// //           })
 // //         );
 // //         return allDocs.flat();
 // //       } else {
@@ -138,12 +384,12 @@
 // //     },
 // //   });
 
-// //   // NEW: Audit Logs Query
+// //   // NEW: Audit Logs Query (separate from allDocuments)
 // //   const {
 // //     data: auditLogsData,
 // //     isLoading: auditLogsLoading,
 // //     error: auditLogsError,
-// //   } = useQuery({
+// //   } = useQuery<{ data?: { auditLogs: any[] }; auditLogs?: any[] }>({
 // //     queryKey: ["auditLogs"],
 // //     queryFn: () => userService.getAuditLogs(),
 // //     enabled: !!user && canViewUsers,
@@ -236,7 +482,11 @@
 // //         </h1>
 // //         <AnalyticsCharts
 // //           allUsers={allUsersData?.data?.users || allUsersData?.users || []}
-// //           allDocuments={allDocumentsData?.data?.documents || allDocumentsData?.documents || []}
+// //           allDocuments={
+// //             allDocumentsData?.data?.documents ||
+// //             allDocumentsData?.documents ||
+// //             []
+// //           }
 // //           allOrganizations={organizations}
 // //           userMetrics={userMetrics?.data?.metrics || userMetrics?.metrics}
 // //           orgMetrics={orgMetrics?.data?.metrics || orgMetrics?.metrics}
@@ -249,15 +499,15 @@
 
 // // export default AnalyticsPage;
 
-// // src/pages/AnalyticsPage.tsx
+// import { useEffect } from "react";
 // import { useQuery } from "@tanstack/react-query";
 // import { useMemo } from "react";
 // import { useAuthContext } from "../contexts/AuthContext";
 // import { userService, organizationService, documentService } from "../lib/api";
 // import { AnalyticsCharts } from "../components/AnalyticsCharts";
 // import { Layout } from "../components/Layout";
-// import type { User, Document, Organization } from "../types";
-// import { handleApiError } from "../utils/error-handler";
+// import type { User, Document, Organization, ApiResponse } from "../types";
+// // import { handleApiError } from "../utils/error-handler";
 // import { toast } from "sonner";
 
 // const AnalyticsPage = () => {
@@ -285,70 +535,81 @@
 //     data: userMetrics,
 //     isLoading: userMetricsLoading,
 //     error: userMetricsError,
-//   } = useQuery({
+//   } = useQuery<ApiResponse<{ metrics: any }>>({
 //     queryKey: ["userMetrics"],
 //     queryFn: () => userService.getUserMetrics(),
 //     enabled: !!user && canViewUsers,
-//     onError: (err: any) => {
-//       console.error("Analytics userMetrics error:", err);
-//       toast.error("Failed to load user metrics");
-//     },
 //   });
+
+//   useEffect(() => {
+//     if (userMetricsError) {
+//       console.error("Analytics userMetrics error:", userMetricsError);
+//       toast.error("Failed to load user metrics");
+//     }
+//   }, [userMetricsError]);
 
 //   const {
 //     data: orgMetrics,
 //     isLoading: orgMetricsLoading,
 //     error: orgMetricsError,
-//   } = useQuery({
+//   } = useQuery<ApiResponse<{ metrics: any }>>({
 //     queryKey: ["organizationMetrics"],
 //     queryFn: () => organizationService.getOrganizationMetrics(),
 //     enabled: !!user && canViewOrganizations,
-//     onError: (err: any) => {
-//       console.error("Analytics orgMetrics error:", err);
-//       toast.error("Failed to load organization metrics");
-//     },
 //   });
+
+//   useEffect(() => {
+//     if (orgMetricsError) {
+//       console.error("Analytics orgMetrics error:", orgMetricsError);
+//       toast.error("Failed to load organization metrics");
+//     }
+//   }, [orgMetricsError]);
 
 //   const {
 //     data: allUsersData,
 //     isLoading: usersLoading,
 //     error: usersError,
-//   } = useQuery<{ data?: { users?: User[] }; users?: User[] }>({
+//   } = useQuery<ApiResponse<{ users: User[] }>>({
 //     queryKey: ["allUsers"],
 //     queryFn: () => userService.getAllUsers(),
 //     enabled: !!user && canViewUsers,
-//     onError: (err: any) => {
-//       console.error("Analytics allUsers error:", err);
-//       toast.error("Failed to load users");
-//     },
 //   });
+
+//   useEffect(() => {
+//     if (usersError) {
+//       console.error("Analytics allUsers error:", usersError);
+//       toast.error("Failed to load users");
+//     }
+//   }, [usersError]);
 
 //   const {
 //     data: organizationsData,
 //     isLoading: orgsLoading,
 //     error: orgsError,
-//   } = useQuery({
+//   } = useQuery<ApiResponse<{ organizations: Organization[] }>>({
 //     queryKey: ["organizations"],
 //     queryFn: () => organizationService.getOrganizations(),
 //     enabled: !!user && canViewOrganizations,
-//     onError: (err: any) => {
-//       console.error("Analytics orgs error:", err);
-//       toast.error("Failed to load organizations");
-//     },
 //   });
+
+//   useEffect(() => {
+//     if (orgsError) {
+//       console.error("Analytics orgs error:", orgsError);
+//       toast.error("Failed to load organizations");
+//     }
+//   }, [orgsError]);
 
 //   const {
 //     data: allDocumentsData,
 //     isLoading: docsLoading,
 //     error: docsError,
-//   } = useQuery<{ data?: { documents: Document[] }; documents?: Document[] }>({
+//   } = useQuery<Document[]>({
 //     queryKey: ["allDocumentsAnalytics"],
 //     queryFn: async () => {
 //       if (!user) return [];
 //       if (canViewOrganizations) {
 //         const orgsResponse = await organizationService.getOrganizations();
-//         const orgs =
-//           orgsResponse.data?.organizations || orgsResponse.organizations || [];
+//         const orgs = orgsResponse.data?.organizations || [];
 //         console.log("Analytics admin orgs:", orgs.length);
 //         const allDocs = await Promise.all(
 //           orgs.map(async (org: Organization) => {
@@ -356,9 +617,7 @@
 //               const docsResponse = await documentService.getDocumentsByOrg(
 //                 org._id.toString()
 //               );
-//               return (
-//                 docsResponse.data?.documents || docsResponse.documents || []
-//               );
+//               return docsResponse.data?.documents || [];
 //             } catch (err) {
 //               console.error(`Failed to fetch docs for org ${org._id}:`, err);
 //               return [];
@@ -374,38 +633,22 @@
 //         const docsResponse = await documentService.getDocumentsByOrg(
 //           user.organization.toString()
 //         );
-//         return docsResponse.data?.documents || docsResponse.documents || [];
+//         return docsResponse.data?.documents || [];
 //       }
 //     },
 //     enabled: !!user && canViewDocuments,
-//     onError: (err: any) => {
-//       console.error("Analytics allDocuments error:", err);
-//       toast.error("Failed to load documents");
-//     },
 //   });
 
-//   // NEW: Audit Logs Query (separate from allDocuments)
-//   const {
-//     data: auditLogsData,
-//     isLoading: auditLogsLoading,
-//     error: auditLogsError,
-//   } = useQuery<{ data?: { auditLogs: any[] }; auditLogs?: any[] }>({
-//     queryKey: ["auditLogs"],
-//     queryFn: () => userService.getAuditLogs(),
-//     enabled: !!user && canViewUsers,
-//     onError: (err: any) => {
-//       console.error("Analytics auditLogs error:", err);
-//       toast.error("Failed to load audit logs");
-//     },
-//   });
+//   useEffect(() => {
+//     if (docsError) {
+//       console.error("Analytics allDocuments error:", docsError);
+//       toast.error("Failed to load documents");
+//     }
+//   }, [docsError]);
 
 //   const organizations = useMemo(() => {
 //     if (canViewOrganizations) {
-//       return (
-//         organizationsData?.data?.organizations ||
-//         organizationsData?.organizations ||
-//         []
-//       );
+//       return organizationsData?.data?.organizations || [];
 //     } else if (user?.organization) {
 //       return [
 //         {
@@ -425,11 +668,10 @@
 //         orgMetricsLoading ||
 //         usersLoading ||
 //         orgsLoading ||
-//         docsLoading ||
-//         auditLogsLoading))
+//         docsLoading))
 //   ) {
 //     return (
-//       <Layout user={user} onLogout={logout}>
+//       <Layout user={user || undefined} onLogout={logout}>
 //         <div className="text-center py-12">Loading analytics...</div>
 //       </Layout>
 //     );
@@ -441,7 +683,7 @@
 
 //   if (!canViewAnalytics) {
 //     return (
-//       <Layout user={user} onLogout={logout}>
+//       <Layout user={user || undefined} onLogout={logout}>
 //         <div className="text-center py-12 text-muted-foreground">
 //           You do not have permission to view analytics.
 //         </div>
@@ -454,8 +696,7 @@
 //     orgMetricsError ||
 //     usersError ||
 //     (orgsError && canViewOrganizations) ||
-//     (docsError && canViewDocuments) ||
-//     (auditLogsError && canViewUsers)
+//     (docsError && canViewDocuments)
 //   ) {
 //     console.error("Analytics errors:", {
 //       userMetricsError,
@@ -463,10 +704,9 @@
 //       usersError,
 //       orgsError,
 //       docsError,
-//       auditLogsError,
 //     });
 //     return (
-//       <Layout user={user} onLogout={logout}>
+//       <Layout user={user || undefined} onLogout={logout}>
 //         <div className="text-center py-12 text-destructive">
 //           Error loading analytics data. Check console for details.
 //         </div>
@@ -475,22 +715,17 @@
 //   }
 
 //   return (
-//     <Layout user={user} onLogout={logout}>
+//     <Layout user={user || undefined} onLogout={logout}>
 //       <div className="space-y-6">
 //         <h1 className="text-3xl font-bold text-foreground">
 //           Analytics Dashboard
 //         </h1>
 //         <AnalyticsCharts
-//           allUsers={allUsersData?.data?.users || allUsersData?.users || []}
-//           allDocuments={
-//             allDocumentsData?.data?.documents ||
-//             allDocumentsData?.documents ||
-//             []
-//           }
+//           allUsers={allUsersData?.data?.users || []}
+//           allDocuments={allDocumentsData || []}
 //           allOrganizations={organizations}
-//           userMetrics={userMetrics?.data?.metrics || userMetrics?.metrics}
-//           orgMetrics={orgMetrics?.data?.metrics || orgMetrics?.metrics}
-//           auditLogs={auditLogsData?.data?.auditLogs || []} // NEW
+//           userMetrics={userMetrics?.data?.metrics || {}}
+//           orgMetrics={orgMetrics?.data?.metrics || {}}
 //         />
 //       </div>
 //     </Layout>
@@ -499,6 +734,7 @@
 
 // export default AnalyticsPage;
 
+// src/pages/Analytics.tsx
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -626,12 +862,12 @@ const AnalyticsPage = () => {
         );
         return allDocs.flat();
       } else {
-        if (!user.organization) {
+        if (!user.organization?._id) {
           console.warn("Analytics no org for non-admin");
           return [];
         }
         const docsResponse = await documentService.getDocumentsByOrg(
-          user.organization.toString()
+          user.organization._id.toString()
         );
         return docsResponse.data?.documents || [];
       }
@@ -647,19 +883,28 @@ const AnalyticsPage = () => {
   }, [docsError]);
 
   const organizations = useMemo(() => {
+    // Flatten nested _id if populated recursively
+    const flatOrgs = (organizationsData?.data?.organizations || []).map(
+      (org: any) => ({
+        _id: typeof org._id === "string" ? org._id : org._id?._id || org._id,
+        name: org.name,
+        organizationType: org.organizationType,
+        documentCount: org.documentCount,
+      })
+    );
     if (canViewOrganizations) {
-      return organizationsData?.data?.organizations || [];
-    } else if (user?.organization) {
+      return flatOrgs;
+    } else if (user?.organization?._id) {
       return [
         {
-          _id: user.organization,
+          _id: user.organization._id,
           name: "Current Organization",
           organizationType: "tech",
         },
       ];
     }
     return [];
-  }, [organizationsData, user?.organization, canViewOrganizations]);
+  }, [organizationsData, user?.organization?._id, canViewOrganizations]);
 
   if (
     authLoading ||

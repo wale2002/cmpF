@@ -69,7 +69,7 @@ export interface User {
   lastName?: string; // ADDED: For last name
   email: string;
   role: Role; // UPDATED: Use full Role type
-  organization: string | null;
+  organization?: Organization | null;
   status: "Active" | "InActive";
   Department?: string; // ADDED: For consistency with backend
   phoneNumber?: string;
