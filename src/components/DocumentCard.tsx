@@ -73,7 +73,7 @@ export function DocumentCard({
   document,
   canEdit = false, // Fallback for legacy usage
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  canEditDocuments = false, // NEW: RBAC-aware
+  // NEW: RBAC-aware
   canDeleteDocuments = false, // NEW: RBAC-aware
   onView,
   onDownload,
@@ -105,8 +105,6 @@ export function DocumentCard({
   const [isUpdating, setIsUpdating] = useState(false);
 
   // FIXED: Coerce IDs to string for consistency (if needed for props)
-  const docId = document._id.toString();
-  const orgId = document.organization?.toString() || "";
 
   // ENHANCED: Format dates if present
   const formatDate = (dateStr?: string) =>

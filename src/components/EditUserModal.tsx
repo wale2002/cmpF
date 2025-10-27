@@ -81,9 +81,6 @@ export const EditUserModal = ({
       onSuccess();
       onClose();
     },
-    onError: (error) => {
-      toast.error("Failed to update user");
-    },
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,15 +100,12 @@ export const EditUserModal = ({
       const originalValue =
         key === "role" ? user.role._id : user[key as keyof User];
       if (value !== originalValue && value !== "") {
+        // In handleSubmit
         if (key === "status") {
-          updates[key] = value as "Active" | "InActive";
-        } else {
           updates[key as keyof CreateUserRequest] =
-            key === "status"
-              ? value === "Active"
-                ? "Active"
-                : "InActive"
-              : value;
+            (value as "Active" | "InActive") || undefined;
+        } else {
+          updates[key as keyof CreateUserRequest] = value;
         }
       }
     });

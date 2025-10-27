@@ -27,7 +27,6 @@ const OrganizationFolders = ({
   documents,
   organizations,
   currentUser,
-  onDocumentAction,
 }: OrganizationFoldersProps) => {
   const navigate = useNavigate();
   const { user } = useAuthContext();

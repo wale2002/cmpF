@@ -48,7 +48,7 @@ const FolderManagement = ({
   documents,
   organizations,
   currentUser,
-  onDocumentAction,
+
   onCreateFolder,
   onDeleteFolder,
   onRenameFolder,

@@ -326,12 +326,14 @@ export interface ApiResponse<T = any> {
   status: "success" | "error";
   statusCode: number;
   message: string;
+
   data: T;
 }
 
 export interface AuthResponse {
   token: string;
   user: User;
+  data?: { user?: User };
 }
 
 // Define Permissions interface for strict typing
@@ -472,6 +474,7 @@ export interface Alert {
   daysToExpiry?: number;
   daysSinceUpload?: number;
   flagColor: string;
+  organization?: string;
   alertType: "expiry" | "new-upload";
 }
 
@@ -483,5 +486,7 @@ export interface Notification {
   type: "info" | "warning" | "error" | "success";
   read: boolean;
   createdAt: string;
+  metadata?: { documentId?: string }; // ADDED
+  organization?: { _id: string }; // ADDED
   relatedId?: string; // e.g., document or user ID
 }

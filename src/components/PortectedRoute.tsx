@@ -26,7 +26,8 @@ export const ProtectedRoute = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requireAdmin && user?.role !== "admin") {
+  if (requireAdmin && user?.role?.name !== "admin") {
+    // .name for string
     return <Navigate to="/dashboard" replace />;
   }
 

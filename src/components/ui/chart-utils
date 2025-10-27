@@ -1,0 +1,33 @@
+// src/components/ui/chart-utils.ts
+import * as React from "react";
+import { useId } from "react";
+
+// Context for chart config
+const ChartContext = React.createContext<any>(null); // Typed as { config?: any } later if needed
+
+export const useChart = () => {
+  const context = React.useContext(ChartContext);
+  if (!context) {
+    throw new Error("useChart must be used within ChartProvider");
+  }
+  return context;
+};
+
+// Provider (use in ChartContainer)
+export const ChartProvider = ChartContext.Provider;
+
+// Payload config extractor
+export const getPayloadConfigFromPayload = (
+  config: any,
+  item: any,
+  key: string
+) => {
+  // Find matching config for this payload item
+  const foundConfig = config.find(
+    (c: any) => c.key === key || c.dataKey === key
+  );
+  return foundConfig || { label: item.value, icon: null };
+};
+
+// ID generator for charts
+export const useChartId = () => useId().replace(/:/g, "");

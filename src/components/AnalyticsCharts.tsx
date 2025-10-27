@@ -19,7 +19,7 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell,
+  
   LineChart,
   Line,
   Legend,
@@ -27,7 +27,7 @@ import {
   Area,
   ReferenceLine,
 } from "recharts";
-import { documentService, userService } from "../lib/api"; // Updated import
+import { documentService } from "../lib/api"; // Updated import
 import { useAuthContext } from "../contexts/AuthContext";
 import { Skeleton } from "../components/ui/skeleton";
 
@@ -39,20 +39,13 @@ import type {
   OrganizationMetrics,
 } from "../types/index";
 
-const COLORS = [
-  "#3B82F6", // blue
-  "#10B981", // green
-  "#F59E0B", // amber
-  "#EF4444", // red
-  "#8B5CF6", // violet
-  "#06B6D4", // cyan
-];
 
-const GRADIENT_COLORS = [
-  { start: "#3B82F6", end: "#1D4ED8" },
-  { start: "#10B981", end: "#059669" },
-  { start: "#F59E0B", end: "#D97706" },
-];
+
+// const GRADIENT_COLORS = [
+//   { start: "#3B82F6", end: "#1D4ED8" },
+//   { start: "#10B981", end: "#059669" },
+//   { start: "#F59E0B", end: "#D97706" },
+// ];
 
 interface AnalyticsChartsProps {
   allUsers?: User[];
@@ -73,7 +66,7 @@ export function AnalyticsCharts({
 }: AnalyticsChartsProps) {
   const { user } = useAuthContext();
 
-  const { data: docMetrics, isLoading: docLoading } = useQuery({
+  const { isLoading: docLoading } = useQuery({
     queryKey: ["documentMetrics", user?.organization],
     queryFn: () => documentService.getDocumentMetrics(user?.organization || ""),
     enabled: !!user?.organization,
@@ -298,12 +291,12 @@ export function AnalyticsCharts({
                 innerRadius={40}
                 dataKey="value"
               >
-                {documentTypeData.map((entry, index) => (
+                {/* {documentTypeData.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={COLORS[index % COLORS.length]}
                   />
-                ))}
+                ))} */}
               </Pie>
               <Tooltip formatter={(value: any) => [`${value}`]} />
               <Legend />
@@ -386,23 +379,19 @@ export function AnalyticsCharts({
                       cx="50%"
                       cy="50%"
                       labelLine={true}
-                      label={({
-                        name,
-                        percent,
-                      }: {
-                        name: string;
-                        percent: number;
-                      }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }: any) =>
+                        `${name} ${(percent * 100).toFixed(0)}%`
+                      } // Loose any for TS
                       outerRadius={80}
                       innerRadius={40}
                       dataKey="value"
                     >
-                      {orgTypeChartData.map((entry, index) => (
+                      {/* {orgTypeChartData.map((entry, index) => (
                         <Cell
                           key={`org-${index}`}
                           fill={COLORS[index % COLORS.length]}
                         />
-                      ))}
+                      ))} */}
                     </Pie>
                     <Tooltip />
                     <Legend />
@@ -423,28 +412,24 @@ export function AnalyticsCharts({
                 <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
                     <Pie
-                      data={actionData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={true}
-                      label={({
-                        name,
-                        percent,
-                      }: {
-                        name: string;
-                        percent: number;
-                      }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      innerRadius={40}
-                      dataKey="value"
-                    >
-                      {actionData.map((entry, index) => (
-                        <Cell
-                          key={`action-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
+  data={actionData} // Or your data array, e.g., [{ name: 'Action1', value: 10 }, ...]
+  cx="50%"
+  cy="50%"
+  labelLine={false}
+  label={({ name, percent }: { name?: string; percent?: number }) => (
+    // Fixed: Use JSX return for ReactNode (Recharts expects this, not string)
+    <text x="0" y="0" fill="black" dominantBaseline="central" textAnchor="middle">
+      {name} {Math.round((percent || 0) * 100)}%
+    </text>
+  )}
+  outerRadius={80}
+  fill="#8884d8"
+  dataKey="value"
+>
+  {actionData.map((entry, index) => (
+    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+  ))}
+</Pie>
                     <Tooltip />
                     <Legend />
                   </PieChart>

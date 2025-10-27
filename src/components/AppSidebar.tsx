@@ -9,7 +9,7 @@ import {
   Home,
   Folder,
 } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useAuthContext } from "../contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { organizationService } from "../lib/api";
@@ -41,7 +41,7 @@ const adminItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const location = useLocation();
+  // const location = useLocation();
   const { user } = useAuthContext();
 
   // FIXED: Fetch orgs with documentCount from backend (no need for multi-fetch docs)
