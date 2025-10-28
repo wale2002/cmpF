@@ -1,8 +1,119 @@
-// // // src/components/UserCard.tsx (Fixed: Added missing imports for Button, Edit, Trash2)
+// // // // src/components/UserCard.tsx (Fixed: Added missing imports for Button, Edit, Trash2)
+// // // import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+// // // import { Badge } from "./ui/badge";
+// // // import { Button } from "./ui/button"; // FIXED: Import Button
+// // // import { User, Mail, Building, CheckCircle2, XCircle, Edit, Trash2 } from "lucide-react"; // FIXED: Added Edit and Trash2
+// // // import type { User } from "../types";
+
+// // // interface UserCardProps {
+// // //   user: User;
+// // //   canEdit?: boolean;
+// // //   canDelete?: boolean;
+// // //   onEdit?: (user: User) => void;
+// // //   onDelete?: (user: User) => void;
+// // //   // Additional props for future actions like onView
+// // // }
+
+// // // const getStatusVariant = (status: string) => {
+// // //   switch (status.toLowerCase()) {
+// // //     case "active":
+// // //       return "default" as const;
+// // //     case "inactive":
+// // //       return "destructive" as const;
+// // //     case "pending":
+// // //       return "secondary" as const;
+// // //     default:
+// // //       return "outline" as const;
+// // //   }
+// // // };
+
+// // // const getStatusIcon = (status: string) => {
+// // //   switch (status.toLowerCase()) {
+// // //     case "active":
+// // //       return <CheckCircle2 className="h-3 w-3" />;
+// // //     case "inactive":
+// // //       return <XCircle className="h-3 w-3" />;
+// // //     default:
+// // //       return <User className="h-3 w-3" />;
+// // //   }
+// // // };
+
+// // // export function UserCard({
+// // //   user,
+// // //   canEdit = false,
+// // //   canDelete = false,
+// // //   onEdit,
+// // //   onDelete,
+// // // }: UserCardProps) {
+// // //   return (
+// // //     <Card className="w-full hover:shadow-md transition-all duration-200 hover:-translate-y-1 shadow-sm rounded-xl">
+// // //       <CardHeader className="pb-2">
+// // //         <div className="flex items-start justify-between gap-2">
+// // //           <CardTitle className="text-xs sm:text-sm lg:text-base leading-5 line-clamp-2 flex-1">{user.fullName}</CardTitle>
+// // //           <Badge variant={getStatusVariant(user.status)} className="text-xs">
+// // //             {getStatusIcon(user.status)}
+// // //             <span className="ml-1">{user.status}</span>
+// // //           </Badge>
+// // //         </div>
+// // //       </CardHeader>
+// // //       <CardContent className="space-y-3 p-3 sm:p-4">
+// // //         <div className="flex items-center gap-1 text-xs text-muted-foreground">
+// // //           <Mail className="h-3 w-3 flex-shrink-0" />
+// // //           <span className="truncate">{user.email}</span>
+// // //         </div>
+// // //         <div className="flex items-center gap-1 text-xs text-muted-foreground">
+// // //           <User className="h-3 w-3 flex-shrink-0" />
+// // //           <span className="truncate">Role: {user.role?.name || 'N/A'}</span>
+// // //         </div>
+// // //         <div className="flex items-center gap-1 text-xs text-muted-foreground">
+// // //           <Building className="h-3 w-3 flex-shrink-0" />
+// // //           <span className="truncate">{user.organization || 'N/A'}</span>
+// // //         </div>
+// // //         <div className="flex flex-wrap gap-1 pt-1">
+// // //           {/* Placeholder actions; extend as needed, e.g., add onView similar to DocumentCard */}
+// // //           {canEdit && onEdit && (
+// // //             <Button
+// // //               variant="ghost"
+// // //               size="sm"
+// // //               onClick={() => onEdit(user)}
+// // //               aria-label={`Edit ${user.fullName}`}
+// // //               className="h-8 px-2 text-xs flex-1 sm:flex-none"
+// // //             >
+// // //               <Edit className="h-3 w-3 mr-1" />
+// // //               Edit
+// // //             </Button>
+// // //           )}
+// // //           {canDelete && onDelete && (
+// // //             <Button
+// // //               variant="destructive"
+// // //               size="sm"
+// // //               onClick={() => onDelete(user)}
+// // //               aria-label={`Delete ${user.fullName}`}
+// // //               className="h-8 px-2 text-xs flex-1 sm:flex-none"
+// // //             >
+// // //               <Trash2 className="h-3 w-3 mr-1" />
+// // //               Delete
+// // //             </Button>
+// // //           )}
+// // //         </div>
+// // //       </CardContent>
+// // //     </Card>
+// // //   );
+// // // }
+
+// // // src/components/UserCard.tsx (Fixed: Renamed lucide 'User' icon to 'UserIcon' to avoid conflict with type import)
 // // import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 // // import { Badge } from "./ui/badge";
-// // import { Button } from "./ui/button"; // FIXED: Import Button
-// // import { User, Mail, Building, CheckCircle2, XCircle, Edit, Trash2 } from "lucide-react"; // FIXED: Added Edit and Trash2
+// // import { Button } from "./ui/button";
+// // import {
+// //   UserIcon,
+// //   Mail,
+// //   Building,
+// //   CheckCircle2,
+// //   XCircle,
+// //   Edit,
+// //   Trash2,
+// // } from "lucide-react"; // FIXED: Renamed 'User' to 'UserIcon'
 // // import type { User } from "../types";
 
 // // interface UserCardProps {
@@ -34,7 +145,7 @@
 // //     case "inactive":
 // //       return <XCircle className="h-3 w-3" />;
 // //     default:
-// //       return <User className="h-3 w-3" />;
+// //       return <UserIcon className="h-3 w-3" />; // FIXED: Use UserIcon
 // //   }
 // // };
 
@@ -49,7 +160,9 @@
 // //     <Card className="w-full hover:shadow-md transition-all duration-200 hover:-translate-y-1 shadow-sm rounded-xl">
 // //       <CardHeader className="pb-2">
 // //         <div className="flex items-start justify-between gap-2">
-// //           <CardTitle className="text-xs sm:text-sm lg:text-base leading-5 line-clamp-2 flex-1">{user.fullName}</CardTitle>
+// //           <CardTitle className="text-xs sm:text-sm lg:text-base leading-5 line-clamp-2 flex-1">
+// //             {user.fullName}
+// //           </CardTitle>
 // //           <Badge variant={getStatusVariant(user.status)} className="text-xs">
 // //             {getStatusIcon(user.status)}
 // //             <span className="ml-1">{user.status}</span>
@@ -62,12 +175,13 @@
 // //           <span className="truncate">{user.email}</span>
 // //         </div>
 // //         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-// //           <User className="h-3 w-3 flex-shrink-0" />
-// //           <span className="truncate">Role: {user.role?.name || 'N/A'}</span>
+// //           <UserIcon className="h-3 w-3 flex-shrink-0" />{" "}
+// //           {/* FIXED: Use UserIcon */}
+// //           <span className="truncate">Role: {user.role?.name || "N/A"}</span>
 // //         </div>
 // //         <div className="flex items-center gap-1 text-xs text-muted-foreground">
 // //           <Building className="h-3 w-3 flex-shrink-0" />
-// //           <span className="truncate">{user.organization || 'N/A'}</span>
+// //           <span className="truncate">{user.organization || "N/A"}</span>
 // //         </div>
 // //         <div className="flex flex-wrap gap-1 pt-1">
 // //           {/* Placeholder actions; extend as needed, e.g., add onView similar to DocumentCard */}
@@ -181,7 +295,10 @@
 //         </div>
 //         <div className="flex items-center gap-1 text-xs text-muted-foreground">
 //           <Building className="h-3 w-3 flex-shrink-0" />
-//           <span className="truncate">{user.organization || "N/A"}</span>
+//           <span className="truncate">
+//             {user.organization?.name || "N/A"}
+//           </span>{" "}
+//           {/* FIXED: Access .name */}
 //         </div>
 //         <div className="flex flex-wrap gap-1 pt-1">
 //           {/* Placeholder actions; extend as needed, e.g., add onView similar to DocumentCard */}
@@ -255,11 +372,11 @@ const getStatusVariant = (status: string) => {
 const getStatusIcon = (status: string) => {
   switch (status.toLowerCase()) {
     case "active":
-      return <CheckCircle2 className="h-3 w-3" />;
+      return <CheckCircle2 className="h-2.5 w-2.5" />;
     case "inactive":
-      return <XCircle className="h-3 w-3" />;
+      return <XCircle className="h-2.5 w-2.5" />;
     default:
-      return <UserIcon className="h-3 w-3" />; // FIXED: Use UserIcon
+      return <UserIcon className="h-2.5 w-2.5" />; // FIXED: Use UserIcon
   }
 };
 
@@ -271,10 +388,10 @@ export function UserCard({
   onDelete,
 }: UserCardProps) {
   return (
-    <Card className="w-full hover:shadow-md transition-all duration-200 hover:-translate-y-1 shadow-sm rounded-xl">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-xs sm:text-sm lg:text-base leading-5 line-clamp-2 flex-1">
+    <Card className="max-w-sm w-full hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 shadow-sm rounded-lg">
+      <CardHeader className="pb-1">
+        <div className="flex items-start justify-between gap-1">
+          <CardTitle className="text-xs leading-4 line-clamp-2 flex-1">
             {user.fullName}
           </CardTitle>
           <Badge variant={getStatusVariant(user.status)} className="text-xs">
@@ -283,18 +400,18 @@ export function UserCard({
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3 p-3 sm:p-4">
+      <CardContent className="space-y-2 p-2 sm:p-3">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Mail className="h-3 w-3 flex-shrink-0" />
+          <Mail className="h-2.5 w-2.5 flex-shrink-0" />
           <span className="truncate">{user.email}</span>
         </div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <UserIcon className="h-3 w-3 flex-shrink-0" />{" "}
+          <UserIcon className="h-2.5 w-2.5 flex-shrink-0" />{" "}
           {/* FIXED: Use UserIcon */}
           <span className="truncate">Role: {user.role?.name || "N/A"}</span>
         </div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Building className="h-3 w-3 flex-shrink-0" />
+          <Building className="h-2.5 w-2.5 flex-shrink-0" />
           <span className="truncate">
             {user.organization?.name || "N/A"}
           </span>{" "}
@@ -308,9 +425,9 @@ export function UserCard({
               size="sm"
               onClick={() => onEdit(user)}
               aria-label={`Edit ${user.fullName}`}
-              className="h-8 px-2 text-xs flex-1 sm:flex-none"
+              className="h-7 px-1.5 text-xs flex-1 sm:flex-none"
             >
-              <Edit className="h-3 w-3 mr-1" />
+              <Edit className="h-2.5 w-2.5 mr-1" />
               Edit
             </Button>
           )}
@@ -320,9 +437,9 @@ export function UserCard({
               size="sm"
               onClick={() => onDelete(user)}
               aria-label={`Delete ${user.fullName}`}
-              className="h-8 px-2 text-xs flex-1 sm:flex-none"
+              className="h-7 px-1.5 text-xs flex-1 sm:flex-none"
             >
-              <Trash2 className="h-3 w-3 mr-1" />
+              <Trash2 className="h-2.5 w-2.5 mr-1" />
               Delete
             </Button>
           )}
