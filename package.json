@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "set NODE_OPTIONS=--max-old-space-size=8192 && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -42,6 +42,7 @@
     "cmdk": "^1.1.1",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.526.0",
     "next-themes": "^0.4.6",
     "react": "^19.1.0",
