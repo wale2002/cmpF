@@ -66,29 +66,29 @@
 
 //       {/* Mobile sidebar menu */}
 //       <div
-//         className={`fixed top-0 left-0 h-full w-64 bg-card border-r shadow-lg z-50 transform transition-transform md:hidden ${
+//         className={`fixed top-0 left-0 h-full w-48 bg-card border-r shadow-lg z-50 transform transition-transform md:hidden ${
 //           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
 //         }`}
 //       >
-//         <div className="p-4 border-b">
+//         <div className="p-3 border-b">
 //           <Button
 //             variant="ghost"
 //             size="sm"
 //             className="w-full justify-start"
 //             onClick={toggleMobileMenu}
 //           >
-//             <X className="h-4 w-4 mr-2" />
+//             <X className="h-3.5 w-3.5 mr-2" />
 //             Close
 //           </Button>
 //         </div>
 //         {/* Profile section for mobile sidebar */}
-//         <div className="p-4 border-b bg-muted/30">
-//           <div className="flex items-center gap-3 mb-3">
-//             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-//               <UserIcon className="h-5 w-5 text-primary" />
+//         <div className="p-3 border-b bg-muted/30">
+//           <div className="flex items-center gap-2 mb-2">
+//             <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+//               <UserIcon className="h-4 w-4 text-primary" />
 //             </div>
 //             <div className="min-w-0 flex-1">
-//               <p className="font-medium text-sm truncate">
+//               <p className="font-medium text-xs truncate">
 //                 {currentUser.fullName}
 //               </p>
 //               <p className="text-xs text-muted-foreground truncate">
@@ -105,15 +105,15 @@
 //               setIsMobileMenuOpen(false);
 //             }}
 //           >
-//             <UserIcon className="h-4 w-4 mr-2" />
+//             <UserIcon className="h-3.5 w-3.5 mr-2" />
 //             Edit Profile
 //           </Button>
 //         </div>
-//         <nav className="p-4 space-y-2">
+//         <nav className="p-3 space-y-1">
 //           <NavLink
 //             to="/dashboard"
 //             className={({ isActive }) =>
-//               `w-full flex items-center px-3 py-2 rounded-md transition ${
+//               `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
 //                 isActive
 //                   ? "bg-accent text-accent-foreground font-medium"
 //                   : "hover:bg-accent/50"
@@ -121,14 +121,14 @@
 //             }
 //             onClick={() => setIsMobileMenuOpen(false)}
 //           >
-//             <FileText className="h-4 w-4 mr-3" />
+//             <FileText className="h-3.5 w-3.5 mr-2" />
 //             Dashboard
 //           </NavLink>
 
 //           <NavLink
 //             to="/documents"
 //             className={({ isActive }) =>
-//               `w-full flex items-center px-3 py-2 rounded-md transition ${
+//               `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
 //                 isActive
 //                   ? "bg-accent text-accent-foreground font-medium"
 //                   : "hover:bg-accent/50"
@@ -136,7 +136,7 @@
 //             }
 //             onClick={() => setIsMobileMenuOpen(false)}
 //           >
-//             <FileText className="h-4 w-4 mr-3" />
+//             <FileText className="h-3.5 w-3.5 mr-2" />
 //             Documents
 //           </NavLink>
 
@@ -144,7 +144,7 @@
 //             <NavLink
 //               to="/analytics"
 //               className={({ isActive }) =>
-//                 `w-full flex items-center px-3 py-2 rounded-md transition ${
+//                 `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
 //                   isActive
 //                     ? "bg-accent text-accent-foreground font-medium"
 //                     : "hover:bg-accent/50"
@@ -152,15 +152,15 @@
 //               }
 //               onClick={() => setIsMobileMenuOpen(false)}
 //             >
-//               <BarChart3 className="h-4 w-4 mr-3" />
+//               <BarChart3 className="h-3.5 w-3.5 mr-2" />
 //               Analytics
 //             </NavLink>
 //           )}
 
 //           {isAdmin && (
 //             <>
-//               <div className="pt-4 pb-2">
-//                 <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider px-3">
+//               <div className="pt-3 pb-1">
+//                 <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-2">
 //                   Admin
 //                 </h3>
 //               </div>
@@ -169,7 +169,7 @@
 //                 <NavLink
 //                   to="/users"
 //                   className={({ isActive }) =>
-//                     `w-full flex items-center px-3 py-2 rounded-md transition ${
+//                     `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
 //                       isActive
 //                         ? "bg-accent text-accent-foreground font-medium"
 //                         : "hover:bg-accent/50"
@@ -177,7 +177,7 @@
 //                   }
 //                   onClick={() => setIsMobileMenuOpen(false)}
 //                 >
-//                   <Users className="h-4 w-4 mr-3" />
+//                   <Users className="h-3.5 w-3.5 mr-2" />
 //                   Users
 //                 </NavLink>
 //               )}
@@ -186,7 +186,7 @@
 //                 <NavLink
 //                   to="/roles"
 //                   className={({ isActive }) =>
-//                     `w-full flex items-center px-3 py-2 rounded-md transition ${
+//                     `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
 //                       isActive
 //                         ? "bg-accent text-accent-foreground font-medium"
 //                         : "hover:bg-accent/50"
@@ -194,7 +194,7 @@
 //                   }
 //                   onClick={() => setIsMobileMenuOpen(false)}
 //                 >
-//                   <Shield className="h-4 w-4 mr-3" />
+//                   <Shield className="h-3.5 w-3.5 mr-2" />
 //                   Roles
 //                 </NavLink>
 //               )}
@@ -204,13 +204,13 @@
 //           <Button
 //             variant="destructive"
 //             size="sm"
-//             className="w-full mt-4"
+//             className="w-full mt-3 text-xs"
 //             onClick={() => {
 //               onLogout?.();
 //               setIsMobileMenuOpen(false);
 //             }}
 //           >
-//             <LogOut className="h-4 w-4 mr-2" />
+//             <LogOut className="h-3.5 w-3.5 mr-2" />
 //             Logout
 //           </Button>
 //         </nav>
@@ -219,29 +219,29 @@
 //       <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
 //         {/* Header */}
 //         <header className="border-b bg-card shadow-soft">
-//           <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+//           <div className="container mx-auto px-3 sm:px-4 py-2 sm:py-3">
 //             <div className="flex items-center justify-between">
-//               <div className="flex items-center gap-3 flex-1">
+//               <div className="flex items-center gap-2 flex-1">
 //                 <Button
 //                   variant="ghost"
 //                   size="sm"
 //                   onClick={toggleMobileMenu}
 //                   className="md:hidden"
 //                 >
-//                   <Menu className="h-6 w-6" />
+//                   <Menu className="h-5 w-5" />
 //                 </Button>
 //                 <NavLink to="/dashboard" className="flex-shrink-0">
 //                   <div className="flex items-center gap-2">
-//                     <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
-//                     <h1 className="text-xl sm:text-2xl font-bold text-primary hidden sm:block">
+//                     <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
+//                     <h1 className="text-lg sm:text-xl font-bold text-primary hidden sm:block">
 //                       ContractHub
 //                     </h1>
-//                     <h1 className="text-lg font-bold text-primary sm:hidden">
+//                     <h1 className="text-base font-bold text-primary sm:hidden">
 //                       CH
 //                     </h1>
 //                   </div>
 //                 </NavLink>
-//                 <div className="hidden md:block ml-4 sm:ml-8">
+//                 <div className="hidden md:block ml-3 sm:ml-6">
 //                   <span className="text-xs sm:text-sm text-muted-foreground">
 //                     Welcome back,{" "}
 //                     <span className="font-medium text-foreground">
@@ -251,11 +251,11 @@
 //                 </div>
 //               </div>
 
-//               <div className="flex items-center gap-2 sm:gap-4">
-//                 <div className="hidden md:flex items-center gap-2 text-xs sm:text-sm">
+//               <div className="flex items-center gap-1 sm:gap-2">
+//                 <div className="hidden md:flex items-center gap-2 text-xs">
 //                   <span className="text-muted-foreground">Role:</span>
 //                   <span
-//                     className={`px-2 py-1 rounded-full text-xs font-medium ${
+//                     className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${
 //                       isAdmin
 //                         ? "bg-primary-light text-primary"
 //                         : "bg-secondary text-secondary-foreground"
@@ -272,7 +272,7 @@
 //                   className="hidden sm:inline-flex"
 //                   title="Update Profile & Organization"
 //                 >
-//                   <UserIcon className="h-4 w-4 mr-1" />
+//                   <UserIcon className="h-3.5 w-3.5 mr-1" />
 //                   Profile
 //                 </Button>
 //                 <Button
@@ -281,7 +281,7 @@
 //                   onClick={onLogout}
 //                   className="hidden sm:inline-flex"
 //                 >
-//                   <LogOut className="h-4 w-4 mr-1" />
+//                   <LogOut className="h-3.5 w-3.5 mr-1" />
 //                   Logout
 //                 </Button>
 //                 {/* Mobile profile and logout buttons */}
@@ -291,10 +291,10 @@
 //                     size="sm"
 //                     onClick={() => setShowProfileModal(true)}
 //                   >
-//                     <UserIcon className="h-4 w-4" />
+//                     <UserIcon className="h-3.5 w-3.5" />
 //                   </Button>
 //                   <Button variant="ghost" size="sm" onClick={onLogout}>
-//                     <LogOut className="h-4 w-4" />
+//                     <LogOut className="h-3.5 w-3.5" />
 //                   </Button>
 //                 </div>
 //               </div>
@@ -302,35 +302,35 @@
 //           </div>
 //         </header>
 
-//         <div className="flex min-h-[calc(100vh-4rem)] sm:min-h-[calc(100vh-5rem)]">
+//         <div className="flex min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4.5rem)]">
 //           {/* Desktop Sidebar - Hidden on mobile */}
-//           <aside className="hidden md:block w-64 bg-card border-r shadow-soft flex-shrink-0">
-//             <nav className="p-6 space-y-2">
+//           <aside className="hidden md:block w-48 bg-card border-r shadow-soft flex-shrink-0">
+//             <nav className="p-4 space-y-1">
 //               <NavLink
 //                 to="/dashboard"
 //                 className={({ isActive }) =>
-//                   `w-full flex items-center px-3 py-2 rounded-md transition ${
+//                   `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
 //                     isActive
 //                       ? "bg-accent text-accent-foreground font-medium"
 //                       : "hover:bg-accent/50"
 //                   }`
 //                 }
 //               >
-//                 <FileText className="h-4 w-4 mr-3" />
+//                 <FileText className="h-3.5 w-3.5 mr-2" />
 //                 Dashboard
 //               </NavLink>
 
 //               <NavLink
 //                 to="/documents"
 //                 className={({ isActive }) =>
-//                   `w-full flex items-center px-3 py-2 rounded-md transition ${
+//                   `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
 //                     isActive
 //                       ? "bg-accent text-accent-foreground font-medium"
 //                       : "hover:bg-accent/50"
 //                   }`
 //                 }
 //               >
-//                 <FileText className="h-4 w-4 mr-3" />
+//                 <FileText className="h-3.5 w-3.5 mr-2" />
 //                 Documents
 //               </NavLink>
 
@@ -338,22 +338,22 @@
 //                 <NavLink
 //                   to="/analytics"
 //                   className={({ isActive }) =>
-//                     `w-full flex items-center px-3 py-2 rounded-md transition ${
+//                     `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
 //                       isActive
 //                         ? "bg-accent text-accent-foreground font-medium"
 //                         : "hover:bg-accent/50"
 //                     }`
 //                   }
 //                 >
-//                   <BarChart3 className="h-4 w-4 mr-3" />
+//                   <BarChart3 className="h-3.5 w-3.5 mr-2" />
 //                   Analytics
 //                 </NavLink>
 //               )}
 
 //               {isAdmin && (
 //                 <>
-//                   <div className="pt-4 pb-2">
-//                     <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider px-3">
+//                   <div className="pt-3 pb-1">
+//                     <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-2">
 //                       Admin
 //                     </h3>
 //                   </div>
@@ -362,14 +362,14 @@
 //                     <NavLink
 //                       to="/users"
 //                       className={({ isActive }) =>
-//                         `w-full flex items-center px-3 py-2 rounded-md transition ${
+//                         `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
 //                           isActive
 //                             ? "bg-accent text-accent-foreground font-medium"
 //                             : "hover:bg-accent/50"
 //                         }`
 //                       }
 //                     >
-//                       <Users className="h-4 w-4 mr-3" />
+//                       <Users className="h-3.5 w-3.5 mr-2" />
 //                       Users
 //                     </NavLink>
 //                   )}
@@ -378,14 +378,14 @@
 //                     <NavLink
 //                       to="/roles"
 //                       className={({ isActive }) =>
-//                         `w-full flex items-center px-3 py-2 rounded-md transition ${
+//                         `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
 //                           isActive
 //                             ? "bg-accent text-accent-foreground font-medium"
 //                             : "hover:bg-accent/50"
 //                         }`
 //                       }
 //                     >
-//                       <Shield className="h-4 w-4 mr-3" />
+//                       <Shield className="h-3.5 w-3.5 mr-2" />
 //                       Roles
 //                     </NavLink>
 //                   )}
@@ -395,17 +395,17 @@
 //               <Button
 //                 variant="destructive"
 //                 size="sm"
-//                 className="w-full mt-4"
+//                 className="w-full mt-3 text-xs"
 //                 onClick={onLogout}
 //               >
-//                 <LogOut className="h-4 w-4 mr-2" />
+//                 <LogOut className="h-3.5 w-3.5 mr-2" />
 //                 Logout
 //               </Button>
 //             </nav>
 //           </aside>
 
 //           {/* Main Content */}
-//           <main className="flex-1 p-4 sm:p-6 overflow-auto">{children}</main>
+//           <main className="flex-1 p-3 sm:p-4 overflow-auto">{children}</main>
 //         </div>
 
 //         {/* Organization Profile Modal */}
@@ -422,6 +422,8 @@
 
 // export default Layout;
 
+// export default Layout;
+
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -434,11 +436,17 @@ import {
   Menu,
   X,
   User as UserIcon,
+  Building2,
+  Folder,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import type { User } from "../types";
 import { useAuthContext } from "../contexts/AuthContext";
 import { OrganizationProfileModal } from "./OrganizationProfileModal";
+import { useQuery } from "@tanstack/react-query";
+import { organizationService } from "../lib/api";
+import type { Organization, ApiResponse } from "../types";
+import { Badge } from "./ui/badge";
 
 interface LayoutProps {
   children: ReactNode;
@@ -462,6 +470,10 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
     isSuperAdmin || permissions.UserManagement?.viewUsers || false;
   const canManageUserRoles =
     isSuperAdmin || permissions.UserManagement?.manageUserRoles || false;
+  const canViewOrganizations =
+    isSuperAdmin ||
+    permissions.OrganizationManagement?.viewOrganizations ||
+    false;
 
   const isAdmin = currentUser?.role?.name === "admin" || isSuperAdmin;
 
@@ -473,6 +485,22 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
     setShowProfileModal(false);
     window.location.reload();
   };
+
+  // Fetch organizations for sidebar if permitted
+  const { data: orgsResponse, isLoading: orgsLoading } = useQuery<
+    ApiResponse<{
+      organizations: Organization[];
+      total: number;
+      page: number;
+      totalPages: number;
+    }>
+  >({
+    queryKey: ["sidebarOrgs"],
+    queryFn: () => organizationService.getOrganizations({ limit: 20 }),
+    enabled: !!currentUser && canViewOrganizations,
+  });
+
+  const organizations: Organization[] = orgsResponse?.data?.organizations || [];
 
   if (!currentUser) {
     return <div>Loading...</div>;
@@ -589,6 +617,23 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
                 </h3>
               </div>
 
+              {canViewOrganizations && (
+                <NavLink
+                  to="/organizations"
+                  className={({ isActive }) =>
+                    `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
+                      isActive
+                        ? "bg-accent text-accent-foreground font-medium"
+                        : "hover:bg-accent/50"
+                    }`
+                  }
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Building2 className="h-3.5 w-3.5 mr-2" />
+                  Organizations
+                </NavLink>
+              )}
+
               {canViewUsers && (
                 <NavLink
                   to="/users"
@@ -622,6 +667,67 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
                   Roles
                 </NavLink>
               )}
+
+              {/* Organizations List in Mobile Sidebar (if permitted and data available) */}
+              {canViewOrganizations &&
+                !orgsLoading &&
+                organizations.length > 0 && (
+                  <>
+                    <div className="pt-3 pb-1">
+                      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-2">
+                        Orgs
+                      </h3>
+                    </div>
+                    {organizations.slice(0, 5).map((org) => {
+                      const orgId = org._id.toString();
+                      const docCount = org.documentCount || 0;
+                      return (
+                        <NavLink
+                          key={org._id}
+                          to={`/organizations/${orgId}/documents`}
+                          className={({ isActive }) =>
+                            `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs pl-6 ${
+                              isActive
+                                ? "bg-accent text-accent-foreground font-medium"
+                                : "hover:bg-accent/50"
+                            }`
+                          }
+                          title={`${org.name} (${docCount} docs)`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <Folder className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                          <span className="truncate flex-1">
+                            {org.name}
+                            {docCount > 0 && (
+                              <Badge
+                                variant="secondary"
+                                className="ml-1 text-xs"
+                              >
+                                {docCount}
+                              </Badge>
+                            )}
+                          </span>
+                        </NavLink>
+                      );
+                    })}
+                    {organizations.length > 5 && (
+                      <NavLink
+                        to="/organizations"
+                        className={({ isActive }) =>
+                          `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
+                            isActive
+                              ? "bg-accent text-accent-foreground font-medium"
+                              : "hover:bg-accent/50"
+                          }`
+                        }
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Building2 className="h-3.5 w-3.5 mr-2" />
+                        View All ({organizations.length})
+                      </NavLink>
+                    )}
+                  </>
+                )}
             </>
           )}
 
@@ -782,6 +888,22 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
                     </h3>
                   </div>
 
+                  {canViewOrganizations && (
+                    <NavLink
+                      to="/organizations"
+                      className={({ isActive }) =>
+                        `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
+                          isActive
+                            ? "bg-accent text-accent-foreground font-medium"
+                            : "hover:bg-accent/50"
+                        }`
+                      }
+                    >
+                      <Building2 className="h-3.5 w-3.5 mr-2" />
+                      Organizations
+                    </NavLink>
+                  )}
+
                   {canViewUsers && (
                     <NavLink
                       to="/users"
@@ -813,6 +935,65 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
                       Roles
                     </NavLink>
                   )}
+
+                  {/* Organizations List in Desktop Sidebar (if permitted and data available) */}
+                  {canViewOrganizations &&
+                    !orgsLoading &&
+                    organizations.length > 0 && (
+                      <>
+                        <div className="pt-3 pb-1">
+                          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-2">
+                            Orgs
+                          </h3>
+                        </div>
+                        {organizations.slice(0, 5).map((org) => {
+                          const orgId = org._id.toString();
+                          const docCount = org.documentCount || 0;
+                          return (
+                            <NavLink
+                              key={org._id}
+                              to={`/organizations/${orgId}/documents`}
+                              className={({ isActive }) =>
+                                `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs pl-6 ${
+                                  isActive
+                                    ? "bg-accent text-accent-foreground font-medium"
+                                    : "hover:bg-accent/50"
+                                }`
+                              }
+                              title={`${org.name} (${docCount} docs)`}
+                            >
+                              <Folder className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                              <span className="truncate flex-1 text-xs">
+                                {org.name}
+                                {docCount > 0 && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="ml-1 text-xs"
+                                  >
+                                    {docCount}
+                                  </Badge>
+                                )}
+                              </span>
+                            </NavLink>
+                          );
+                        })}
+                        {organizations.length > 5 && (
+                          <NavLink
+                            to="/organizations"
+                            className={({ isActive }) =>
+                              `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
+                                isActive
+                                  ? "bg-accent text-accent-foreground font-medium"
+                                  : "hover:bg-accent/50"
+                              }`
+                            }
+                          >
+                            <Building2 className="h-3.5 w-3.5 mr-2" />
+                            View All ({organizations.length})
+                          </NavLink>
+                        )}
+                      </>
+                    )}
                 </>
               )}
 
