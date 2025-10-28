@@ -14,7 +14,7 @@ import type {
   Alert, // Added if not present
 } from "../types";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = "https://cpm-contracts.onrender.com/api";
 // const BASE_URL = "http://localhost:5000/api";
 
 // Helper function to make authenticated requests
