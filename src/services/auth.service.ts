@@ -1,8 +1,8 @@
 import type { User, AuthResponse } from "../types"; // Adjust path if needed
 import axios from "axios"; // Assume axios for API calls
 
-// const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api"; // Adjust
-const API_BASE = "http://localhost:5000/api"; // Adjust
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api"; // Adjust
+// const API_BASE = "http://localhost:5000/api"; // Adjust
 export const authService = {
   isAuthenticated: (): boolean => {
     return !!localStorage.getItem("token");
