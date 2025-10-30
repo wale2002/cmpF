@@ -903,29 +903,33 @@ const DocumentsPage = () => {
   const documents = Array.isArray(documentsData) ? documentsData : [];
 
   // Fixed: Extract from paginated data safely
-  const organizations = useMemo(() => {
-    // Flatten nested _id if populated recursively
-    const flatOrgs = (organizationsData?.data?.organizations || []).map(
-      (org: any) => ({
-        _id: typeof org._id === "string" ? org._id : org._id?._id || org._id,
-        name: org.name,
-        organizationType: org.organizationType,
-        documentCount: org.documentCount,
-      })
-    );
-    if (!canViewOrganizations) {
-      return user?.organization?._id
-        ? [
-            {
-              _id: user.organization._id,
-              name: "Current Organization",
-              organizationType: "tech",
-            },
-          ]
-        : [];
-    }
-    return flatOrgs;
-  }, [organizationsData, user?.organization?._id, canViewOrganizations]);
+  // Fixed: Extract from paginated data safely
+const organizations = useMemo(() => {
+  // Flatten nested _id if populated recursively
+  const flatOrgs = (organizationsData?.data?.organizations || []).map(
+    (org: any) => ({
+      _id: typeof org._id === "string" ? org._id : org._id?._id || org._id,
+      name: org.name,
+      organizationType: org.organizationType,
+      documentCount: org.documentCount,
+      createdAt: org.createdAt,  // ADD: Include from source data
+    })
+  );
+  if (!canViewOrganizations) {
+    return user?.organization?._id
+      ? [
+          {
+            _id: user.organization._id,
+            name: "Current Organization",
+            organizationType: "tech",
+            documentCount: 0,  // ADD: For consistency
+            createdAt: user.organization?.createdAt || new Date().toISOString(),  // ADD: Default timestamp
+          },
+        ]
+      : [];
+  }
+  return flatOrgs as Organization[];  // ADD: Explicit type for safety
+}, [organizationsData, user?.organization?._id, canViewOrganizations]) as Organization[];  // ADD: Explicit return type
 
   const filteredDocuments = documents.filter((doc) => {
     const matchesSearch = doc.name

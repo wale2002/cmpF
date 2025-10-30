@@ -330,7 +330,7 @@ const OrganizationFolders = ({
     new Set()
   );
 
-  const PAGE_SIZE = 3;
+  const PAGE_SIZE =3;
   const isServerPaginated = totalPages !== undefined; // Detect server mode
   const effectiveTotalPages = isServerPaginated
     ? totalPages!

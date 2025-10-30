@@ -424,6 +424,7 @@
 
 // export default Layout;
 
+// src/components/Layout.tsx
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -436,17 +437,11 @@ import {
   Menu,
   X,
   User as UserIcon,
-  Building2,
-  Folder,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import type { User } from "../types";
 import { useAuthContext } from "../contexts/AuthContext";
 import { OrganizationProfileModal } from "./OrganizationProfileModal";
-import { useQuery } from "@tanstack/react-query";
-import { organizationService } from "../lib/api";
-import type { Organization, ApiResponse } from "../types";
-import { Badge } from "./ui/badge";
 
 interface LayoutProps {
   children: ReactNode;
@@ -470,10 +465,6 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
     isSuperAdmin || permissions.UserManagement?.viewUsers || false;
   const canManageUserRoles =
     isSuperAdmin || permissions.UserManagement?.manageUserRoles || false;
-  const canViewOrganizations =
-    isSuperAdmin ||
-    permissions.OrganizationManagement?.viewOrganizations ||
-    false;
 
   const isAdmin = currentUser?.role?.name === "admin" || isSuperAdmin;
 
@@ -485,22 +476,6 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
     setShowProfileModal(false);
     window.location.reload();
   };
-
-  // Fetch organizations for sidebar if permitted
-  const { data: orgsResponse, isLoading: orgsLoading } = useQuery<
-    ApiResponse<{
-      organizations: Organization[];
-      total: number;
-      page: number;
-      totalPages: number;
-    }>
-  >({
-    queryKey: ["sidebarOrgs"],
-    queryFn: () => organizationService.getOrganizations({ limit: 20 }),
-    enabled: !!currentUser && canViewOrganizations,
-  });
-
-  const organizations: Organization[] = orgsResponse?.data?.organizations || [];
 
   if (!currentUser) {
     return <div>Loading...</div>;
@@ -617,23 +592,6 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
                 </h3>
               </div>
 
-              {canViewOrganizations && (
-                <NavLink
-                  to="/organizations"
-                  className={({ isActive }) =>
-                    `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
-                      isActive
-                        ? "bg-accent text-accent-foreground font-medium"
-                        : "hover:bg-accent/50"
-                    }`
-                  }
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Building2 className="h-3.5 w-3.5 mr-2" />
-                  Organizations
-                </NavLink>
-              )}
-
               {canViewUsers && (
                 <NavLink
                   to="/users"
@@ -667,67 +625,6 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
                   Roles
                 </NavLink>
               )}
-
-              {/* Organizations List in Mobile Sidebar (if permitted and data available) */}
-              {canViewOrganizations &&
-                !orgsLoading &&
-                organizations.length > 0 && (
-                  <>
-                    <div className="pt-3 pb-1">
-                      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-2">
-                        Orgs
-                      </h3>
-                    </div>
-                    {organizations.slice(0, 5).map((org) => {
-                      const orgId = org._id.toString();
-                      const docCount = org.documentCount || 0;
-                      return (
-                        <NavLink
-                          key={org._id}
-                          to={`/organizations/${orgId}/documents`}
-                          className={({ isActive }) =>
-                            `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs pl-6 ${
-                              isActive
-                                ? "bg-accent text-accent-foreground font-medium"
-                                : "hover:bg-accent/50"
-                            }`
-                          }
-                          title={`${org.name} (${docCount} docs)`}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <Folder className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
-                          <span className="truncate flex-1">
-                            {org.name}
-                            {docCount > 0 && (
-                              <Badge
-                                variant="secondary"
-                                className="ml-1 text-xs"
-                              >
-                                {docCount}
-                              </Badge>
-                            )}
-                          </span>
-                        </NavLink>
-                      );
-                    })}
-                    {organizations.length > 5 && (
-                      <NavLink
-                        to="/organizations"
-                        className={({ isActive }) =>
-                          `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
-                            isActive
-                              ? "bg-accent text-accent-foreground font-medium"
-                              : "hover:bg-accent/50"
-                          }`
-                        }
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <Building2 className="h-3.5 w-3.5 mr-2" />
-                        View All ({organizations.length})
-                      </NavLink>
-                    )}
-                  </>
-                )}
             </>
           )}
 
@@ -888,22 +785,6 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
                     </h3>
                   </div>
 
-                  {canViewOrganizations && (
-                    <NavLink
-                      to="/organizations"
-                      className={({ isActive }) =>
-                        `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
-                          isActive
-                            ? "bg-accent text-accent-foreground font-medium"
-                            : "hover:bg-accent/50"
-                        }`
-                      }
-                    >
-                      <Building2 className="h-3.5 w-3.5 mr-2" />
-                      Organizations
-                    </NavLink>
-                  )}
-
                   {canViewUsers && (
                     <NavLink
                       to="/users"
@@ -935,65 +816,6 @@ export function Layout({ children, user, onLogout }: LayoutProps) {
                       Roles
                     </NavLink>
                   )}
-
-                  {/* Organizations List in Desktop Sidebar (if permitted and data available) */}
-                  {canViewOrganizations &&
-                    !orgsLoading &&
-                    organizations.length > 0 && (
-                      <>
-                        <div className="pt-3 pb-1">
-                          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-2">
-                            Orgs
-                          </h3>
-                        </div>
-                        {organizations.slice(0, 5).map((org) => {
-                          const orgId = org._id.toString();
-                          const docCount = org.documentCount || 0;
-                          return (
-                            <NavLink
-                              key={org._id}
-                              to={`/organizations/${orgId}/documents`}
-                              className={({ isActive }) =>
-                                `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs pl-6 ${
-                                  isActive
-                                    ? "bg-accent text-accent-foreground font-medium"
-                                    : "hover:bg-accent/50"
-                                }`
-                              }
-                              title={`${org.name} (${docCount} docs)`}
-                            >
-                              <Folder className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
-                              <span className="truncate flex-1 text-xs">
-                                {org.name}
-                                {docCount > 0 && (
-                                  <Badge
-                                    variant="secondary"
-                                    className="ml-1 text-xs"
-                                  >
-                                    {docCount}
-                                  </Badge>
-                                )}
-                              </span>
-                            </NavLink>
-                          );
-                        })}
-                        {organizations.length > 5 && (
-                          <NavLink
-                            to="/organizations"
-                            className={({ isActive }) =>
-                              `w-full flex items-center px-2 py-1.5 rounded-md transition text-xs ${
-                                isActive
-                                  ? "bg-accent text-accent-foreground font-medium"
-                                  : "hover:bg-accent/50"
-                              }`
-                            }
-                          >
-                            <Building2 className="h-3.5 w-3.5 mr-2" />
-                            View All ({organizations.length})
-                          </NavLink>
-                        )}
-                      </>
-                    )}
                 </>
               )}
 

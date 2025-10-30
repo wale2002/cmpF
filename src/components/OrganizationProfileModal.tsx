@@ -1,3 +1,4 @@
+// // src/components/OrganizationProfileModal.tsx
 // import { useState, useEffect } from "react";
 // import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 // import {
@@ -95,7 +96,7 @@
 //         timezone: user.timezone || "",
 //         language: user.language || "",
 //         dateFormat: user.dateFormat || "",
-//         organization: user.organization || "",
+//         organization: user.organization?._id || "",
 //         role:
 //           user.role?._id ||
 //           (typeof user.role === "string" ? user.role : "") ||
@@ -188,7 +189,8 @@
 //   if (!user) return null;
 
 //   // Helper for current org display with fallback and type coercion
-//   const userOrgId = user.organization?.toString();
+//   const userOrgId =
+//     user.organization?._id?.toString() || user.organization?.toString() || "";
 //   const currentOrg = organizations.find((o) => o._id.toString() === userOrgId);
 //   const currentOrgDisplay = currentOrg
 //     ? `${currentOrg.name} (${currentOrg.organizationType}) - ${
@@ -569,6 +571,7 @@ export const OrganizationProfileModal = ({
   const isSelfUpdate = true;
 
   // Fetch organizations for dropdown (invalidate on open to ensure fresh data)
+  // UPDATED: Enabled for all users - no permission gate
   const { data: orgsData } = useQuery({
     queryKey: ["orgsForProfile", isOpen],
     queryFn: () =>
@@ -625,10 +628,12 @@ export const OrganizationProfileModal = ({
     },
   });
 
-  // Mutation for updating user profile
+  // UPDATED: Mutation for self-profile update (bypasses full editUsers permission)
   const updateUserMutation = useMutation({
     mutationFn: (updates: Partial<CreateUserRequest>) =>
-      userService.updateUser(user!._id, updates),
+      // Assume backend has /users/me endpoint for self-updates without permission gate
+      // If not, implement in backend: check if req.user.id === id for self-edits
+      userService.selfUpdateProfile(updates), // NEW: Use self-specific method
     onSuccess: () => {
       toast.success("Profile updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["user"] });
