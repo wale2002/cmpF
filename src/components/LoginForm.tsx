@@ -1,5 +1,3 @@
-
-
 // // src/components/LoginForm.tsx
 // import { useForm } from "react-hook-form";
 // import { zodResolver } from "@hookform/resolvers/zod";
@@ -97,7 +95,6 @@
 //   );
 // };
 
-
 // src/components/LoginForm.tsx
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -150,13 +147,16 @@ export const LoginForm = () => {
       </CardHeader>
       <CardContent className="px-4 sm:px-6 pt-0">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 sm:space-y-6"
+          >
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm sm:text-base">Email</FormLabel>
+                  <FormLabel className="text-sm sm:text-base"></FormLabel>
                   <FormControl>
                     <Input
                       type="email"
@@ -174,7 +174,7 @@ export const LoginForm = () => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm sm:text-base">Password</FormLabel>
+                  <FormLabel className="text-sm sm:text-base"></FormLabel>
                   <FormControl>
                     <Input
                       type="password"
@@ -187,7 +187,10 @@ export const LoginForm = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full h-10 sm:h-12 text-sm sm:text-base">
+            <Button
+              type="submit"
+              className="w-full h-10 sm:h-12 text-sm sm:text-base"
+            >
               Login
             </Button>
           </form>
