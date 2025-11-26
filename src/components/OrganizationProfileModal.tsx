@@ -71,7 +71,6 @@
 //   const isSelfUpdate = true;
 
 //   // Fetch organizations for dropdown (invalidate on open to ensure fresh data)
-//   // UPDATED: Enabled for all users - no permission gate
 //   const { data: orgsData } = useQuery({
 //     queryKey: ["orgsForProfile", isOpen],
 //     queryFn: () =>
@@ -128,12 +127,10 @@
 //     },
 //   });
 
-//   // UPDATED: Mutation for self-profile update (bypasses full editUsers permission)
+//   // Mutation for updating user profile
 //   const updateUserMutation = useMutation({
 //     mutationFn: (updates: Partial<CreateUserRequest>) =>
-//       // Assume backend has /users/me endpoint for self-updates without permission gate
-//       // If not, implement in backend: check if req.user.id === id for self-edits
-//       userService.selfUpdateProfile(updates), // NEW: Use self-specific method
+//       userService.updateUser(user!._id, updates),
 //     onSuccess: () => {
 //       toast.success("Profile updated successfully!");
 //       queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -502,7 +499,7 @@
 // };
 
 // src/components/OrganizationProfileModal.tsx
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
@@ -531,8 +528,6 @@ import {
   Plus,
   User as UserIcon,
   Shield,
-  Camera,
-  Upload,
 } from "lucide-react";
 import { userService, organizationService } from "../lib/api";
 import type { User, Organization, CreateUserRequest } from "../types";
@@ -551,9 +546,6 @@ export const OrganizationProfileModal = ({
   onSuccess,
 }: OrganizationProfileModalProps) => {
   const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [profilePreview, setProfilePreview] = useState<string | null>(null);
-
   const [formData, setFormData] = useState({
     fullName: "",
     firstName: "",
@@ -561,7 +553,7 @@ export const OrganizationProfileModal = ({
     Department: "",
     email: "",
     phoneNumber: "",
-    profilePicture: "", // Can be string (URL) or File object
+    profilePicture: "",
     jobTitle: "",
     location: "",
     timezone: "",
@@ -571,14 +563,15 @@ export const OrganizationProfileModal = ({
     role: "",
     status: "Active" as "Active" | "InActive",
   });
-
   const [newOrgName, setNewOrgName] = useState("");
   const [newOrgType, setNewOrgType] = useState("tech");
   const [isCreatingOrg, setIsCreatingOrg] = useState(false);
 
+  // Assume this modal is for self-update; adjust if used elsewhere for admin updates
   const isSelfUpdate = true;
 
-  // Fetch organizations
+  // Fetch organizations for dropdown (invalidate on open to ensure fresh data)
+  // UPDATED: Enabled for all users - no permission gate
   const { data: orgsData } = useQuery({
     queryKey: ["orgsForProfile", isOpen],
     queryFn: () =>
@@ -588,7 +581,7 @@ export const OrganizationProfileModal = ({
 
   const organizations: Organization[] = orgsData?.data?.organizations || [];
 
-  // Populate form on open
+  // Populate form with current user data on open
   useEffect(() => {
     if (isOpen && user) {
       setFormData({
@@ -604,21 +597,19 @@ export const OrganizationProfileModal = ({
         timezone: user.timezone || "",
         language: user.language || "",
         dateFormat: user.dateFormat || "",
-        organization:
-          user.organization?._id || user.organization?.toString() || "",
+        organization: user.organization?._id || "",
         role:
           user.role?._id ||
           (typeof user.role === "string" ? user.role : "") ||
           "",
         status: user.status || "Active",
       });
-      setProfilePreview(user.profilePicture || null);
       setNewOrgName("");
       setNewOrgType("tech");
     }
   }, [isOpen, user]);
 
-  // Create organization mutation
+  // Mutation for creating new org
   const createOrgMutation = useMutation({
     mutationFn: (data: { name: string; organizationType: string }) =>
       organizationService.createOrganization(data),
@@ -630,15 +621,19 @@ export const OrganizationProfileModal = ({
       setIsCreatingOrg(false);
     },
     onError: (error: Error) => {
-      toast.error(`Failed to create organization: ${error.message}`);
+      toast.error(
+        `Failed to create organization: ${error.message || "Please try again."}`
+      );
       setIsCreatingOrg(false);
     },
   });
 
-  // Update profile mutation (supports FormData for file upload)
+  // UPDATED: Mutation for self-profile update (bypasses full editUsers permission)
   const updateUserMutation = useMutation({
-    mutationFn: (updates: FormData | Partial<CreateUserRequest>) =>
-      userService.selfUpdateProfile(updates),
+    mutationFn: (updates: Partial<CreateUserRequest>) =>
+      // Assume backend has /users/me endpoint for self-updates without permission gate
+      // If not, implement in backend: check if req.user.id === id for self-edits
+      userService.selfUpdateProfile(updates), // NEW: Use self-specific method
     onSuccess: () => {
       toast.success("Profile updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -646,42 +641,21 @@ export const OrganizationProfileModal = ({
       onClose();
     },
     onError: (error: Error) => {
-      toast.error(`Failed to update profile: ${error.message}`);
+      toast.error(
+        `Failed to update profile: ${error.message || "Please try again."}`
+      );
     },
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleProfilePictureChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image must be under 5MB");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProfilePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-
-    setFormData((prev) => ({ ...prev, profilePicture: file }));
   };
 
   const handleCreateOrg = () => {
@@ -698,38 +672,26 @@ export const OrganizationProfileModal = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    const updates = new FormData();
-    let hasChanges = false;
-
+    const updates: Partial<CreateUserRequest> = {};
     Object.entries(formData).forEach(([key, value]) => {
-      if (isSelfUpdate && (key === "role" || key === "status")) return;
-
-      const originalValue = user?.[key as keyof User];
-
-      if (key === "profilePicture" && value instanceof File) {
-        updates.append("profilePicture", value);
-        hasChanges = true;
-      } else if (
-        typeof value === "string" &&
-        value.trim() !== "" &&
-        value.trim() !== (originalValue as string)
-      ) {
-        updates.append(key, value.trim());
-        hasChanges = true;
+      // Skip role and status for self-updates to avoid type mismatches
+      if (isSelfUpdate && (key === "role" || key === "status")) {
+        return;
+      }
+      if (value !== "" && value !== user?.[key as keyof User]) {
+        updates[key as keyof CreateUserRequest] = value as any;
       }
     });
-
-    if (!hasChanges) {
+    if (Object.keys(updates).length === 0) {
       toast.info("No changes detected");
       return;
     }
-
     updateUserMutation.mutate(updates);
   };
 
   if (!user) return null;
 
+  // Helper for current org display with fallback and type coercion
   const userOrgId =
     user.organization?._id?.toString() || user.organization?.toString() || "";
   const currentOrg = organizations.find((o) => o._id.toString() === userOrgId);
@@ -748,80 +710,13 @@ export const OrganizationProfileModal = ({
             Update Profile & Organization
           </DialogTitle>
           <DialogDescription>
-            Manage your personal details and assign an organization.
+            Manage your personal details and assign an organization for document
+            access.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Profile Picture Upload */}
-          <div className="space-y-4 border rounded-lg p-6 bg-gray-50">
-            <h3 className="font-semibold flex items-center gap-2">
-              <Camera className="h-4 w-4" />
-              Profile Picture
-            </h3>
-            <div className="flex items-center gap-6">
-              <div className="relative">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl bg-white">
-                  {profilePreview ? (
-                    <img
-                      src={profilePreview}
-                      alt="Profile preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                      <UserIcon className="h-16 w-16 text-gray-400" />
-                    </div>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-1 right-1 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all"
-                >
-                  <Camera className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="flex-1 space-y-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="gap-2"
-                >
-                  <Upload className="h-4 w-4" />
-                  {profilePreview ? "Change Photo" : "Upload Photo"}
-                </Button>
-                <p className="text-sm text-gray-500">JPG, PNG, GIF up to 5MB</p>
-                <div className="text-sm text-gray-500">or paste image URL:</div>
-                <Input
-                  value={
-                    typeof formData.profilePicture === "string"
-                      ? formData.profilePicture
-                      : ""
-                  }
-                  onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      profilePicture: e.target.value,
-                    }));
-                    if (e.target.value) setProfilePreview(e.target.value);
-                  }}
-                  placeholder="https://example.com/avatar.jpg"
-                />
-              </div>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleProfilePictureChange}
-              className="hidden"
-            />
-          </div>
-
-          {/* Personal Details */}
+          {/* Personal Details Section */}
           <div className="space-y-4 border rounded-lg p-4">
             <h3 className="font-semibold flex items-center gap-2">
               <UserIcon className="h-4 w-4" />
@@ -835,6 +730,7 @@ export const OrganizationProfileModal = ({
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleInputChange}
+                  placeholder="Enter full name"
                 />
               </div>
               <div>
@@ -844,6 +740,7 @@ export const OrganizationProfileModal = ({
                   name="Department"
                   value={formData.Department}
                   onChange={handleInputChange}
+                  placeholder="Enter department"
                 />
               </div>
               <div>
@@ -854,6 +751,7 @@ export const OrganizationProfileModal = ({
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
+                  placeholder="Enter email"
                 />
               </div>
               <div>
@@ -863,12 +761,23 @@ export const OrganizationProfileModal = ({
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
+                  placeholder="Enter phone number"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Label htmlFor="profilePicture">Profile Picture URL</Label>
+                <Input
+                  id="profilePicture"
+                  name="profilePicture"
+                  value={formData.profilePicture}
+                  onChange={handleInputChange}
+                  placeholder="Enter image URL"
                 />
               </div>
             </div>
           </div>
 
-          {/* Professional Details */}
+          {/* Professional Details Section */}
           <div className="space-y-4 border rounded-lg p-4">
             <h3 className="font-semibold flex items-center gap-2">
               <Briefcase className="h-4 w-4" />
@@ -882,6 +791,7 @@ export const OrganizationProfileModal = ({
                   name="jobTitle"
                   value={formData.jobTitle}
                   onChange={handleInputChange}
+                  placeholder="Enter job title"
                 />
               </div>
               <div>
@@ -891,6 +801,7 @@ export const OrganizationProfileModal = ({
                   name="location"
                   value={formData.location}
                   onChange={handleInputChange}
+                  placeholder="Enter location"
                 />
               </div>
               <div>
@@ -908,7 +819,7 @@ export const OrganizationProfileModal = ({
                     </SelectItem>
                     <SelectItem value="Europe/London">Europe/London</SelectItem>
                     <SelectItem value="Asia/Tokyo">Asia/Tokyo</SelectItem>
-                    <SelectItem value="UTC">UTC</SelectItem>
+                    {/* Add more as needed */}
                   </SelectContent>
                 </Select>
               </div>
@@ -935,7 +846,7 @@ export const OrganizationProfileModal = ({
                   onValueChange={(val) => handleSelectChange("dateFormat", val)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select format" />
+                    <SelectValue placeholder="Select date format" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
@@ -947,7 +858,7 @@ export const OrganizationProfileModal = ({
             </div>
           </div>
 
-          {/* Organization */}
+          {/* Organization Section */}
           <div className="space-y-4 border rounded-lg p-4">
             <h3 className="font-semibold flex items-center gap-2">
               <Building className="h-4 w-4" />
@@ -955,7 +866,7 @@ export const OrganizationProfileModal = ({
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <Label>Select Organization</Label>
+                <Label htmlFor="organization">Select Organization</Label>
                 <Select
                   value={formData.organization}
                   onValueChange={(val) =>
@@ -972,17 +883,21 @@ export const OrganizationProfileModal = ({
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {organizations.map((org) => (
-                      <SelectItem key={org._id} value={org._id.toString()}>
-                        {org.name} ({org.organizationType}) -{" "}
-                        {org.documentCount || 0} docs
-                      </SelectItem>
-                    ))}
+                    {organizations.map((org) => {
+                      const orgId = org._id.toString();
+                      const docCount = org.documentCount || 0;
+                      return (
+                        <SelectItem key={orgId} value={orgId}>
+                          {org.name} ({org.organizationType}) - {docCount}{" "}
+                          document{docCount !== 1 ? "s" : ""}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
               <div className="md:col-span-2">
-                <Label>Or Create New</Label>
+                <Label>Or Create New Organization</Label>
                 <div className="flex gap-2">
                   <Input
                     placeholder="New Organization Name"
@@ -992,7 +907,7 @@ export const OrganizationProfileModal = ({
                   />
                   <Select value={newOrgType} onValueChange={setNewOrgType}>
                     <SelectTrigger className="w-32">
-                      <SelectValue />
+                      <SelectValue placeholder="Type" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="tech">Tech</SelectItem>
@@ -1003,7 +918,11 @@ export const OrganizationProfileModal = ({
                   <Button
                     type="button"
                     onClick={handleCreateOrg}
-                    disabled={!newOrgName.trim() || createOrgMutation.isPending}
+                    disabled={
+                      !newOrgName.trim() ||
+                      createOrgMutation.isPending ||
+                      isCreatingOrg
+                    }
                     variant="outline"
                     size="sm"
                   >
@@ -1015,12 +934,63 @@ export const OrganizationProfileModal = ({
             </div>
           </div>
 
+          {/* Admin Fields (Hidden for Self-Update) */}
+          {!isSelfUpdate && (
+            <div className="space-y-4 border rounded-lg p-4">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Admin Fields
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="role">Role</Label>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(val) => handleSelectChange("role", val)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="66e9b1a2f3b4c5d6e7f8a9b0">
+                        Super Admin
+                      </SelectItem>
+                      {/* Add dynamic roles */}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(val) =>
+                      handleSelectChange("status", val as "Active" | "InActive")
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="InActive">InActive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
+
           <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={onClose}>
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
-            <Button type="submit" disabled={updateUserMutation.isPending}>
+            <Button
+              type="submit"
+              disabled={
+                updateUserMutation.isPending || createOrgMutation.isPending
+              }
+            >
               <Save className="h-4 w-4 mr-2" />
               {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
