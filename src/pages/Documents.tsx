@@ -344,18 +344,27 @@ const DocumentsPage = () => {
           <>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {paginatedDocuments.map((doc) => (
+                // <DocumentCard
+                //   key={doc._id}
+                //   document={doc}
+                //   canEditDocuments={
+                //     canEditDocuments || doc.uploadedBy === user._id
+                //   }
+                //   canDeleteDocuments={
+                //     canDeleteDocuments || doc.uploadedBy === user._id
+                //   }
+                //   onView={() => handleDocumentAction("view", doc)}
+                //   onDownload={() => handleDocumentAction("download", doc)}
+                //   onEdit={() => handleDocumentAction("edit", doc)}
+                //   onDelete={() => handleDocumentAction("delete", doc)}
+                // />
                 <DocumentCard
                   key={doc._id}
                   document={doc}
-                  canEditDocuments={
-                    canEditDocuments || doc.uploadedBy === user._id
-                  }
-                  canDeleteDocuments={
-                    canDeleteDocuments || doc.uploadedBy === user._id
-                  }
+                  canEditDocuments={canEditDocuments}
+                  canDeleteDocuments={canDeleteDocuments}
                   onView={() => handleDocumentAction("view", doc)}
                   onDownload={() => handleDocumentAction("download", doc)}
-                  onEdit={() => handleDocumentAction("edit", doc)}
                   onDelete={() => handleDocumentAction("delete", doc)}
                 />
               ))}

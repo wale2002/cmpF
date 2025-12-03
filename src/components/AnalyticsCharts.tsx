@@ -78,8 +78,7 @@ export function AnalyticsCharts({
 
   const { isLoading: docLoading } = useQuery({
     queryKey: ["documentMetrics", user?.organization?._id],
-    queryFn: () =>
-      documentService.getDocumentMetrics(user?.organization?._id || ""),
+    queryFn: () => documentService.getDocumentMetrics(),
     enabled: !!user?.organization?._id,
   });
 
@@ -666,4 +665,4 @@ export function AnalyticsCharts({
       </Card>
     </div>
   );
-}
+} 

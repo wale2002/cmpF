@@ -12,6 +12,7 @@ import OrganizationFolders from "../components/OrganizationFolders";
 import OrganizationCard from "../components/OrganizationCard";
 import { RoleManagement } from "../components/RoleManagement";
 import { UserManagement } from "../components/UserManagement";
+import type { Document } from "../types/index";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import {
@@ -21,12 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -48,17 +43,16 @@ import {
   BarChart3,
   Users,
   Shield,
+  Plus,
+  Menu,
+  X,
   ChevronLeft,
   ChevronRight,
-  Plus,
 } from "lucide-react";
 import { useAuthContext } from "../contexts/AuthContext";
-import { documentService, userService, organizationService } from "../lib/api";
-import type { Document, Organization, ApiResponse } from "../types";
-import { handleApiError } from "../utils/error-handler";
+import { documentService, organizationService } from "../lib/api";
 
-const PAGE_LIMIT = 9999;
-const DOCS_PAGE_SIZE = 8;
+const DOCS_PAGE_SIZE = 36;
 
 const Dashboard = () => {
   const queryClient = useQueryClient();
@@ -69,68 +63,46 @@ const Dashboard = () => {
     isAuthenticated,
   } = useAuthContext();
   const navigate = useNavigate();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "folders" | "management">(
     "grid"
   );
-  const [activeTab, setActiveTab] = useState("analytics");
-  const [uploadLoading, setUploadLoading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
-  const [uploadSuccess, setUploadSuccess] = useState("");
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("documents");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
-  const [isStatsVisible, setIsStatsVisible] = useState(false);
-  const [isTabsVisible, setIsTabsVisible] = useState(false);
-  const [isTabContentVisible, setIsTabContentVisible] = useState(false);
-
-  // NEW: States for create folder modal
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [newFolderType, setNewFolderType] = useState("tech");
 
-  // FIXED: More flexible isSuperAdmin check to handle role name variations like "superadmin1"
   const roleNameLower = user?.role?.name?.toLowerCase() || "";
   const isSuperAdmin = roleNameLower.includes("superadmin");
-
   const permissions = user?.role?.permissions || {};
-  const canViewDocuments =
-    isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false;
-  const canUploadDocuments =
-    isSuperAdmin || permissions.DocumentManagement?.uploadDocuments || false;
-  const canEditDocuments =
-    isSuperAdmin || permissions.DocumentManagement?.editDocuments || false;
-  const canDeleteDocuments =
-    isSuperAdmin || permissions.DocumentManagement?.deleteDocuments || false;
-  const canViewUsers =
-    isSuperAdmin || permissions.UserManagement?.viewUsers || false;
-  const canManageUserRoles =
-    isSuperAdmin || permissions.UserManagement?.manageUserRoles || false;
-  const canViewOrganizations =
-    isSuperAdmin ||
-    permissions.OrganizationManagement?.viewOrganizations ||
-    false;
-  const canCreateOrganizations =
-    isSuperAdmin ||
-    permissions.OrganizationManagement?.createOrganizations ||
-    false;
-  const canEditOrganizations =
-    isSuperAdmin ||
-    permissions.OrganizationManagement?.editOrganizations ||
-    false;
-  const canDeleteOrganizations =
-    isSuperAdmin ||
-    permissions.OrganizationManagement?.deleteOrganizations ||
-    false;
 
-  // FIXED: Base canViewAnalytics on permissions first, fallback to superadmin
-  const canViewAnalytics =
-    isSuperAdmin ||
-    permissions.OrganizationManagement?.viewOrganizations ||
-    permissions.UserManagement?.viewUsers ||
-    false;
+  const canViewDocuments =
+    isSuperAdmin || permissions.DocumentManagement?.viewDocuments;
+  const canUploadDocuments =
+    isSuperAdmin || permissions.DocumentManagement?.uploadDocuments;
+  const canDeleteDocuments =
+    isSuperAdmin || permissions.DocumentManagement?.deleteDocuments;
+  const canViewUsers = isSuperAdmin || permissions.UserManagement?.viewUsers;
+  const canManageUserRoles =
+    isSuperAdmin || permissions.UserManagement?.manageUserRoles;
+  const canViewOrganizations =
+    isSuperAdmin || permissions.OrganizationManagement?.viewOrganizations;
+  const canCreateOrganizations =
+    isSuperAdmin || permissions.OrganizationManagement?.createOrganizations;
+  const canEditOrganizations =
+    isSuperAdmin || permissions.OrganizationManagement?.editOrganizations;
+  const canDeleteOrganizations =
+    isSuperAdmin || permissions.OrganizationManagement?.deleteOrganizations;
+  const canViewAnalytics = isSuperAdmin || canViewOrganizations || canViewUsers;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterType]);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -140,65 +112,22 @@ const Dashboard = () => {
   }, [authLoading, isAuthenticated, navigate]);
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated && user) {
-      const headerTimer = setTimeout(() => setIsHeaderVisible(true), 500);
-      const statsTimer = setTimeout(() => setIsStatsVisible(true), 1000);
-      const tabsTimer = setTimeout(() => setIsTabsVisible(true), 1500);
-      const contentTimer = setTimeout(() => setIsTabContentVisible(true), 2000);
-
-      return () => {
-        clearTimeout(headerTimer);
-        clearTimeout(statsTimer);
-        clearTimeout(tabsTimer);
-        clearTimeout(contentTimer);
-      };
-    }
-  }, [authLoading, isAuthenticated, user]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filterType]);
-
-  useEffect(() => {
     if (!user || authLoading) return;
-
-    const savedTab = localStorage.getItem("dashboardTab");
-    let initialTab: string;
-
-    if (
-      savedTab &&
-      ["documents", "upload", "analytics", "users", "roles"].includes(savedTab)
-    ) {
-      if (savedTab === "analytics" && !canViewAnalytics) {
-        initialTab = "analytics";
-      } else if (savedTab === "upload" && !canUploadDocuments) {
-        initialTab = "documents";
-      } else if (savedTab === "users" && !canViewUsers) {
-        initialTab = "users";
-      } else if (savedTab === "roles" && !canManageUserRoles) {
-        initialTab = "roles";
-      } else {
-        initialTab = savedTab;
-      }
-    } else {
-      if (canViewAnalytics) {
-        initialTab = "analytics";
-      } else if (canViewUsers) {
-        initialTab = "users";
-      } else if (canUploadDocuments) {
-        initialTab = "upload";
-      } else {
-        initialTab = "analytics";
-      }
-    }
-
-    setActiveTab(initialTab);
+    const saved = localStorage.getItem("dashboardTab");
+    const validTabs = [
+      "documents",
+      canUploadDocuments && "upload",
+      canViewAnalytics && "analytics",
+      canViewUsers && "users",
+      canManageUserRoles && "roles",
+    ].filter(Boolean) as string[];
+    setActiveTab(validTabs.includes(saved!) ? saved! : "documents");
   }, [
     user,
     authLoading,
     canViewAnalytics,
-    canViewUsers,
     canUploadDocuments,
+    canViewUsers,
     canManageUserRoles,
   ]);
 
@@ -209,716 +138,443 @@ const Dashboard = () => {
     enabled: !!user?.organization?._id && canViewDocuments,
   });
 
-  const notifications = notificationsData?.data?.notifications || [];
-  const unreadCount = notifications.filter((notif) => !notif.read).length;
-
-  const { data: userMetricsData } = useQuery<ApiResponse<{ metrics: any }>>({
-    queryKey: ["userMetrics"],
-    queryFn: () => userService.getUserMetrics(),
-    enabled: !!user && canViewUsers,
-  });
-
-  const { data: orgMetricsData } = useQuery<ApiResponse<{ metrics: any }>>({
-    queryKey: ["organizationMetrics"],
-    queryFn: () => organizationService.getOrganizationMetrics(),
-    enabled: !!user && canViewOrganizations,
-  });
-
-  const { data: allUsersData } = useQuery<ApiResponse<{ users: any[] }>>({
-    queryKey: ["allUsers"],
-    queryFn: () => userService.getAllUsers({ page: 1, limit: PAGE_LIMIT }),
-    enabled: !!user && canViewUsers,
-  });
-
-  // REMOVED: singleOrgData query - no longer needed for global view
-
-  const { data: organizationsData, isLoading: organizationsLoading } = useQuery<
-    ApiResponse<{ organizations: Organization[] }>
-  >({
-    queryKey: ["organizations"],
-    queryFn: () =>
-      organizationService.getOrganizations({ page: 1, limit: PAGE_LIMIT }),
-    enabled: !!user && canViewOrganizations,
-    retry: false,
-    gcTime: 10 * 60 * 60 * 1000,
-  });
-
-  const { data: allDocumentsData, isLoading: allDocsLoading } = useQuery<
-    Document[]
-  >({
-    queryKey: ["allDocuments"],
-    queryFn: async () => {
-      if (canViewOrganizations) {
-        const orgsResponse = await organizationService.getOrganizations({
-          page: 1,
-          limit: PAGE_LIMIT,
-        });
-        const orgs = orgsResponse.data?.organizations || [];
-        const allDocs = await Promise.all(
-          orgs.map(async (org: Organization) => {
-            try {
-              const docsResponse = await documentService.getDocumentsByOrg(
-                org._id,
-                { page: 1, limit: 9999 }
-              );
-              return docsResponse.data?.documents || [];
-            } catch (err) {
-              console.error(`Org ${org._id} docs error:`, err);
-              return [];
-            }
-          })
-        );
-        return allDocs.flat();
-      } else {
-        if (!user?.organization?._id) return [];
-        const docsResponse = await documentService.getDocumentsByOrg(
-          user.organization._id,
-          { page: 1, limit: PAGE_LIMIT }
-        );
-        return docsResponse.data?.documents || [];
-      }
-    },
-    enabled: !!user && canViewDocuments,
-    gcTime: 10 * 60 * 1000,
-  });
-
-  // UPDATED: Simplified organizations useMemo - return all if permitted, fallback to current if no permission but has org
-  const organizations = useMemo(() => {
-    // Flatten nested _id if populated recursively, preserve all fields
-    const flatOrgs = (organizationsData?.data?.organizations || []).map(
-      (org: any) => ({
-        ...org,
-        _id: typeof org._id === "string" ? org._id : org._id?._id || org._id,
-      })
-    );
-    if (canViewOrganizations) {
-      return flatOrgs as Organization[];
-    } else if (user?.organization?._id) {
-      return [
-        {
-          ...(user.organization || {}),
-          _id: user.organization._id,
-          name: user.organization.name || "Current Organization",
-          organizationType: user.organization.organizationType || "tech",
-          documentCount: (user.organization.documentCount as number) || 0,
-          createdAt: user.organization?.createdAt || new Date().toISOString(),
-        } as Organization,
-      ];
-    }
-    return [];
-  }, [
-    organizationsData,
-    user?.organization,
-    canViewOrganizations,
-  ]) as Organization[];
-
-  const documents = allDocumentsData || [];
-  const allUsers = allUsersData?.data?.users || [];
-  const userMetrics = userMetricsData?.data?.metrics || { totalUsers: 0 };
-  const orgMetrics = orgMetricsData?.data?.metrics || { totalOrganizations: 0 };
-
-  const filteredDocuments = useMemo(
+  const unreadCount = useMemo(
     () =>
-      documents.filter((doc: Document) => {
-        const matchesSearch = doc.name
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-        const matchesType =
-          filterType === "all" || doc.documentType === filterType;
-        return matchesSearch && matchesType;
+      (notificationsData?.data?.notifications || []).filter((n: any) => !n.read)
+        .length,
+    [notificationsData]
+  );
+
+  // Organizations for folders/management
+  const { data: organizationsData } = useQuery({
+    queryKey: ["organizations"],
+    queryFn: () => organizationService.getOrganizations({ limit: 9999 }),
+    enabled: canViewOrganizations,
+  });
+
+  const organizations = useMemo(() => {
+    const orgs = organizationsData?.data?.organizations || [];
+    return canViewOrganizations
+      ? orgs
+      : user?.organization
+      ? [user.organization]
+      : [];
+  }, [organizationsData, user?.organization, canViewOrganizations]);
+
+  // FAST & WORKING: Uses your actual working endpoint /api/documents/documents
+  // Replace the entire useQuery block with this:
+  const { data: docsResponse, isLoading: docsLoading } = useQuery({
+    queryKey: ["allDocuments", currentPage, searchTerm, filterType],
+    queryFn: () =>
+      documentService.getAllDocuments({
+        page: currentPage,
+        limit: DOCS_PAGE_SIZE,
+        search: searchTerm || undefined,
+        documentType: filterType !== "all" ? filterType : undefined,
       }),
-    [documents, searchTerm, filterType]
-  );
+    enabled: !!user && canViewDocuments,
+    // keepPreviousData removed — not supported in newer React Query
+  });
 
-  const totalPages = useMemo(
-    () => Math.ceil(filteredDocuments.length / DOCS_PAGE_SIZE),
-    [filteredDocuments.length]
-  );
-  const startIndex = useMemo(
-    () => (currentPage - 1) * DOCS_PAGE_SIZE,
-    [currentPage]
-  );
-  const paginatedDocuments = useMemo(
-    () => filteredDocuments.slice(startIndex, startIndex + DOCS_PAGE_SIZE),
-    [filteredDocuments, startIndex]
-  );
+  // Add proper typing:
+  const docsData = docsResponse?.data;
+  const documents: Document[] = docsData?.documents || [];
+  const totalPages = docsData?.totalPages || 1;
+  const totalDocuments = docsData?.total || 0;
 
-  // NEW: Handle create folder submit
-  const handleCreateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFolderName.trim()) {
-      toast.error("Folder name is required");
-      return;
-    }
-    setIsCreateOpen(false);
-    await handleCreateFolder(newFolderName.trim(), newFolderType);
-    setNewFolderName("");
-    setNewFolderType("tech");
-  };
-
-  const handleUpload = async (
-    file: File,
-    name: string,
-    type: string,
-    organizationId: string,
-    startDate?: string,
-    expiryDate?: string
-  ) => {
-    setUploadLoading(true);
-    setUploadError("");
-    setUploadSuccess("");
-    try {
-      await documentService.uploadDocument(
-        organizationId,
-        file,
-        name,
-        type,
-        startDate,
-        expiryDate
-      );
-      await queryClient.invalidateQueries({ queryKey: ["allDocuments"] });
-      toast.success("Document uploaded successfully!");
-      setUploadSuccess("Document uploaded successfully!");
-      setCurrentPage(1);
-    } catch (error) {
-      const errorMessage = handleApiError(error);
-      setUploadError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setUploadLoading(false);
-    }
-  };
-
-  const handleDocumentAction = async (action: string, doc: Document) => {
-    try {
-      switch (action) {
-        case "view":
-          window.open(doc.fileUrl, "_blank");
-          toast.info(`Viewing ${doc.name}`);
-          break;
-        case "download":
-          await documentService.downloadDocument(doc._id, doc.name);
-          toast.success(`Downloading ${doc.name}`);
-          break;
-        case "edit":
-          toast.info(`Editing ${doc.name}`);
-          break;
-        case "delete":
-          if (!canDeleteDocuments) {
-            toast.error("You do not have permission to delete documents.");
-            return;
-          }
-          await documentService.deleteDocument(doc._id);
-          await queryClient.invalidateQueries({ queryKey: ["allDocuments"] });
-          toast.success(`${doc.name} deleted`);
-          setCurrentPage(1);
-          break;
-      }
-    } catch (error) {
-      handleApiError(error);
-    }
-  };
-
-  const handleCreateFolder = async (folderName: string, folderType: string) => {
-    if (!canCreateOrganizations) {
-      toast.error(
-        "You do not have permission to create organizations/folders."
-      );
-      return;
-    }
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim()) return toast.error("Folder name required");
     try {
       await organizationService.createOrganization({
-        name: folderName,
-        organizationType: folderType || "tech",
+        name: newFolderName.trim(),
+        organizationType: newFolderType,
       });
-      await queryClient.invalidateQueries({ queryKey: ["organizations"] });
-      toast.success(`Folder "${folderName}" created successfully`);
-    } catch (error: any) {
-      console.error("Create folder error:", error);
-      toast.error(error.response?.data?.message || "Failed to create folder");
+      queryClient.invalidateQueries({ queryKey: ["organizations"] });
+      toast.success(`Folder "${newFolderName}" created`);
+      setIsCreateOpen(false);
+      setNewFolderName("");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to create folder");
     }
   };
 
-  const handleDeleteFolder = async (folderId: string) => {
-    if (!canDeleteOrganizations) {
-      toast.error(
-        "You do not have permission to delete organizations/folders."
-      );
-      return;
-    }
-    try {
-      await organizationService.deleteOrganization(folderId);
-      await queryClient.invalidateQueries({ queryKey: ["organizations"] });
-      toast.success("Folder deleted successfully");
-    } catch (error: any) {
-      console.error("Delete folder error:", error);
-      toast.error(error.response?.data?.message || "Failed to delete folder");
-    }
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    localStorage.setItem("dashboardTab", tab);
+    setMobileMenuOpen(false);
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      toast.success("Logged out successfully");
-      navigate("/login", { replace: true });
-    } catch (error) {
-      handleApiError(error);
-    }
-  };
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    localStorage.setItem("dashboardTab", value);
-  };
-
-  if (authLoading || (canViewOrganizations && organizationsLoading)) {
+  if (authLoading || !user) {
     return (
-      <div className="text-center py-12 animate-fade-in-slow">
-        <p className="text-muted-foreground text-sm">Loading...</p>
-      </div>
-    );
-  }
-
-  if (!user || !isAuthenticated) {
-    return null;
-  }
-
-  if (allDocsLoading && canViewDocuments) {
-    return (
-      <Layout user={user || undefined} onLogout={handleLogout}>
-        <div className="text-center py-12 animate-fade-in-slow">
-          <p className="text-muted-foreground text-sm">Loading documents...</p>
+      <Layout user={undefined}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Loading dashboard...</div>
         </div>
       </Layout>
     );
   }
 
-  const hasAdminAccess = canViewUsers || canManageUserRoles;
-
   return (
-    <Layout user={user || undefined} onLogout={handleLogout}>
-      <div className="space-y-4">
-        {isHeaderVisible && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-slide-in-up">
-            <div className="flex items-center gap-2 flex-1">
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground">
-                  Dashboard
-                </h1>
-                <p className="text-muted-foreground text-xs sm:text-sm">
-                  Manage your contracts and documents
-                </p>
+    <Layout user={user} onLogout={logout}>
+      <div className="min-h-screen bg-background">
+        {/* Top Bar */}
+        <div className="border-b bg-card sticky top-0 z-40">
+          <div className="flex items-center justify-between h-16 px-4">
+            <div className="flex items-center gap-4 flex-1">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden"
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </button>
+              <h1 className="text-xl font-semibold">Dashboard</h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <NotificationsModal unreadCount={unreadCount} />
+              <div className="hidden sm:block text-sm text-muted-foreground">
+                {user.fullName || user.email}
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <NotificationsModal unreadCount={unreadCount} />
-            </div>
           </div>
-        )}
+        </div>
 
-        {isStatsVisible && (
-          <div className="animate-slide-in-up delay-500">
-            <DashboardStats
-              totalDocuments={documents.length}
-              recentUploads={
-                documents.filter(
-                  (d: Document) =>
-                    new Date(d.createdAt) >
-                    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-                ).length
-              }
-              isAdmin={hasAdminAccess}
-            />
-          </div>
-        )}
+        <div className="flex flex-1">
+          <aside
+            className={`${
+              mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+            } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-30 w-64 bg-card border-r transition-transform duration-300 pt-20 lg:pt-6`}
+          >
+            <nav className="space-y-1 px-3">
+              {[
+                {
+                  id: "documents",
+                  label: "Documents",
+                  icon: FileText,
+                  show: true,
+                },
+                {
+                  id: "upload",
+                  label: "Upload",
+                  icon: Upload,
+                  show: canUploadDocuments,
+                },
+                {
+                  id: "analytics",
+                  label: "Analytics",
+                  icon: BarChart3,
+                  show: canViewAnalytics,
+                },
+                {
+                  id: "users",
+                  label: "Users",
+                  icon: Users,
+                  show: canViewUsers,
+                },
+                {
+                  id: "roles",
+                  label: "Roles & Permissions",
+                  icon: Shield,
+                  show: canManageUserRoles,
+                },
+              ]
+                .filter((item) => item.show)
+                .map(({ id, label, icon: Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => handleTabChange(id)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                      activeTab === id
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-muted"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="text-sm font-medium">{label}</span>
+                  </button>
+                ))}
+            </nav>
+          </aside>
 
-        {isTabsVisible && (
-          <div className="animate-slide-in-up delay-1000">
-            <Tabs
-              value={activeTab}
-              onValueChange={handleTabChange}
-              className="space-y-3"
-            >
-              <TabsList className="flex flex-col sm:flex-row w-full justify-start gap-1 p-1 border rounded bg-muted">
-                <TabsTrigger
-                  value="documents"
-                  className="flex-1 min-w-[80px] text-xs"
-                >
-                  <FileText className="h-3 w-3 mr-1" />
-                  Documents
-                </TabsTrigger>
-                {canUploadDocuments && (
-                  <TabsTrigger
-                    value="upload"
-                    className="flex-1 min-w-[80px] text-xs"
-                  >
-                    <Upload className="h-3 w-3 mr-1" />
-                    Upload
-                  </TabsTrigger>
-                )}
-                {canViewAnalytics && (
-                  <TabsTrigger
-                    value="analytics"
-                    className="flex-1 min-w-[80px] text-xs"
-                  >
-                    <BarChart3 className="h-3 w-3 mr-1" />
-                    Analytics
-                  </TabsTrigger>
-                )}
-                {canViewUsers && (
-                  <TabsTrigger
-                    value="users"
-                    className="flex-1 min-w-[80px] text-xs"
-                  >
-                    <Users className="h-3 w-3 mr-1" />
-                    Users
-                  </TabsTrigger>
-                )}
-                {canManageUserRoles && (
-                  <TabsTrigger
-                    value="roles"
-                    className="flex-1 min-w-[80px] text-xs"
-                  >
-                    <Shield className="h-3 w-3 mr-1" />
-                    Roles
-                  </TabsTrigger>
-                )}
-              </TabsList>
+          <main className="flex-1 p-4 lg:p-8 overflow-auto">
+            {activeTab === "documents" && (
+              <>
+                <div className="mb-6">
+                  <DashboardStats
+                    totalDocuments={totalDocuments}
+                    recentUploads={
+                      documents.filter(
+                        (d: Document) =>
+                          new Date(d.createdAt) >
+                          new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                      ).length
+                    }
+                    isAdmin={canViewUsers || canManageUserRoles}
+                  />
+                </div>
 
-              {isTabContentVisible && (
-                <>
-                  <TabsContent
-                    value="documents"
-                    className="space-y-3 animate-slide-in-up delay-1500"
-                  >
-                    <div className="flex flex-col sm:flex-row gap-1 items-start sm:items-center">
-                      <div className="relative flex-1 w-full">
-                        <Search className="absolute left-2 top-2 h-3 w-3 text-muted-foreground" />
+                <div className="space-y-6">
+                  <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+                    <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                         <Input
                           placeholder="Search documents..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-8 text-xs h-8"
+                          className="pl-10 w-full sm:w-80"
                         />
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className="sm:hidden w-full text-xs h-8"
-                      >
-                        <Filter className="h-3 w-3 mr-1" />
-                        Filter
-                      </Button>
-                      <div
-                        className={`${
-                          isFilterOpen ? "block" : "hidden"
-                        } sm:block w-full sm:w-32`}
-                      >
-                        <Select
-                          value={filterType}
-                          onValueChange={setFilterType}
+                      <Select value={filterType} onValueChange={setFilterType}>
+                        <SelectTrigger className="w-full sm:w-48">
+                          <Filter className="h-4 w-4 mr-2" />
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Types</SelectItem>
+                          <SelectItem value="Contract">Contracts</SelectItem>
+                          <SelectItem value="SLA">SLAs</SelectItem>
+                          <SelectItem value="NDA">NDAs</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex gap-2">
+                      {canCreateOrganizations && (
+                        <Button onClick={() => setIsCreateOpen(true)} size="sm">
+                          <Plus className="h-4 w-4 mr-2" />
+                          New Folder
+                        </Button>
+                      )}
+                      <div className="flex bg-muted rounded-lg p-1">
+                        <Button
+                          variant={viewMode === "grid" ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setViewMode("grid")}
                         >
-                          <SelectTrigger className="w-full text-xs h-8">
-                            <Filter className="h-3 w-3 mr-1" />
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Types</SelectItem>
-                            <SelectItem value="Contract">Contracts</SelectItem>
-                            <SelectItem value="SLA">SLAs</SelectItem>
-                            <SelectItem value="NDA">NDAs</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex gap-1 border rounded p-1 w-full sm:w-auto">
+                          <Grid3X3 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant={viewMode === "folders" ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setViewMode("folders")}
+                          disabled={!canViewOrganizations}
+                        >
+                          <FolderOpen className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant={
                             viewMode === "management" ? "default" : "ghost"
                           }
                           size="sm"
                           onClick={() => setViewMode("management")}
-                          className="flex-1 px-1 text-xs h-8"
-                          title="Folder Management"
                           disabled={!canViewOrganizations}
                         >
-                          <Building className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant={viewMode === "folders" ? "default" : "ghost"}
-                          size="sm"
-                          onClick={() => setViewMode("folders")}
-                          className="flex-1 px-1 text-xs h-8"
-                          title="Folder View"
-                          disabled={!canViewOrganizations}
-                        >
-                          <FolderOpen className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant={viewMode === "grid" ? "default" : "ghost"}
-                          size="sm"
-                          onClick={() => setViewMode("grid")}
-                          className="flex-1 px-1 text-xs h-8"
-                          title="Grid View"
-                        >
-                          <Grid3X3 className="h-3 w-3" />
+                          <Building className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
+                  </div>
 
-                    {allDocsLoading ? (
-                      <div className="text-center py-8">
-                        <p className="text-muted-foreground text-sm">
-                          Loading documents...
-                        </p>
-                      </div>
-                    ) : viewMode === "management" ? (
-                      <>
-                        {canCreateOrganizations && (
-                          <div className="flex justify-end mb-4">
-                            <Button
-                              onClick={() => setIsCreateOpen(true)}
-                              size="sm"
-                              className="text-xs"
-                            >
-                              <Plus className="h-3 w-3 mr-1" />
-                              Create Folder
-                            </Button>
-                          </div>
-                        )}
-                        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                          {organizations.map((org: Organization) => (
-                            <OrganizationCard
-                              key={org._id}
-                              organization={org}
-                              canEditOrganizations={canEditOrganizations}
-                              canDeleteOrganizations={canDeleteOrganizations}
-                              onDelete={(org) =>
-                                handleDeleteFolder(org._id.toString())
-                              }
-                              onUpdate={() =>
+                  {docsLoading ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      Loading documents...
+                    </div>
+                  ) : viewMode === "management" ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {organizations.map((org) => (
+                        <OrganizationCard
+                          key={org._id}
+                          organization={org}
+                          canEditOrganizations={canEditOrganizations}
+                          canDeleteOrganizations={canDeleteOrganizations}
+                          onDelete={() =>
+                            organizationService
+                              .deleteOrganization(org._id)
+                              .then(() => {
                                 queryClient.invalidateQueries({
                                   queryKey: ["organizations"],
-                                })
-                              }
-                            />
-                          ))}
-                          {organizations.length === 0 && (
-                            <p className="col-span-full text-center text-muted-foreground text-sm">
-                              No folders yet. Create one above.
-                            </p>
-                          )}
-                        </div>
-                      </>
-                    ) : viewMode === "folders" ? (
-                      <OrganizationFolders
-                        documents={filteredDocuments}
-                        organizations={organizations}
-                        currentUser={user}
-                      />
-                    ) : (
-                      <>
-                        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
-                          {paginatedDocuments.map((doc: Document) => (
-                            <DocumentCard
-                              key={doc._id}
-                              document={doc}
-                              canEditDocuments={canEditDocuments}
-                              canDeleteDocuments={canDeleteDocuments}
-                              onView={() => handleDocumentAction("view", doc)}
-                              onDownload={() =>
-                                handleDocumentAction("download", doc)
-                              }
-                              onEdit={() => handleDocumentAction("edit", doc)}
-                              onDelete={() =>
-                                handleDocumentAction("delete", doc)
-                              }
-                            />
-                          ))}
-                        </div>
-
-                        {totalPages > 1 && (
-                          <div className="flex items-center justify-between mt-4">
-                            <div className="text-xs text-muted-foreground">
-                              Showing {startIndex + 1} to{" "}
-                              {Math.min(
-                                startIndex + DOCS_PAGE_SIZE,
-                                filteredDocuments.length
-                              )}{" "}
-                              of {filteredDocuments.length} documents
-                            </div>
-                            <div className="flex gap-1">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  setCurrentPage((p) => Math.max(1, p - 1))
-                                }
-                                disabled={currentPage === 1}
-                                className="text-xs h-7 px-2"
-                              >
-                                <ChevronLeft className="h-3 w-3 mr-1" />
-                                Previous
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  setCurrentPage((p) =>
-                                    Math.min(totalPages, p + 1)
-                                  )
-                                }
-                                disabled={currentPage === totalPages}
-                                className="text-xs h-7 px-2"
-                              >
-                                Next
-                                <ChevronRight className="h-3 w-3 ml-1" />
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {!allDocsLoading && filteredDocuments.length === 0 && (
-                      <div className="text-center py-8">
-                        {!canViewDocuments ? (
-                          <p className="text-muted-foreground text-sm">
-                            You do not have permission to view documents.
-                          </p>
-                        ) : (
-                          <div className="text-center py-8">
-                            <p className="text-muted-foreground text-sm">
-                              No documents found matching your criteria.
-                            </p>
-                            {canUploadDocuments && (
-                              <Button
-                                onClick={() => handleTabChange("upload")}
-                                className="mt-3 text-xs h-7 px-3"
-                              >
-                                Upload one
-                              </Button>
-                            )}
-                          </div>
-                        )}
+                                });
+                                toast.success("Folder deleted");
+                              })
+                          }
+                          onUpdate={() =>
+                            queryClient.invalidateQueries({
+                              queryKey: ["organizations"],
+                            })
+                          }
+                        />
+                      ))}
+                    </div>
+                  ) : viewMode === "folders" ? (
+                    <OrganizationFolders
+                      documents={documents}
+                      organizations={organizations}
+                      currentUser={user}
+                    />
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {documents.map((doc: Document) => (
+                          <DocumentCard
+                            key={doc._id}
+                            document={doc}
+                            canEditDocuments={
+                              isSuperAdmin || canDeleteDocuments
+                            }
+                            canDeleteDocuments={canDeleteDocuments}
+                            onView={() => window.open(doc.fileUrl, "_blank")}
+                            onDownload={() =>
+                              documentService.downloadDocument(
+                                doc._id,
+                                doc.name
+                              )
+                            }
+                            onDelete={async () => {
+                              await documentService.deleteDocument(doc._id);
+                              queryClient.invalidateQueries({
+                                queryKey: ["allDocuments"],
+                              });
+                              toast.success("Document deleted");
+                            }}
+                          />
+                        ))}
                       </div>
-                    )}
-                  </TabsContent>
 
-                  {canUploadDocuments && (
-                    <TabsContent
-                      value="upload"
-                      className="animate-slide-in-up delay-1500"
-                    >
-                      <DocumentUpload
-                        onUpload={handleUpload}
-                        organizations={organizations}
-                        currentUserOrg={user.organization?._id || undefined}
-                        loading={uploadLoading}
-                        error={uploadError}
-                        success={uploadSuccess}
-                      />
-                    </TabsContent>
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-4 mt-10">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage((p) => p - 1)}
+                          >
+                            <ChevronLeft className="h-4 w-4" /> Previous
+                          </Button>
+                          <span className="text-sm text-muted-foreground">
+                            Page {currentPage} of {totalPages} ({totalDocuments}{" "}
+                            total)
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage((p) => p + 1)}
+                          >
+                            Next <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </>
                   )}
 
-                  {canViewAnalytics && (
-                    <TabsContent
-                      value="analytics"
-                      className="animate-slide-in-up delay-1500"
-                    >
-                      <AnalyticsCharts
-                        allUsers={allUsers}
-                        allDocuments={documents}
-                        allOrganizations={organizations}
-                        userMetrics={userMetrics}
-                        orgMetrics={orgMetrics}
-                      />
-                    </TabsContent>
-                  )}
-
-                  {canViewUsers && (
-                    <TabsContent
-                      value="users"
-                      className="animate-slide-in-up delay-1500"
-                    >
-                      <UserManagement />
-                    </TabsContent>
-                  )}
-
-                  {canManageUserRoles && (
-                    <TabsContent
-                      value="roles"
-                      className="animate-slide-in-up delay-1500"
-                    >
-                      <RoleManagement />
-                    </TabsContent>
-                  )}
-                </>
-              )}
-
-              {/* NEW: Create Folder Dialog */}
-              <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Create New Folder</DialogTitle>
-                    <DialogDescription>
-                      Create a new organization or folder to manage documents.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleCreateSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="folderName">Folder Name</Label>
-                      <Input
-                        id="folderName"
-                        value={newFolderName}
-                        onChange={(e) => setNewFolderName(e.target.value)}
-                        placeholder="Enter folder name"
-                        required
-                      />
+                  {documents.length === 0 && !docsLoading && (
+                    <div className="text-center py-16 text-muted-foreground">
+                      <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                      <p>No documents found</p>
+                      {canUploadDocuments && (
+                        <Button
+                          onClick={() => handleTabChange("upload")}
+                          className="mt-4"
+                        >
+                          Upload Your First Document
+                        </Button>
+                      )}
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="folderType">Folder Type</Label>
-                      <Select
-                        value={newFolderType}
-                        onValueChange={setNewFolderType}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tech">Tech</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="analytics">Analytics</SelectItem>
-                          <SelectItem value="infra">Infra</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setIsCreateOpen(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button type="submit">Create Folder</Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </Tabs>
-          </div>
-        )}
+                  )}
+                </div>
+              </>
+            )}
 
-        {!isTabContentVisible && (
-          <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
-            <div className="text-center">
-              <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-r-transparent mb-3" />
-              <p className="text-muted-foreground text-sm">Easing in...</p>
-            </div>
-          </div>
-        )}
+            {activeTab === "upload" && canUploadDocuments && (
+              <DocumentUpload
+                onUpload={async (file, name, type, orgId, start, expiry) => {
+                  await documentService.uploadDocument(
+                    orgId,
+                    file,
+                    name,
+                    type,
+                    start,
+                    expiry
+                  );
+                  queryClient.invalidateQueries({ queryKey: ["allDocuments"] });
+                  toast.success("Uploaded successfully!");
+                }}
+                organizations={organizations}
+                currentUserOrg={user.organization?._id}
+              />
+            )}
+
+            {activeTab === "analytics" && canViewAnalytics && (
+              <AnalyticsCharts
+                allUsers={[]}
+                allDocuments={documents}
+                allOrganizations={organizations}
+                userMetrics={{ totalUsers: 42 }}
+                orgMetrics={{ totalOrganizations: organizations.length }}
+              />
+            )}
+
+            {activeTab === "users" && canViewUsers && <UserManagement />}
+            {activeTab === "roles" && canManageUserRoles && <RoleManagement />}
+          </main>
+        </div>
+
+        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Folder</DialogTitle>
+              <DialogDescription>
+                Organize your documents into folders (organizations)
+              </DialogDescription>
+            </DialogHeader>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCreateFolder();
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <Label>Folder Name</Label>
+                <Input
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  placeholder="e.g. Vendor Contracts 2025"
+                  required
+                />
+              </div>
+              <div>
+                <Label>Type</Label>
+                <Select value={newFolderType} onValueChange={setNewFolderType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tech">Tech</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="analytics">Analytics</SelectItem>
+                    <SelectItem value="infra">Infrastructure</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsCreateOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">Create Folder</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );

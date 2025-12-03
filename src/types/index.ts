@@ -277,7 +277,7 @@ export interface Document {
   documentType: "Contract" | "SLA" | "NDA" | "Other";
   fileUrl: string;
   organization: string;
-  uploadedBy: string; // Clarified: This is a user ID
+  uploadedBy: string | { _id: string; fullName: string; email?: string }; // Updated to handle populated user
   accessCount?: number;
   createdAt: string;
   isApproved: boolean;
@@ -285,8 +285,25 @@ export interface Document {
   startDate?: string;
   expiryDate?: string;
   sizeMB?: number;
-  negotiatedAmount?: number; // NEW: Optional negotiated amount
+  negotiatedAmount?: number;
 }
+// export interface Document {
+//   uploadDate: string;
+//   _id: string;
+//   name: string;
+//   documentType: "Contract" | "SLA" | "NDA" | "Other";
+//   fileUrl: string;
+//   organization: string;
+//   uploadedBy: string; // Clarified: This is a user ID
+//   accessCount?: number;
+//   createdAt: string;
+//   isApproved: boolean;
+//   approvedBy?: string;
+//   startDate?: string;
+//   expiryDate?: string;
+//   sizeMB?: number;
+//   negotiatedAmount?: number; // NEW: Optional negotiated amount
+// }
 // export interface Document {
 //   uploadDate: string;
 //   _id: string;

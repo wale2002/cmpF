@@ -1,21 +1,49 @@
+:root {
+  --max-width: 1280px;
+  --primary-color: #646cff;
+  --secondary-color: #61dafb;
+  --text-color: #333;
+  --subtle-color: #888;
+  --transition-duration: 300ms;
+  --animation-duration: 20s;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --logo-size: 6em;
+  --padding-large: 2rem;
+  --padding-medium: 1.5em;
+  --padding-small: 2em;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-color: #ddd;
+    --subtle-color: #aaa;
+    --shadow-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
 #root {
-  max-width: 1280px;
+  max-width: var(--max-width);
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--padding-large);
   text-align: center;
+  color: var(--text-color);
 }
 
 .logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+  height: var(--logo-size);
+  padding: var(--padding-medium);
+  will-change: filter, transform;
+  transition: filter var(--transition-duration) ease-in-out,
+    transform var(--transition-duration) ease-in-out;
 }
+
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em var(--primary-color));
+  transform: scale(1.05);
 }
+
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em var(--secondary-color));
 }
 
 @keyframes logo-spin {
@@ -29,14 +57,23 @@
 
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+    animation: logo-spin infinite var(--animation-duration) linear;
   }
 }
 
 .card {
-  padding: 2em;
+  padding: var(--padding-small);
+  box-shadow: 0 4px 6px var(--shadow-color);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  /* backdrop-filter: blur(10px); */
+  transition: box-shadow var(--transition-duration) ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 6px 12px var(--shadow-color);
 }
 
 .read-the-docs {
-  color: #888;
+  color: var(--subtle-color);
 }
