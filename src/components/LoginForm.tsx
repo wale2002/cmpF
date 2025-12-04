@@ -200,7 +200,6 @@
 //   );
 // };
 
-
 // src/components/LoginForm.tsx
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -212,7 +211,7 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
+  // FormLabel,
   FormMessage,
 } from "./ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -284,7 +283,7 @@ export const LoginForm = ({
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm sm:text-base">Email</FormLabel>
+                  {/* <FormLabel className="text-sm sm:text-base">Email</FormLabel> */}
                   <FormControl>
                     <Input
                       type="email"
@@ -304,7 +303,9 @@ export const LoginForm = ({
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm sm:text-base">Password</FormLabel>
+                  {/* <FormLabel className="text-sm sm:text-base">
+                    Password
+                  </FormLabel> */}
                   <FormControl>
                     <Input
                       type="password"
