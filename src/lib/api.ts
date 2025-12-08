@@ -14,9 +14,9 @@ import type {
   Alert, // Added if not present
 } from "../types";
 
-const BASE_URL = "https://cpm-contracts.onrender.com/api";
+// const BASE_URL = "https://cpm-contracts.onrender.com/api";
 
-// const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000/api";
 
 const apiFetch = async (
   url: string,
@@ -283,7 +283,14 @@ export const userService = {
       totalPages: number;
     }>
   > => {
-    const query = new URLSearchParams(params as any).toString();
+    // UPDATED: Always include a high limit (100) to fetch all users if not specified
+    const effectiveParams = {
+      ...params,
+      limit: params?.limit ?? 100, // Default to 100 for full fetch
+      page: params?.page ?? 1,
+    };
+    const query = new URLSearchParams(effectiveParams as any).toString();
+    console.log("getAllUsers Query:", query); // Debug: Log the full query
     return apiFetch(`/users${query ? `?${query}` : ""}`);
   },
 
