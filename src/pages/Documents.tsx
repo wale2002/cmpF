@@ -634,7 +634,7 @@ const DocumentsPage = () => {
 
   // ====================== ENUMERATOR / REGIONAL OFFICER REPORT ======================
   const handleEnumeratorSubmit = async (
-    picture: File | null,
+    picture: File | null, // ← This was missing!
     fullName: string,
     role: "Regional Officer" | "Enumerator",
     phoneNumber: string,
@@ -648,11 +648,11 @@ const DocumentsPage = () => {
     setFieldReportLoading(true);
     setFieldReportError("");
     setFieldReportSuccess("");
-    try {
-      // TODO: Replace with your real service when ready
-      // await enumeratorService.submitReport({ picture, fullName, role, ... });
 
+    try {
+      // TODO: Replace with your real backend call when ready
       console.log("Field report submitted:", {
+        picture: picture ? picture.name : "No picture",
         fullName,
         role,
         phoneNumber,

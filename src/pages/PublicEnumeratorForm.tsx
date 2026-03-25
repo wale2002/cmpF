@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { EnumeratorUploadForm } from "../components/EnumeratorUploadForm";
 import { toast } from "sonner";
-import { handleApiError } from "../utils/error-handler";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 export default function PublicEnumeratorForm() {
   const [loading, setLoading] = useState(false);
