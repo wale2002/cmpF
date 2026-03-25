@@ -2289,7 +2289,8 @@ export function DocumentCard({
   const permissions = user?.role?.permissions?.DocumentManagement || {};
 
   const canEdit = propCanEdit ?? (isSuperAdmin || permissions.editDocuments);
-  const canDelete = propCanDelete ?? (isSuperAdmin || permissions.deleteDocuments);
+  const canDelete =
+    propCanDelete ?? (isSuperAdmin || permissions.deleteDocuments);
   const canView = isSuperAdmin || permissions.viewDocuments;
 
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -2306,10 +2307,18 @@ export function DocumentCard({
   const getExpiryStatus = () => {
     if (!expiryDate) return null;
     if (isExpired) {
-      return { label: "Expired", color: "bg-red-100 text-red-700 border-red-300", icon: AlertTriangle };
+      return {
+        label: "Expired",
+        color: "bg-red-100 text-red-700 border-red-300",
+        icon: AlertTriangle,
+      };
     }
     if (isExpiringSoon) {
-      return { label: "Expiring Soon", color: "bg-orange-100 text-orange-700 border-orange-300", icon: CalendarDays };
+      return {
+        label: "Expiring Soon",
+        color: "bg-orange-100 text-orange-700 border-orange-300",
+        icon: CalendarDays,
+      };
     }
     return null;
   };
@@ -2337,7 +2346,8 @@ export function DocumentCard({
     const formData = new FormData(e.currentTarget);
     const name = formData.get("name")?.toString().trim();
     const type = formData.get("documentType")?.toString();
-    const amountInput = formData.get("negotiatedAmount")?.toString().trim() || "";
+    const amountInput =
+      formData.get("negotiatedAmount")?.toString().trim() || "";
     const expiry = formData.get("expiryDate")?.toString() || null;
     const start = formData.get("startDate")?.toString() || null;
 
@@ -2365,7 +2375,10 @@ export function DocumentCard({
         updateData.negotiatedAmount = amount;
       }
 
-      const res = await documentService.updateDocument(document._id.toString(), updateData);
+      const res = await documentService.updateDocument(
+        document._id.toString(),
+        updateData
+      );
       if (res.data?.document) {
         toast.success("Document updated successfully");
         onUpdate?.(res.data.document);
@@ -2385,15 +2398,20 @@ export function DocumentCard({
     <>
       {/* Card */}
       <Card
-        className={`group cursor-pointer transition-all hover:shadow-md hover:border-foreground/20 ${isExpired ? "opacity-75" : ""
-          }`}
+        className={`group cursor-pointer transition-all hover:shadow-md hover:border-foreground/20 ${
+          isExpired ? "opacity-75" : ""
+        }`}
         onClick={() => setIsDetailsOpen(true)}
       >
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="relative">
-                <FileText className={`h-9 w-9 ${isExpired ? "text-red-500" : "text-muted-foreground"}`} />
+                <FileText
+                  className={`h-9 w-9 ${
+                    isExpired ? "text-red-500" : "text-muted-foreground"
+                  }`}
+                />
                 {isExpired && (
                   <div className="absolute -top-1 -right-1">
                     <AlertTriangle className="h-4 w-4 text-red-600" />
@@ -2401,7 +2419,11 @@ export function DocumentCard({
                 )}
               </div>
               <div className="min-w-0">
-                <h3 className={`font-medium text-sm truncate ${isExpired ? "text-red-700" : ""}`}>
+                <h3
+                  className={`font-medium text-sm truncate ${
+                    isExpired ? "text-red-700" : ""
+                  }`}
+                >
                   {document.name}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
@@ -2409,7 +2431,10 @@ export function DocumentCard({
                     {document.documentType}
                   </Badge>
                   {expiryStatus && (
-                    <Badge variant="outline" className={`text-xs ${expiryStatus.color}`}>
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${expiryStatus.color}`}
+                    >
                       <expiryStatus.icon className="h-3 w-3 mr-1" />
                       {expiryStatus.label}
                     </Badge>
@@ -2420,22 +2445,41 @@ export function DocumentCard({
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {onView && (
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onView(); }}>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onView();
+                    }}
+                  >
                     <Eye className="h-4 w-4 mr-2" /> View
                   </DropdownMenuItem>
                 )}
                 {onDownload && (
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDownload(); }}>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDownload();
+                    }}
+                  >
                     <Download className="h-4 w-4 mr-2" /> Download
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); shareDocument(); }}>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    shareDocument();
+                  }}
+                >
                   <Share2 className="h-4 w-4 mr-2" /> Share
                 </DropdownMenuItem>
                 {canEdit && (
@@ -2450,7 +2494,13 @@ export function DocumentCard({
                   </DropdownMenuItem>
                 )}
                 {canDelete && onDelete && (
-                  <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete();
+                    }}
+                  >
                     <Trash2 className="h-4 w-4 mr-2" /> Delete
                   </DropdownMenuItem>
                 )}
@@ -2471,12 +2521,18 @@ export function DocumentCard({
             <DialogDescription className="flex items-center gap-3 mt-2">
               <Badge variant="secondary">{document.documentType}</Badge>
               {isExpired && (
-                <Badge variant="outline" className="bg-red-100 text-red-700 border-red-300">
+                <Badge
+                  variant="outline"
+                  className="bg-red-100 text-red-700 border-red-300"
+                >
                   <AlertTriangle className="h-3 w-3 mr-1" /> Expired
                 </Badge>
               )}
               {isExpiringSoon && !isExpired && (
-                <Badge variant="outline" className="bg-orange-100 text-orange-700 border-orange-300">
+                <Badge
+                  variant="outline"
+                  className="bg-orange-100 text-orange-700 border-orange-300"
+                >
                   <CalendarDays className="h-3 w-3 mr-1" /> Expiring Soon
                 </Badge>
               )}
@@ -2496,7 +2552,9 @@ export function DocumentCard({
               <div>
                 <Label className="text-muted-foreground">Uploaded</Label>
                 <p className="font-medium">
-                  {formatDistanceToNow(new Date(document.createdAt), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(document.createdAt), {
+                    addSuffix: true,
+                  })}
                 </p>
               </div>
               <div>
@@ -2505,13 +2563,25 @@ export function DocumentCard({
               </div>
               <div>
                 <Label className="text-muted-foreground">Expiry Date</Label>
-                <p className={`font-medium text-lg ${isExpired ? "text-red-600" : isExpiringSoon ? "text-orange-600" : ""}`}>
+                <p
+                  className={`font-medium text-lg ${
+                    isExpired
+                      ? "text-red-600"
+                      : isExpiringSoon
+                      ? "text-orange-600"
+                      : ""
+                  }`}
+                >
                   {formatDate(document.expiryDate)}
                 </p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Negotiated Amount</Label>
-                <p className="font-medium text-xl">{formatNaira(document.negotiatedAmount)}</p>
+                <Label className="text-muted-foreground">
+                  Negotiated Amount
+                </Label>
+                <p className="font-medium text-xl">
+                  {formatNaira(document.negotiatedAmount)}
+                </p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Size</Label>
@@ -2545,18 +2615,29 @@ export function DocumentCard({
           <form onSubmit={handleUpdate} className="space-y-4">
             <div className="space-y-2">
               <Label>Name</Label>
-              <Input name="name" defaultValue={document.name} required disabled={isUpdating} />
+              <Input
+                name="name"
+                defaultValue={document.name}
+                required
+                disabled={isUpdating}
+              />
             </div>
 
             <div className="space-y-2">
               <Label>Type</Label>
-              <Select name="documentType" defaultValue={document.documentType} disabled={isUpdating}>
+              <Select
+                name="documentType"
+                defaultValue={document.documentType}
+                disabled={isUpdating}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {DOCUMENT_TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -2570,12 +2651,16 @@ export function DocumentCard({
                 placeholder="e.g. 1,500,000"
                 defaultValue={
                   document.negotiatedAmount != null
-                    ? document.negotiatedAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    ? document.negotiatedAmount
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     : ""
                 }
                 disabled={isUpdating}
               />
-              <p className="text-xs text-muted-foreground">Enter amount with or without commas</p>
+              <p className="text-xs text-muted-foreground">
+                Enter amount with or without commas
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -2599,7 +2684,12 @@ export function DocumentCard({
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)} disabled={isUpdating}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditOpen(false)}
+                disabled={isUpdating}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isUpdating}>

@@ -343,7 +343,7 @@ interface DocumentUploadProps {
     type: string,
     organizationId: string,
     startDate?: string,
-    expiryDate?: string
+    expiryDate?: string,
   ) => Promise<void>;
   organizations: Organization[];
   currentUserOrg?: string;
@@ -364,7 +364,7 @@ export function DocumentUpload({
   const [name, setName] = useState("");
   const [documentType, setDocumentType] = useState("");
   const [selectedOrganization, setSelectedOrganization] = useState(
-    currentUserOrg || ""
+    currentUserOrg || "",
   );
   const [startDate, setStartDate] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
@@ -422,7 +422,7 @@ export function DocumentUpload({
         documentType,
         selectedOrganization,
         startDate || undefined,
-        expiryDate || undefined
+        expiryDate || undefined,
       );
 
       // Reset form on success

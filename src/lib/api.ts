@@ -14,13 +14,13 @@ import type {
   Alert, // Added if not present
 } from "../types";
 
-const BASE_URL = "https://cpm-contracts.onrender.com/api";
+// const BASE_URL = "https://cpm-contracts.onrender.com/api";
 
-// const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000/api";
 
 const apiFetch = async (
   url: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<any> => {
   const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
   const config: RequestInit = {
@@ -47,7 +47,7 @@ const apiFetch = async (
       message: error.message,
     }); // Debug
     throw new Error(
-      error.message || `HTTP ${response.status}: API request failed`
+      error.message || `HTTP ${response.status}: API request failed`,
     );
   }
   return response.json();
@@ -91,7 +91,7 @@ const apiDownload = async (url: string): Promise<Blob> => {
 export const authService = {
   login: async (
     email: string,
-    password: string
+    password: string,
   ): Promise<ApiResponse<AuthResponse>> => {
     const response = await apiFetch("/auth/login", {
       method: "POST",
@@ -150,7 +150,7 @@ export const authService = {
 
   resetPassword: async (
     resetToken: string,
-    newPassword: string
+    newPassword: string,
   ): Promise<ApiResponse> => {
     return apiFetch("/auth/reset-password", {
       method: "POST",
@@ -161,7 +161,7 @@ export const authService = {
   changePassword: async (
     currentPassword: string,
     newPassword: string,
-    confirmNewPassword: string
+    confirmNewPassword: string,
   ): Promise<ApiResponse> => {
     return apiFetch("/auth/change-password", {
       method: "POST",
@@ -175,7 +175,7 @@ export const authService = {
 
   adminResetPassword: async (
     emailAddress: string,
-    newPassword: string
+    newPassword: string,
   ): Promise<ApiResponse> => {
     return apiFetch("/auth/admin-reset-password", {
       method: "POST",
@@ -231,7 +231,7 @@ export const userService = {
       phoneNumber: string;
       status?: string;
       organization?: string;
-    }
+    },
   ): Promise<ApiResponse<CreateUserResponse>> => {
     // FIXED: Match backend exactly - send only required fields, derive firstName in backend
     const {
@@ -300,7 +300,7 @@ export const userService = {
 
   updateUser: async (
     id: string,
-    data: Partial<CreateUserRequest>
+    data: Partial<CreateUserRequest>,
   ): Promise<ApiResponse<{ user: User }>> => {
     return apiFetch(`/users/${id}`, {
       method: "PUT",
@@ -318,7 +318,7 @@ export const userService = {
   //   });
   // },
   selfUpdateProfile: async (
-    data: Partial<CreateUserRequest> | FormData
+    data: Partial<CreateUserRequest> | FormData,
   ): Promise<ApiResponse<{ user: User }>> => {
     return apiFetch("/users/profile", {
       method: "PATCH", // ← Changed to PATCH (this fixes the 404)
@@ -364,7 +364,7 @@ export const userService = {
 
   updateRole: async (
     id: string,
-    data: Partial<{ name: string; description: string; permissions: any }>
+    data: Partial<{ name: string; description: string; permissions: any }>,
   ): Promise<ApiResponse<{ role: any }>> => {
     return apiFetch(`/users/roles/${id}`, {
       method: "PUT",
@@ -387,7 +387,7 @@ export const documentService = {
       limit?: number;
       search?: string;
       documentType?: string;
-    }
+    },
   ) => {
     const query = new URLSearchParams(params as any).toString();
     return apiFetch(`/documents/${orgId}/documents${query ? `?${query}` : ""}`);
@@ -408,7 +408,7 @@ export const documentService = {
       query.append("documentType", params.documentType);
 
     return apiFetch(
-      `/documents/documents${query.toString() ? `?${query.toString()}` : ""}`
+      `/documents/documents${query.toString() ? `?${query.toString()}` : ""}`,
     );
   },
 
@@ -433,7 +433,7 @@ export const documentService = {
     type: string,
     startDate?: string,
     expiryDate?: string,
-    negotiatedAmount?: number
+    negotiatedAmount?: number,
   ) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -470,7 +470,7 @@ export const documentService = {
       negotiatedAmount?: number;
       startDate?: string;
       expiryDate?: string;
-    }
+    },
   ) =>
     apiFetch(`/documents/${id}`, {
       method: "PATCH",
@@ -756,7 +756,7 @@ export const organizationService = {
   },
 
   getOrganization: async (
-    id: string
+    id: string,
   ): Promise<ApiResponse<{ organization: Organization }>> => {
     return apiFetch(`/organizations/${id}`);
   },
@@ -773,7 +773,7 @@ export const organizationService = {
 
   updateOrganization: async (
     id: string,
-    data: Partial<{ name: string; organizationType: string }>
+    data: Partial<{ name: string; organizationType: string }>,
   ): Promise<ApiResponse<{ organization: Organization }>> => {
     return apiFetch(`/organizations/${id}`, {
       method: "PATCH",
