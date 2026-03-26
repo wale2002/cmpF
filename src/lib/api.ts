@@ -425,7 +425,28 @@ export const documentService = {
   > => {
     return apiFetch("/documents/global-alerts");
   },
+  // Public form submission (no token required)
+  // Public form submission (no token required) - CORRECT PATH
+  submitPublicSchoolVisitReport: async (formData: FormData) => {
+    const response = await fetch(
+      `${BASE_URL}/documents/public/school-visit-report`,
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
 
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Failed to submit report");
+    }
+    return response.json();
+  },
+  getSchoolVisitReports: async () => {
+    const response = await apiFetch("/documents/school-visit-reports");
+    return response.data; // ← this is the clean array your browser page expects
+  },
+  //
   uploadDocument: async (
     orgId: string,
     file: File,
