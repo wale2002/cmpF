@@ -1,12 +1,8 @@
-// /* eslint-disable @typescript-eslint/no-explicit-any */
-// // // src/pages/Documents.tsx
-// // /* eslint-disable @typescript-eslint/no-explicit-any */
-
+// // // src/pages/DocumentsPage.tsx
 // // import { useState, useEffect, useMemo } from "react";
 // // import { useQuery } from "@tanstack/react-query";
 // // import { useAuthContext } from "../contexts/AuthContext";
 // // import { documentService, organizationService } from "../lib/api";
-// // import { EnumeratorUploadForm } from "../components/EnumeratorUploadForm";
 // // import { DocumentCard } from "../components/DocumentCard";
 // // import { DocumentUpload } from "../components/DocumentUpload";
 // // import { Layout } from "../components/Layout";
@@ -19,7 +15,21 @@
 // //   SelectTrigger,
 // //   SelectValue,
 // // } from "../components/ui/select";
-// // import { Search, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+// // import {
+// //   Tabs,
+// //   TabsContent,
+// //   TabsList,
+// //   TabsTrigger,
+// // } from "../components/ui/tabs";
+// // import {
+// //   Search,
+// //   Plus,
+// //   ChevronLeft,
+// //   ChevronRight,
+// //   Users,
+// //   ExternalLink,
+// //   FileText,
+// // } from "lucide-react";
 // // import type {
 // //   Document,
 // //   Organization,
@@ -29,6 +39,12 @@
 // // import { toast } from "sonner";
 // // import { handleApiError } from "../utils/error-handler";
 
+// // // Field Reports
+// // import SchoolVisitReportsBrowser from "./SchoolVisitReportsBrowser";
+
+// // // Invoices & Receipts Tab
+// // import InvoiceReceiptsTab from "../components/InvoiceReceiptsTab";
+
 // // const DocumentsPage = () => {
 // //   const {
 // //     user,
@@ -36,32 +52,27 @@
 // //     isLoading: authLoading,
 // //     logout,
 // //   } = useAuthContext();
+
 // //   const [searchTerm, setSearchTerm] = useState("");
 // //   const [filterType, setFilterType] = useState("all");
 // //   const [showUpload, setShowUpload] = useState(false);
+
 // //   const [uploadLoading, setUploadLoading] = useState(false);
 // //   const [uploadError, setUploadError] = useState("");
 // //   const [uploadSuccess, setUploadSuccess] = useState("");
-// //   const [currentPage, setCurrentPage] = useState(1);
 
+// //   const [currentPage, setCurrentPage] = useState(1);
 // //   const PAGE_SIZE = 9;
 
 // //   const isSuperAdmin = user?.role?.name?.toLowerCase() === "superadmin";
 // //   const permissions: Permissions = user?.role?.permissions || {};
+
 // //   const canViewDocuments =
 // //     isSuperAdmin || permissions.DocumentManagement?.viewDocuments || false;
 // //   const canUploadDocuments =
 // //     isSuperAdmin || permissions.DocumentManagement?.uploadDocuments || false;
-// //   const canEditDocuments =
-// //     isSuperAdmin || permissions.DocumentManagement?.editDocuments || false;
-// //   const canDeleteDocuments =
-// //     isSuperAdmin || permissions.DocumentManagement?.deleteDocuments || false;
-// //   const canViewOrganizations =
-// //     isSuperAdmin ||
-// //     permissions.OrganizationManagement?.viewOrganizations ||
-// //     false;
 
-// //   // Fixed: Paginated type; no onError; use error from hook
+// //   // Queries
 // //   const {
 // //     data: organizationsData,
 // //     isLoading: orgsLoading,
@@ -76,11 +87,14 @@
 // //   >({
 // //     queryKey: ["organizations"],
 // //     queryFn: () => organizationService.getOrganizations(),
-// //     enabled: !!user && canViewOrganizations,
+// //     enabled:
+// //       !!user &&
+// //       (isSuperAdmin ||
+// //         permissions.OrganizationManagement?.viewOrganizations ||
+// //         false),
 // //     staleTime: 5 * 60 * 1000,
 // //   });
 
-// //   // Fixed: Handle errors via useEffect
 // //   useEffect(() => {
 // //     if (orgsError) {
 // //       console.error("DocumentsPage orgs error:", orgsError);
@@ -88,7 +102,6 @@
 // //     }
 // //   }, [orgsError]);
 
-// //   // Fixed: No onError; use error from hook; return Document[]
 // //   const {
 // //     data: documentsData,
 // //     isLoading: docsLoading,
@@ -97,15 +110,9 @@
 // //   } = useQuery<Document[]>({
 // //     queryKey: ["documents", user?.organization?._id, user?.role?.name],
 // //     queryFn: async () => {
-// //       console.log("DocumentsPage docs fetch:", {
-// //         role: user?.role?.name,
-// //         org: user?.organization?._id,
-// //       });
-// //       if (canViewOrganizations && isSuperAdmin) {
+// //       if (isSuperAdmin) {
 // //         const orgsResponse = await organizationService.getOrganizations();
-// //         // Fixed: Access from paginated response
 // //         const orgs = orgsResponse.data?.organizations || [];
-// //         console.log("DocumentsPage admin orgs:", orgs.length);
 // //         const allDocs = await Promise.all(
 // //           orgs.map(async (org: Organization) => {
 // //             try {
@@ -126,7 +133,6 @@
 // //         );
 // //         return docsResponse.data?.documents || [];
 // //       }
-// //       console.warn("DocumentsPage no org or no view permission");
 // //       return [];
 // //     },
 // //     enabled: !!user && canViewDocuments,
@@ -134,7 +140,6 @@
 // //     gcTime: 10 * 60 * 1000,
 // //   });
 
-// //   // Fixed: Handle errors via useEffect
 // //   useEffect(() => {
 // //     if (docsError) {
 // //       console.error("DocumentsPage docs error:", docsError);
@@ -144,46 +149,46 @@
 
 // //   const documents = Array.isArray(documentsData) ? documentsData : [];
 
-// //   // Fixed: Extract from paginated data safely
-// //   // Fixed: Extract from paginated data safely
 // //   const organizations = useMemo(() => {
-// //     // Flatten nested _id if populated recursively
 // //     const flatOrgs = (organizationsData?.data?.organizations || []).map(
 // //       (org: any) => ({
 // //         _id: typeof org._id === "string" ? org._id : org._id?._id || org._id,
 // //         name: org.name,
 // //         organizationType: org.organizationType,
 // //         documentCount: org.documentCount,
-// //         createdAt: org.createdAt, // ADD: Include from source data
+// //         createdAt: org.createdAt,
 // //       }),
 // //     );
-// //     if (!canViewOrganizations) {
+
+// //     if (!isSuperAdmin) {
 // //       return user?.organization?._id
 // //         ? [
 // //             {
 // //               _id: user.organization._id,
 // //               name: "Current Organization",
 // //               organizationType: "tech",
-// //               documentCount: 0, // ADD: For consistency
+// //               documentCount: 0,
 // //               createdAt:
-// //                 user.organization?.createdAt || new Date().toISOString(), // ADD: Default timestamp
+// //                 user.organization?.createdAt || new Date().toISOString(),
 // //             },
 // //           ]
 // //         : [];
 // //     }
-// //     return flatOrgs as Organization[]; // ADD: Explicit type for safety
-// //   }, [
-// //     organizationsData,
-// //     user?.organization?._id,
-// //     canViewOrganizations,
-// //   ]) as Organization[]; // ADD: Explicit return type
+// //     return flatOrgs as Organization[];
+// //   }, [organizationsData, user?.organization?._id, isSuperAdmin]);
 
+// //   // ====================== FIXED FILTERING ======================
 // //   const filteredDocuments = documents.filter((doc) => {
 // //     const matchesSearch = doc.name
 // //       .toLowerCase()
 // //       .includes(searchTerm.toLowerCase());
 // //     const matchesType = filterType === "all" || doc.documentType === filterType;
-// //     return matchesSearch && matchesType;
+
+// //     // Exclude Invoices & Receipts from main Documents tab
+// //     const isInvoiceOrReceipt =
+// //       doc.documentType === "Invoice" || doc.documentType === "Receipt";
+
+// //     return matchesSearch && matchesType && !isInvoiceOrReceipt;
 // //   });
 
 // //   useEffect(() => {
@@ -196,12 +201,10 @@
 // //   const paginatedDocuments = filteredDocuments.slice(startIndex, endIndex);
 
 // //   const handlePageChange = (page: number) => {
-// //     if (page >= 1 && page <= totalPages) {
-// //       setCurrentPage(page);
-// //     }
+// //     if (page >= 1 && page <= totalPages) setCurrentPage(page);
 // //   };
 
-// //   const handleUpload = async (
+// //   const handleDocumentUpload = async (
 // //     file: File,
 // //     name: string,
 // //     type: string,
@@ -245,9 +248,6 @@
 // //           await documentService.downloadDocument(doc._id.toString(), doc.name);
 // //           toast.success(`Downloading ${doc.name}`);
 // //           break;
-// //         case "edit":
-// //           toast.info(`Editing ${doc.name}`);
-// //           break;
 // //         case "delete":
 // //           await documentService.deleteDocument(doc._id.toString());
 // //           refetch();
@@ -259,17 +259,17 @@
 // //     }
 // //   };
 
-// //   if (authLoading || docsLoading || (canViewOrganizations && orgsLoading)) {
+// //   if (authLoading || docsLoading || (isSuperAdmin && orgsLoading)) {
 // //     return (
 // //       <Layout user={user ?? undefined} onLogout={logout}>
-// //         <div className="text-center py-12">Loading documents...</div>
+// //         <div className="text-center py-12">
+// //           Loading documents &amp; reports...
+// //         </div>
 // //       </Layout>
 // //     );
 // //   }
 
-// //   if (!isAuthenticated || !user) {
-// //     return null;
-// //   }
+// //   if (!isAuthenticated || !user) return null;
 
 // //   if (!canViewDocuments) {
 // //     return (
@@ -283,122 +283,188 @@
 
 // //   return (
 // //     <Layout user={user} onLogout={logout}>
-// //       <div className="space-y-6">
-// //         <div className="flex items-center justify-between">
-// //           <h1 className="text-3xl font-bold text-foreground">Documents</h1>
-// //           {canUploadDocuments && (
-// //             <Button
-// //               onClick={() => setShowUpload(!showUpload)}
-// //               variant="professional"
+// //       <div className="max-w-7xl mx-auto p-6 space-y-8">
+// //         <Tabs defaultValue="documents" className="w-full">
+// //           <TabsList className="grid w-full grid-cols-3">
+// //             <TabsTrigger value="documents" className="flex items-center gap-2">
+// //               Documents
+// //             </TabsTrigger>
+// //             <TabsTrigger
+// //               value="field-reports"
+// //               className="flex items-center gap-2"
 // //             >
-// //               <Plus className="h-4 w-4 mr-2" />
-// //               Upload Document
-// //             </Button>
-// //           )}
-// //         </div>
-// //         {showUpload && canUploadDocuments && (
-// //           <DocumentUpload
-// //             onUpload={handleUpload}
-// //             organizations={organizations}
-// //             currentUserOrg={user.organization?._id ?? undefined}
-// //             loading={uploadLoading}
-// //             error={uploadError}
-// //             success={uploadSuccess}
-// //           />
-// //         )}
-// //         <div className="flex gap-4 items-center">
-// //           <div className="relative flex-1">
-// //             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-// //             <Input
-// //               placeholder="Search documents..."
-// //               value={searchTerm}
-// //               onChange={(e) => setSearchTerm(e.target.value)}
-// //               className="pl-10"
-// //             />
-// //           </div>
-// //           <Select value={filterType} onValueChange={setFilterType}>
-// //             <SelectTrigger className="w-48">
-// //               <SelectValue placeholder="Filter by type" />
-// //             </SelectTrigger>
-// //             <SelectContent>
-// //               <SelectItem value="all">All Types</SelectItem>
-// //               <SelectItem value="Contract">Contracts</SelectItem>
-// //               <SelectItem value="SLA">SLAs</SelectItem>
-// //               <SelectItem value="NDA">NDAs</SelectItem>
-// //               <SelectItem value="Other">Other</SelectItem>
-// //             </SelectContent>
-// //           </Select>
-// //         </div>
-// //         {filteredDocuments.length === 0 ? (
-// //           <div className="text-center py-12">
-// //             {canUploadDocuments ? (
-// //               <p className="text-muted-foreground">
-// //                 No documents found.{" "}
-// //                 <Button variant="link" onClick={() => setShowUpload(true)}>
-// //                   Upload one
+// //               <Users className="h-4 w-4" />
+// //               Field Reports
+// //             </TabsTrigger>
+// //             <TabsTrigger
+// //               value="invoices-receipts"
+// //               className="flex items-center gap-2"
+// //             >
+// //               <FileText className="h-4 w-4" />
+// //               Invoices &amp; Receipts
+// //             </TabsTrigger>
+// //           </TabsList>
+
+// //           {/* ====================== DOCUMENTS TAB ====================== */}
+// //           <TabsContent value="documents" className="space-y-6">
+// //             <div className="flex items-center justify-between">
+// //               <h1 className="text-3xl font-bold text-foreground">Documents</h1>
+// //               {canUploadDocuments && (
+// //                 <Button
+// //                   onClick={() => setShowUpload(!showUpload)}
+// //                   variant="professional"
+// //                 >
+// //                   <Plus className="h-4 w-4 mr-2" />
+// //                   Upload Document
 // //                 </Button>
-// //               </p>
-// //             ) : (
-// //               <p className="text-muted-foreground">No documents found.</p>
-// //             )}
-// //           </div>
-// //         ) : (
-// //           <>
-// //             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-// //               {paginatedDocuments.map((doc) => (
-// //                 // <DocumentCard
-// //                 //   key={doc._id}
-// //                 //   document={doc}
-// //                 //   canEditDocuments={
-// //                 //     canEditDocuments || doc.uploadedBy === user._id
-// //                 //   }
-// //                 //   canDeleteDocuments={
-// //                 //     canDeleteDocuments || doc.uploadedBy === user._id
-// //                 //   }
-// //                 //   onView={() => handleDocumentAction("view", doc)}
-// //                 //   onDownload={() => handleDocumentAction("download", doc)}
-// //                 //   onEdit={() => handleDocumentAction("edit", doc)}
-// //                 //   onDelete={() => handleDocumentAction("delete", doc)}
-// //                 // />
-// //                 <DocumentCard
-// //                   key={doc._id}
-// //                   document={doc}
-// //                   canEditDocuments={canEditDocuments}
-// //                   canDeleteDocuments={canDeleteDocuments}
-// //                   onView={() => handleDocumentAction("view", doc)}
-// //                   onDownload={() => handleDocumentAction("download", doc)}
-// //                   onDelete={() => handleDocumentAction("delete", doc)}
-// //                 />
-// //               ))}
+// //               )}
 // //             </div>
-// //             {totalPages > 1 && (
-// //               <div className="flex items-center justify-between mt-4">
-// //                 <Button
-// //                   variant="outline"
-// //                   size="sm"
-// //                   onClick={() => handlePageChange(currentPage - 1)}
-// //                   disabled={currentPage === 1}
-// //                 >
-// //                   <ChevronLeft className="h-4 w-4 mr-2" />
-// //                   Previous
-// //                 </Button>
-// //                 <span className="text-sm text-muted-foreground">
-// //                   Page {currentPage} of {totalPages} ({filteredDocuments.length}{" "}
-// //                   documents)
-// //                 </span>
-// //                 <Button
-// //                   variant="outline"
-// //                   size="sm"
-// //                   onClick={() => handlePageChange(currentPage + 1)}
-// //                   disabled={currentPage === totalPages}
-// //                 >
-// //                   Next
-// //                   <ChevronRight className="h-4 w-4 ml-2" />
-// //                 </Button>
-// //               </div>
+
+// //             {showUpload && canUploadDocuments && (
+// //               <DocumentUpload
+// //                 onUpload={handleDocumentUpload}
+// //                 organizations={organizations}
+// //                 currentUserOrg={user.organization?._id ?? undefined}
+// //                 loading={uploadLoading}
+// //                 error={uploadError}
+// //                 success={uploadSuccess}
+// //               />
 // //             )}
-// //           </>
-// //         )}
+
+// //             <div className="flex gap-4 items-center">
+// //               <div className="relative flex-1">
+// //                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+// //                 <Input
+// //                   placeholder="Search documents..."
+// //                   value={searchTerm}
+// //                   onChange={(e) => setSearchTerm(e.target.value)}
+// //                   className="pl-10"
+// //                 />
+// //               </div>
+// //               <Select value={filterType} onValueChange={setFilterType}>
+// //                 <SelectTrigger className="w-48">
+// //                   <SelectValue placeholder="Filter by type" />
+// //                 </SelectTrigger>
+// //                 <SelectContent>
+// //                   <SelectItem value="all">All Types</SelectItem>
+// //                   <SelectItem value="Contract">Contracts</SelectItem>
+// //                   <SelectItem value="SLA">SLAs</SelectItem>
+// //                   <SelectItem value="NDA">NDAs</SelectItem>
+// //                   <SelectItem value="Other">Other</SelectItem>
+// //                 </SelectContent>
+// //               </Select>
+// //             </div>
+
+// //             {filteredDocuments.length === 0 ? (
+// //               <div className="text-center py-12">
+// //                 {canUploadDocuments ? (
+// //                   <p className="text-muted-foreground">
+// //                     No documents found.{" "}
+// //                     <Button variant="link" onClick={() => setShowUpload(true)}>
+// //                       Upload one
+// //                     </Button>
+// //                   </p>
+// //                 ) : (
+// //                   <p className="text-muted-foreground">No documents found.</p>
+// //                 )}
+// //               </div>
+// //             ) : (
+// //               <>
+// //                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+// //                   {paginatedDocuments.map((doc) => (
+// //                     <DocumentCard
+// //                       key={doc._id}
+// //                       document={doc}
+// //                       canEditDocuments={false}
+// //                       canDeleteDocuments={true}
+// //                       onView={() => handleDocumentAction("view", doc)}
+// //                       onDownload={() => handleDocumentAction("download", doc)}
+// //                       onDelete={() => handleDocumentAction("delete", doc)}
+// //                     />
+// //                   ))}
+// //                 </div>
+
+// //                 {totalPages > 1 && (
+// //                   <div className="flex items-center justify-between mt-4">
+// //                     <Button
+// //                       variant="outline"
+// //                       size="sm"
+// //                       onClick={() => handlePageChange(currentPage - 1)}
+// //                       disabled={currentPage === 1}
+// //                     >
+// //                       <ChevronLeft className="h-4 w-4 mr-2" />
+// //                       Previous
+// //                     </Button>
+// //                     <span className="text-sm text-muted-foreground">
+// //                       Page {currentPage} of {totalPages} (
+// //                       {filteredDocuments.length} documents)
+// //                     </span>
+// //                     <Button
+// //                       variant="outline"
+// //                       size="sm"
+// //                       onClick={() => handlePageChange(currentPage + 1)}
+// //                       disabled={currentPage === totalPages}
+// //                     >
+// //                       Next
+// //                       <ChevronRight className="h-4 w-4 ml-2" />
+// //                     </Button>
+// //                   </div>
+// //                 )}
+// //               </>
+// //             )}
+// //           </TabsContent>
+
+// //           {/* ====================== FIELD REPORTS TAB ====================== */}
+// //           <TabsContent value="field-reports" className="space-y-6">
+// //             <div className="flex items-center justify-between">
+// //               <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+// //                 <Users className="h-8 w-8" />
+// //                 Field Reports
+// //               </h1>
+
+// //               <Button
+// //                 variant="outline"
+// //                 onClick={() =>
+// //                   window.open(
+// //                     "https://cmp-sage.vercel.app/public/enumerator-form",
+// //                     "_blank",
+// //                   )
+// //                 }
+// //               >
+// //                 <ExternalLink className="mr-2 h-4 w-4" />
+// //                 Submit New Report (Public)
+// //               </Button>
+// //             </div>
+
+// //             <SchoolVisitReportsBrowser />
+// //           </TabsContent>
+
+// //           {/* ====================== INVOICES & RECEIPTS TAB ====================== */}
+// //           <TabsContent value="invoices-receipts" className="space-y-6">
+// //             <div className="flex items-center justify-between">
+// //               <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+// //                 <FileText className="h-8 w-8" />
+// //                 Invoices &amp; Receipts
+// //               </h1>
+
+// //               {/* Public Quick Invoice Link */}
+// //               <Button
+// //                 variant="outline"
+// //                 onClick={() =>
+// //                   window.open(
+// //                     "http://localhost:5173/public/quick-invoice",
+// //                     "_blank",
+// //                   )
+// //                 }
+// //               >
+// //                 <ExternalLink className="mr-2 h-4 w-4" />
+// //                 Create Invoice via Public Link
+// //               </Button>
+// //             </div>
+
+// //             <InvoiceReceiptsTab documents={documents} refetch={refetch} />
+// //           </TabsContent>
+// //         </Tabs>
 // //       </div>
 // //     </Layout>
 // //   );
@@ -411,7 +477,6 @@
 // import { useQuery } from "@tanstack/react-query";
 // import { useAuthContext } from "../contexts/AuthContext";
 // import { documentService, organizationService } from "../lib/api";
-// import { EnumeratorUploadForm } from "../components/EnumeratorUploadForm";
 // import { DocumentCard } from "../components/DocumentCard";
 // import { DocumentUpload } from "../components/DocumentUpload";
 // import { Layout } from "../components/Layout";
@@ -430,7 +495,15 @@
 //   TabsList,
 //   TabsTrigger,
 // } from "../components/ui/tabs";
-// import { Search, Plus, ChevronLeft, ChevronRight, Users } from "lucide-react";
+// import {
+//   Search,
+//   Plus,
+//   ChevronLeft,
+//   ChevronRight,
+//   Users,
+//   ExternalLink,
+//   FileText,
+// } from "lucide-react";
 // import type {
 //   Document,
 //   Organization,
@@ -439,6 +512,10 @@
 // } from "../types";
 // import { toast } from "sonner";
 // import { handleApiError } from "../utils/error-handler";
+
+// // Dedicated Explorers
+// import SchoolVisitReportsBrowser from "./SchoolVisitReportsBrowser";
+// import InvoiceExplorer from "./InvoiceExplorer";
 
 // const DocumentsPage = () => {
 //   const {
@@ -452,15 +529,9 @@
 //   const [filterType, setFilterType] = useState("all");
 //   const [showUpload, setShowUpload] = useState(false);
 
-//   // Document upload states
 //   const [uploadLoading, setUploadLoading] = useState(false);
 //   const [uploadError, setUploadError] = useState("");
 //   const [uploadSuccess, setUploadSuccess] = useState("");
-
-//   // Field report states (separate so both forms can work independently)
-//   const [fieldReportLoading, setFieldReportLoading] = useState(false);
-//   const [fieldReportError, setFieldReportError] = useState("");
-//   const [fieldReportSuccess, setFieldReportSuccess] = useState("");
 
 //   const [currentPage, setCurrentPage] = useState(1);
 //   const PAGE_SIZE = 9;
@@ -473,35 +544,19 @@
 //   const canUploadDocuments =
 //     isSuperAdmin || permissions.DocumentManagement?.uploadDocuments || false;
 
-//   // Queries (unchanged from your code)
+//   // Queries
 //   const {
 //     data: organizationsData,
 //     isLoading: orgsLoading,
 //     error: orgsError,
-//   } = useQuery<
-//     ApiResponse<{
-//       organizations: Organization[];
-//       total: number;
-//       page: number;
-//       totalPages: number;
-//     }>
-//   >({
+//   } = useQuery<ApiResponse<{ organizations: Organization[] }>>({
 //     queryKey: ["organizations"],
 //     queryFn: () => organizationService.getOrganizations(),
 //     enabled:
 //       !!user &&
-//       (isSuperAdmin ||
-//         permissions.OrganizationManagement?.viewOrganizations ||
-//         false),
+//       (isSuperAdmin || !!permissions.OrganizationManagement?.viewOrganizations),
 //     staleTime: 5 * 60 * 1000,
 //   });
-
-//   useEffect(() => {
-//     if (orgsError) {
-//       console.error("DocumentsPage orgs error:", orgsError);
-//       toast.error("Failed to load organizations");
-//     }
-//   }, [orgsError]);
 
 //   const {
 //     data: documentsData,
@@ -521,8 +576,7 @@
 //                 org._id.toString(),
 //               );
 //               return docsResponse.data?.documents || [];
-//             } catch (err) {
-//               console.error(`DocumentsPage org ${org._id} docs error:`, err);
+//             } catch {
 //               return [];
 //             }
 //           }),
@@ -538,51 +592,49 @@
 //     },
 //     enabled: !!user && canViewDocuments,
 //     staleTime: 5 * 60 * 1000,
-//     gcTime: 10 * 60 * 1000,
 //   });
 
 //   useEffect(() => {
-//     if (docsError) {
-//       console.error("DocumentsPage docs error:", docsError);
-//       toast.error("Failed to load documents");
-//     }
-//   }, [docsError]);
+//     if (orgsError) toast.error("Failed to load organizations");
+//     if (docsError) toast.error("Failed to load documents");
+//   }, [orgsError, docsError]);
 
 //   const documents = Array.isArray(documentsData) ? documentsData : [];
 
 //   const organizations = useMemo(() => {
 //     const flatOrgs = (organizationsData?.data?.organizations || []).map(
 //       (org: any) => ({
-//         _id: typeof org._id === "string" ? org._id : org._id?._id || org._id,
+//         _id: org._id,
 //         name: org.name,
 //         organizationType: org.organizationType,
 //         documentCount: org.documentCount,
 //         createdAt: org.createdAt,
 //       }),
 //     );
-//     if (!isSuperAdmin) {
-//       return user?.organization?._id
-//         ? [
-//             {
-//               _id: user.organization._id,
-//               name: "Current Organization",
-//               organizationType: "tech",
-//               documentCount: 0,
-//               createdAt:
-//                 user.organization?.createdAt || new Date().toISOString(),
-//             },
-//           ]
-//         : [];
+
+//     if (!isSuperAdmin && user?.organization?._id) {
+//       return [
+//         {
+//           _id: user.organization._id,
+//           name: "Current Organization",
+//           organizationType: "tech",
+//           documentCount: 0,
+//           createdAt: user.organization?.createdAt || new Date().toISOString(),
+//         },
+//       ];
 //     }
 //     return flatOrgs as Organization[];
 //   }, [organizationsData, user?.organization?._id, isSuperAdmin]);
 
+//   // Filter out Invoices & Receipts from main Documents tab
 //   const filteredDocuments = documents.filter((doc) => {
 //     const matchesSearch = doc.name
 //       .toLowerCase()
 //       .includes(searchTerm.toLowerCase());
 //     const matchesType = filterType === "all" || doc.documentType === filterType;
-//     return matchesSearch && matchesType;
+//     const isInvoiceOrReceipt =
+//       doc.documentType === "Invoice" || doc.documentType === "Receipt";
+//     return matchesSearch && matchesType && !isInvoiceOrReceipt;
 //   });
 
 //   useEffect(() => {
@@ -598,7 +650,6 @@
 //     if (page >= 1 && page <= totalPages) setCurrentPage(page);
 //   };
 
-//   // ====================== DOCUMENT UPLOAD ======================
 //   const handleDocumentUpload = async (
 //     file: File,
 //     name: string,
@@ -629,49 +680,6 @@
 //       toast.error(errorMessage);
 //     } finally {
 //       setUploadLoading(false);
-//     }
-//   };
-
-//   // ====================== ENUMERATOR / REGIONAL OFFICER REPORT ======================
-//   const handleEnumeratorSubmit = async (
-//     picture: File | null, // ← This was missing!
-//     fullName: string,
-//     role: "Regional Officer" | "Enumerator",
-//     phoneNumber: string,
-//     schoolName: string,
-//     localGovernment: string,
-//     topicBeingTaught: string,
-//     latitude?: string,
-//     longitude?: string,
-//     dateOfVisit?: string,
-//   ) => {
-//     setFieldReportLoading(true);
-//     setFieldReportError("");
-//     setFieldReportSuccess("");
-
-//     try {
-//       // TODO: Replace with your real backend call when ready
-//       console.log("Field report submitted:", {
-//         picture: picture ? picture.name : "No picture",
-//         fullName,
-//         role,
-//         phoneNumber,
-//         schoolName,
-//         localGovernment,
-//         topicBeingTaught,
-//         latitude,
-//         longitude,
-//         dateOfVisit,
-//       });
-
-//       setFieldReportSuccess("Field report submitted successfully! ✅");
-//       toast.success("Field report submitted successfully!");
-//     } catch (error) {
-//       const errorMessage = handleApiError(error);
-//       setFieldReportError(errorMessage);
-//       toast.error(errorMessage);
-//     } finally {
-//       setFieldReportLoading(false);
 //     }
 //   };
 
@@ -723,7 +731,7 @@
 //     <Layout user={user} onLogout={logout}>
 //       <div className="max-w-7xl mx-auto p-6 space-y-8">
 //         <Tabs defaultValue="documents" className="w-full">
-//           <TabsList className="grid w-full grid-cols-2">
+//           <TabsList className="grid w-full grid-cols-3">
 //             <TabsTrigger value="documents" className="flex items-center gap-2">
 //               Documents
 //             </TabsTrigger>
@@ -733,6 +741,13 @@
 //             >
 //               <Users className="h-4 w-4" />
 //               Field Reports
+//             </TabsTrigger>
+//             <TabsTrigger
+//               value="invoices-receipts"
+//               className="flex items-center gap-2"
+//             >
+//               <FileText className="h-4 w-4" />
+//               Invoices &amp; Receipts
 //             </TabsTrigger>
 //           </TabsList>
 
@@ -806,7 +821,7 @@
 //                     <DocumentCard
 //                       key={doc._id}
 //                       document={doc}
-//                       canEditDocuments={false} // adjust if you have edit permission logic
+//                       canEditDocuments={false}
 //                       canDeleteDocuments={true}
 //                       onView={() => handleDocumentAction("view", doc)}
 //                       onDownload={() => handleDocumentAction("download", doc)}
@@ -852,16 +867,43 @@
 //                 <Users className="h-8 w-8" />
 //                 Field Reports
 //               </h1>
+//               <Button
+//                 variant="outline"
+//                 onClick={() =>
+//                   window.open(
+//                     "https://cmp-sage.vercel.app/public/enumerator-form",
+//                     "_blank",
+//                   )
+//                 }
+//               >
+//                 <ExternalLink className="mr-2 h-4 w-4" />
+//                 Submit New Report (Public)
+//               </Button>
 //             </div>
+//             <SchoolVisitReportsBrowser />
+//           </TabsContent>
 
-//             <EnumeratorUploadForm
-//               onSubmit={handleEnumeratorSubmit}
-//               // ← CHANGE THIS to your real public unauthenticated URL
-//               publicFormUrl="http://localhost:5173/public/enumerator-form"
-//               loading={fieldReportLoading}
-//               error={fieldReportError}
-//               success={fieldReportSuccess}
-//             />
+//           {/* ====================== INVOICES & RECEIPTS TAB ====================== */}
+//           <TabsContent value="invoices-receipts" className="space-y-6">
+//             <div className="flex items-center justify-between">
+//               <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+//                 <FileText className="h-8 w-8" />
+//                 Invoices &amp; Receipts
+//               </h1>
+//               <Button
+//                 variant="outline"
+//                 onClick={() =>
+//                   window.open(
+//                     "http://localhost:5173/public/quick-invoice",
+//                     "_blank",
+//                   )
+//                 }
+//               >
+//                 <ExternalLink className="mr-2 h-4 w-4" />
+//                 Create Invoice via Public Link
+//               </Button>
+//             </div>
+//             <InvoiceExplorer />
 //           </TabsContent>
 //         </Tabs>
 //       </div>
@@ -901,6 +943,7 @@ import {
   ChevronRight,
   Users,
   ExternalLink,
+  FileText,
 } from "lucide-react";
 import type {
   Document,
@@ -911,8 +954,9 @@ import type {
 import { toast } from "sonner";
 import { handleApiError } from "../utils/error-handler";
 
-// NEW: Field Reports Folder Explorer
+// Dedicated Explorers
 import SchoolVisitReportsBrowser from "./SchoolVisitReportsBrowser";
+import InvoiceExplorer from "./InvoiceExplorer";
 
 const DocumentsPage = () => {
   const {
@@ -926,7 +970,6 @@ const DocumentsPage = () => {
   const [filterType, setFilterType] = useState("all");
   const [showUpload, setShowUpload] = useState(false);
 
-  // Document upload states
   const [uploadLoading, setUploadLoading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState("");
@@ -947,30 +990,14 @@ const DocumentsPage = () => {
     data: organizationsData,
     isLoading: orgsLoading,
     error: orgsError,
-  } = useQuery<
-    ApiResponse<{
-      organizations: Organization[];
-      total: number;
-      page: number;
-      totalPages: number;
-    }>
-  >({
+  } = useQuery<ApiResponse<{ organizations: Organization[] }>>({
     queryKey: ["organizations"],
     queryFn: () => organizationService.getOrganizations(),
     enabled:
       !!user &&
-      (isSuperAdmin ||
-        permissions.OrganizationManagement?.viewOrganizations ||
-        false),
+      (isSuperAdmin || !!permissions.OrganizationManagement?.viewOrganizations),
     staleTime: 5 * 60 * 1000,
   });
-
-  useEffect(() => {
-    if (orgsError) {
-      console.error("DocumentsPage orgs error:", orgsError);
-      toast.error("Failed to load organizations");
-    }
-  }, [orgsError]);
 
   const {
     data: documentsData,
@@ -990,8 +1017,7 @@ const DocumentsPage = () => {
                 org._id.toString(),
               );
               return docsResponse.data?.documents || [];
-            } catch (err) {
-              console.error(`DocumentsPage org ${org._id} docs error:`, err);
+            } catch {
               return [];
             }
           }),
@@ -1007,51 +1033,49 @@ const DocumentsPage = () => {
     },
     enabled: !!user && canViewDocuments,
     staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
   });
 
   useEffect(() => {
-    if (docsError) {
-      console.error("DocumentsPage docs error:", docsError);
-      toast.error("Failed to load documents");
-    }
-  }, [docsError]);
+    if (orgsError) toast.error("Failed to load organizations");
+    if (docsError) toast.error("Failed to load documents");
+  }, [orgsError, docsError]);
 
   const documents = Array.isArray(documentsData) ? documentsData : [];
 
   const organizations = useMemo(() => {
     const flatOrgs = (organizationsData?.data?.organizations || []).map(
       (org: any) => ({
-        _id: typeof org._id === "string" ? org._id : org._id?._id || org._id,
+        _id: org._id,
         name: org.name,
         organizationType: org.organizationType,
         documentCount: org.documentCount,
         createdAt: org.createdAt,
       }),
     );
-    if (!isSuperAdmin) {
-      return user?.organization?._id
-        ? [
-            {
-              _id: user.organization._id,
-              name: "Current Organization",
-              organizationType: "tech",
-              documentCount: 0,
-              createdAt:
-                user.organization?.createdAt || new Date().toISOString(),
-            },
-          ]
-        : [];
+
+    if (!isSuperAdmin && user?.organization?._id) {
+      return [
+        {
+          _id: user.organization._id,
+          name: "Current Organization",
+          organizationType: "tech",
+          documentCount: 0,
+          createdAt: user.organization?.createdAt || new Date().toISOString(),
+        },
+      ];
     }
     return flatOrgs as Organization[];
   }, [organizationsData, user?.organization?._id, isSuperAdmin]);
 
+  // Filter out Invoices & Receipts from main Documents tab
   const filteredDocuments = documents.filter((doc) => {
     const matchesSearch = doc.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesType = filterType === "all" || doc.documentType === filterType;
-    return matchesSearch && matchesType;
+    const isInvoiceOrReceipt =
+      doc.documentType === "Invoice" || doc.documentType === "Receipt";
+    return matchesSearch && matchesType && !isInvoiceOrReceipt;
   });
 
   useEffect(() => {
@@ -1067,7 +1091,6 @@ const DocumentsPage = () => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  // ====================== DOCUMENT UPLOAD ======================
   const handleDocumentUpload = async (
     file: File,
     name: string,
@@ -1149,7 +1172,7 @@ const DocumentsPage = () => {
     <Layout user={user} onLogout={logout}>
       <div className="max-w-7xl mx-auto p-6 space-y-8">
         <Tabs defaultValue="documents" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="documents" className="flex items-center gap-2">
               Documents
             </TabsTrigger>
@@ -1159,6 +1182,13 @@ const DocumentsPage = () => {
             >
               <Users className="h-4 w-4" />
               Field Reports
+            </TabsTrigger>
+            <TabsTrigger
+              value="invoices-receipts"
+              className="flex items-center gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Invoices &amp; Receipts
             </TabsTrigger>
           </TabsList>
 
@@ -1271,15 +1301,13 @@ const DocumentsPage = () => {
             )}
           </TabsContent>
 
-          {/* ====================== FIELD REPORTS TAB (NEW BROWSER) ====================== */}
+          {/* ====================== FIELD REPORTS TAB ====================== */}
           <TabsContent value="field-reports" className="space-y-6">
             <div className="flex items-center justify-between">
               <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
                 <Users className="h-8 w-8" />
                 Field Reports
               </h1>
-
-              {/* Quick link to public form */}
               <Button
                 variant="outline"
                 onClick={() =>
@@ -1293,9 +1321,32 @@ const DocumentsPage = () => {
                 Submit New Report (Public)
               </Button>
             </div>
-
-            {/* Full folder explorer: reg-01 → Year → Month → Week → Reports */}
             <SchoolVisitReportsBrowser />
+          </TabsContent>
+
+          {/* ====================== INVOICES & RECEIPTS TAB ====================== */}
+          <TabsContent value="invoices-receipts" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+                <FileText className="h-8 w-8" />
+                Invoices &amp; Receipts
+              </h1>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  window.open(
+                    "https://cmp-sage.vercel.app/public/quick-invoice",
+                    "_blank",
+                  )
+                }
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Create Invoice via Public Link
+              </Button>
+            </div>
+
+            {/* FIXED: Now passing documents + refetch so invoices appear */}
+            <InvoiceExplorer documents={documents} refetch={refetch} />
           </TabsContent>
         </Tabs>
       </div>

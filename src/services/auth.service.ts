@@ -2,7 +2,8 @@ import type { User, AuthResponse } from "../types"; // Adjust path if needed
 import axios from "axios"; // Assume axios for API calls
 
 // const API_BASE = "https://cpm-contracts.onrender.com/api";
-const API_BASE = "http://localhost:5000/api"; // Adjust
+// const API_BASE = "http://localhost:5000/api"; // Adjust
+const API_BASE = "https://cpm-contracts.onrender.com/api"; // Adjust
 export const authService = {
   isAuthenticated: (): boolean => {
     return !!localStorage.getItem("token");
@@ -48,7 +49,7 @@ export const authService = {
       {},
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
     authService.clearAuth();
   },

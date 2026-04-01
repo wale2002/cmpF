@@ -134,6 +134,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 
 // NEW: Public Enumerator Form (already added)
 import PublicEnumeratorForm from "./pages/PublicEnumeratorForm";
+import PublicQuickInvoice from "./pages/PublicQuickInvoice";
+import InvoiceExplorer from "./pages/InvoiceExplorer";
 
 // ✅ NEW: School Visit Reports Browser (Folder Explorer)
 import SchoolVisitReportsBrowser from "./pages/SchoolVisitReportsBrowser";
@@ -164,6 +166,7 @@ const App = () => (
                 path="/school-visit-reports"
                 element={<SchoolVisitReportsBrowser />}
               />
+              <Route path="/invoices-explorer" element={<InvoiceExplorer />} />
 
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/organizations" element={<Organizations />} />
@@ -174,6 +177,10 @@ const App = () => (
               <Route
                 path="/public/enumerator-form"
                 element={<PublicEnumeratorForm />}
+              />
+              <Route
+                path="/public/quick-invoice"
+                element={<PublicQuickInvoice />}
               />
 
               <Route path="*" element={<NotFound />} />

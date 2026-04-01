@@ -14,9 +14,9 @@ import type {
   Alert, // Added if not present
 } from "../types";
 
-// const BASE_URL = "https://cpm-contracts.onrender.com/api";
+const BASE_URL = "https://cpm-contracts.onrender.com/api";
 
-const BASE_URL = "http://localhost:5000/api";
+// const BASE_URL = "http://localhost:5000/api";
 
 const apiFetch = async (
   url: string,
@@ -377,7 +377,144 @@ export const userService = {
   },
 };
 
-// FULLY COMPLETE DOCUMENT SERVICE
+// // FULLY COMPLETE DOCUMENT SERVICE
+// export const documentService = {
+//   // Per organization (legacy)
+//   getDocumentsByOrg: async (
+//     orgId: string,
+//     params?: {
+//       page?: number;
+//       limit?: number;
+//       search?: string;
+//       documentType?: string;
+//     },
+//   ) => {
+//     const query = new URLSearchParams(params as any).toString();
+//     return apiFetch(`/documents/${orgId}/documents${query ? `?${query}` : ""}`);
+//   },
+
+//   // GLOBAL FAST DOCUMENTS — THIS IS YOUR WINNER
+//   getAllDocuments: async (params?: {
+//     page?: number;
+//     limit?: number;
+//     search?: string;
+//     documentType?: string;
+//   }) => {
+//     const query = new URLSearchParams();
+//     if (params?.page) query.append("page", params.page.toString());
+//     if (params?.limit) query.append("limit", params.limit.toString());
+//     if (params?.search) query.append("search", params.search);
+//     if (params?.documentType && params.documentType !== "all")
+//       query.append("documentType", params.documentType);
+
+//     return apiFetch(
+//       `/documents/documents${query.toString() ? `?${query.toString()}` : ""}`,
+//     );
+//   },
+
+//   // ADDED: Document Metrics (for Dashboard Stats)
+//   getDocumentMetrics: async (): Promise<
+//     ApiResponse<{ metrics: DocumentMetrics }>
+//   > => {
+//     return apiFetch("/documents/metrics"); // SuperAdmin sees global metrics
+//   },
+
+//   // ADDED: Global Alerts (expiry + new uploads)
+//   getGlobalExpiryAlerts: async (): Promise<
+//     ApiResponse<{ alerts: Alert[] }>
+//   > => {
+//     return apiFetch("/documents/global-alerts");
+//   },
+//   // Public form submission (no token required)
+//   // Public form submission (no token required) - CORRECT PATH
+//   submitPublicSchoolVisitReport: async (formData: FormData) => {
+//     const response = await fetch(
+//       `${BASE_URL}/documents/public/school-visit-report`,
+//       {
+//         method: "POST",
+//         body: formData,
+//       },
+//     );
+
+//     if (!response.ok) {
+//       const error = await response.json().catch(() => ({}));
+//       throw new Error(error.message || "Failed to submit report");
+//     }
+//     return response.json();
+//   },
+//   getSchoolVisitReports: async () => {
+//     const response = await apiFetch("/documents/school-visit-reports");
+//     return response.data; // ← this is the clean array your browser page expects
+//   },
+//   //
+//   uploadDocument: async (
+//     orgId: string,
+//     file: File,
+//     name: string,
+//     type: string,
+//     startDate?: string,
+//     expiryDate?: string,
+//     negotiatedAmount?: number,
+//   ) => {
+//     const formData = new FormData();
+//     formData.append("file", file);
+//     formData.append("documentName", name.trim());
+//     formData.append("documentType", type);
+//     if (startDate) formData.append("startDate", startDate);
+//     if (expiryDate) formData.append("expiryDate", expiryDate);
+//     if (negotiatedAmount !== undefined && negotiatedAmount !== null)
+//       formData.append("negotiatedAmount", negotiatedAmount.toString());
+
+//     return apiUpload(`/documents/${orgId}/upload`, formData);
+//   },
+
+//   downloadDocument: async (id: string, filename?: string): Promise<void> => {
+//     const blob = await apiDownload(`/documents/download/${id}`);
+//     const url = window.URL.createObjectURL(blob);
+//     const link = document.createElement("a");
+//     link.href = url;
+//     link.download = filename || "document.pdf";
+//     document.body.appendChild(link);
+//     link.click();
+//     document.body.removeChild(link);
+//     window.URL.revokeObjectURL(url);
+//   },
+
+//   deleteDocument: async (id: string) =>
+//     apiFetch(`/documents/${id}`, { method: "DELETE" }),
+
+//   updateDocument: async (
+//     id: string,
+//     data: {
+//       name?: string;
+//       documentType?: string;
+//       negotiatedAmount?: number;
+//       startDate?: string;
+//       expiryDate?: string;
+//     },
+//   ) =>
+//     apiFetch(`/documents/${id}`, {
+//       method: "PATCH",
+//       body: JSON.stringify(data),
+//     }),
+
+//   approveDocument: async (id: string) =>
+//     apiFetch(`/documents/${id}/approve`, { method: "POST" }),
+
+//   getDocumentsByUser: async (userId: string) =>
+//     apiFetch(`/documents/user/${userId}`),
+
+//   getNotifications: async (orgId: string) =>
+//     apiFetch(`/documents/notifications/${orgId}`),
+
+//   getContractExpiryAlerts: async (orgId: string) =>
+//     apiFetch(`/documents/alerts/${orgId}`),
+
+//   getEnhancedContractExpiryAlerts: async (orgId: string) =>
+//     apiFetch(`/documents/enhanced-alerts/${orgId}`),
+// };
+
+// FULLY COMPLETE DOCUMENT SERVICE (with Invoice & Receipt support)
 export const documentService = {
   // Per organization (legacy)
   getDocumentsByOrg: async (
@@ -393,7 +530,7 @@ export const documentService = {
     return apiFetch(`/documents/${orgId}/documents${query ? `?${query}` : ""}`);
   },
 
-  // GLOBAL FAST DOCUMENTS — THIS IS YOUR WINNER
+  // GLOBAL FAST DOCUMENTS
   getAllDocuments: async (params?: {
     page?: number;
     limit?: number;
@@ -412,21 +549,53 @@ export const documentService = {
     );
   },
 
-  // ADDED: Document Metrics (for Dashboard Stats)
-  getDocumentMetrics: async (): Promise<
-    ApiResponse<{ metrics: DocumentMetrics }>
-  > => {
-    return apiFetch("/documents/metrics"); // SuperAdmin sees global metrics
+  // NEW: Dedicated Invoice & Receipt methods
+  uploadInvoice: async (
+    paymentId: string,
+    file: File,
+    documentName: string,
+  ) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("documentName", documentName.trim());
+
+    return apiUpload(`/documents/payments/${paymentId}/invoice`, formData);
   },
 
-  // ADDED: Global Alerts (expiry + new uploads)
-  getGlobalExpiryAlerts: async (): Promise<
-    ApiResponse<{ alerts: Alert[] }>
-  > => {
-    return apiFetch("/documents/global-alerts");
+  uploadReceipt: async (
+    paymentId: string,
+    file: File,
+    documentName: string,
+    paymentReference?: string,
+    paymentMethod?: "Transfer" | "Cash" | "POS",
+  ) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("documentName", documentName.trim());
+    if (paymentReference) formData.append("paymentReference", paymentReference);
+    if (paymentMethod) formData.append("paymentMethod", paymentMethod);
+
+    return apiUpload(`/documents/payments/${paymentId}/receipt`, formData);
   },
-  // Public form submission (no token required)
-  // Public form submission (no token required) - CORRECT PATH
+  // ✅ NEW: Public Quick Invoice (exactly as requested)
+  submitPublicQuickInvoice: async (data: any) => {
+    const response = await fetch(`${BASE_URL}/documents/public-quick-invoice`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Failed to create invoice");
+    }
+    return response.json();
+  },
+  // ✅ NEW: Get active officers for dropdown
+  getActiveOfficers: async () => {
+    return apiFetch("/documents/officers");
+  },
+  // Public form submission
   submitPublicSchoolVisitReport: async (formData: FormData) => {
     const response = await fetch(
       `${BASE_URL}/documents/public/school-visit-report`,
@@ -442,11 +611,25 @@ export const documentService = {
     }
     return response.json();
   },
+
   getSchoolVisitReports: async () => {
     const response = await apiFetch("/documents/school-visit-reports");
-    return response.data; // ← this is the clean array your browser page expects
+    return response.data;
   },
-  //
+
+  // Existing methods (kept unchanged)
+  getDocumentMetrics: async (): Promise<
+    ApiResponse<{ metrics: DocumentMetrics }>
+  > => {
+    return apiFetch("/documents/metrics");
+  },
+
+  getGlobalExpiryAlerts: async (): Promise<
+    ApiResponse<{ alerts: Alert[] }>
+  > => {
+    return apiFetch("/documents/global-alerts");
+  },
+
   uploadDocument: async (
     orgId: string,
     file: File,
@@ -509,11 +692,15 @@ export const documentService = {
 
   getContractExpiryAlerts: async (orgId: string) =>
     apiFetch(`/documents/alerts/${orgId}`),
+  // ====================== EXECUTIVE REPORTING DASHBOARD ======================
+  // ====================== EXECUTIVE REPORTING DASHBOARD ======================
+  getDashboardMetrics: async (): Promise<any> => {
+    return apiFetch("/documents/dashboard/metrics"); // ← CHANGED to match your document router
+  },
 
   getEnhancedContractExpiryAlerts: async (orgId: string) =>
     apiFetch(`/documents/enhanced-alerts/${orgId}`),
 };
-
 // export const documentService = {
 //   getDocumentsByOrg: async (
 //     orgId: string,
