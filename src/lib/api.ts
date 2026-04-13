@@ -14,7 +14,7 @@ import type {
   Alert, // Added if not present
 } from "../types";
 
-const BASE_URL = "https://cpm-contracts.onrender.com/api";
+const BASE_URL = "https://contract-i.onrender.com/api";
 
 // const BASE_URL = "http://localhost:5000/api";
 
