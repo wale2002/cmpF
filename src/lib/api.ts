@@ -14,9 +14,9 @@ import type {
   Alert, // Added if not present
 } from "../types";
 
-const BASE_URL = "https://cpm-contracts.onrender.com/api";
+// const BASE_URL = "https://cpm-contracts.onrender.com/api";
 
-// const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000/api";
 
 const apiFetch = async (
   url: string,
