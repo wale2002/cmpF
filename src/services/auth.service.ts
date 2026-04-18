@@ -58,9 +58,8 @@
 // src/services/auth.service.ts
 import type { User, AuthResponse } from "../types";
 
-// const API_BASE =
-//   import.meta.env.VITE_API_URL || "https://contract-i.onrender.com/api";
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://contract-i.onrender.com/api";
+// const API_BASE = "http://localhost:5000/api";
 
 export const authService = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
