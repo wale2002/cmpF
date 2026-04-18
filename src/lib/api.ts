@@ -14,72 +14,56 @@ import type {
   Alert, // Added if not present
 } from "../types";
 
-const BASE_URL = "https://contract-i.onrender.com/api";
+// const BASE_URL = "https://contract-i.onrender.com/api";
 
-// const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000/api";
 
 const apiFetch = async (
   url: string,
   options: RequestInit = {},
 ): Promise<any> => {
-  const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
   const config: RequestInit = {
     headers: {
       "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
     },
+    credentials: "include", // ← REQUIRED for httpOnly cookies (Google + JWT)
     ...options,
   };
 
-  // THIS IS THE FIX — ADD THESE 4 LINES
-  // === CRITICAL FIX FOR PROFILE PICTURE & DOCUMENT UPLOAD ===
+  // Remove Content-Type header for FormData uploads
   if (options.body instanceof FormData) {
     delete (config.headers as Record<string, string>)["Content-Type"];
   }
 
-  console.log("API Fetch:", { url: `${BASE_URL}${url}`, hasToken: !!token }); // Debug log
-
   const response = await fetch(`${BASE_URL}${url}`, config);
+
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    console.error("API Error:", {
-      status: response.status,
-      message: error.message,
-    }); // Debug
-    throw new Error(
-      error.message || `HTTP ${response.status}: API request failed`,
-    );
+    throw new Error(error.message || `HTTP ${response.status}`);
   }
   return response.json();
 };
 
-// Helper for file uploads (multipart/form-data)
+// Upload helper (multipart/form-data)
 const apiUpload = async (url: string, formData: FormData): Promise<any> => {
-  const token = localStorage.getItem("token");
-  const config: RequestInit = {
+  const response = await fetch(`${BASE_URL}${url}`, {
     method: "POST",
     body: formData,
-    ...(token && { headers: { Authorization: `Bearer ${token}` } }),
-  };
+    credentials: "include",
+  });
 
-  const response = await fetch(`${BASE_URL}${url}`, config);
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `HTTP ${response.status}: Upload failed`);
+    throw new Error(error.message || "Upload failed");
   }
   return response.json();
 };
-
 // Helper for downloads (returns blob)
 const apiDownload = async (url: string): Promise<Blob> => {
-  const token = localStorage.getItem("token");
-  const config: RequestInit = {
-    headers: {
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
-  };
+  const response = await fetch(`${BASE_URL}${url}`, {
+    credentials: "include", // ← cookie is enough now
+  });
 
-  const response = await fetch(`${BASE_URL}${url}`, config);
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}: Download failed`);
   }
@@ -92,131 +76,67 @@ export const authService = {
   login: async (
     email: string,
     password: string,
-  ): Promise<ApiResponse<AuthResponse>> => {
-    const response = await apiFetch("/auth/login", {
+  ): Promise<ApiResponse<AuthResponse>> =>
+    apiFetch("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
-    });
-    // Handle both nested and flat responses
-    const token = response.data?.token || response.token;
-    const userData = response.data?.user || response.user;
-    if (token && userData) {
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(userData));
-      console.log("Login success:", {
-        token: token.substring(0, 20) + "...",
-        userRole: userData.role?.name || userData.role,
-      }); // Debug, handle populated role
-    } else {
-      throw new Error("Invalid response from server");
-    }
-    return response;
-  },
+    }),
 
-  getMe: async (): Promise<ApiResponse<{ user: User }>> => {
-    const response = await apiFetch("/auth/me");
-    // Handle both nested and flat responses
-    const userData = response.data?.user || response.user;
-    if (userData) {
-      localStorage.setItem("user", JSON.stringify(userData));
-    }
-    return response;
-  },
+  // ← GOOGLE SIGN-IN (NEW)
+  googleLogin: async (credential: string): Promise<ApiResponse<AuthResponse>> =>
+    apiFetch("/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ credential }),
+    }),
+
+  getMe: async (): Promise<ApiResponse<{ user: User }>> => apiFetch("/auth/me"),
 
   logout: async (): Promise<ApiResponse> => {
     try {
       await apiFetch("/auth/logout", { method: "POST" });
-    } catch (error) {
-      console.error("authService: Logout API error", error);
     } finally {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      // No localStorage cleanup needed (httpOnly cookie)
     }
-    return {
-      status: "success",
-      statusCode: 200,
-      message: "Logged out",
-      data: null,
-      documents: [],
-    };
+    return { status: "success", message: "Logged out" } as any;
   },
 
-  requestPasswordReset: async (email: string): Promise<ApiResponse> => {
-    return apiFetch("/auth/request-reset", {
+  requestPasswordReset: async (email: string): Promise<ApiResponse> =>
+    apiFetch("/auth/request-reset", {
       method: "POST",
       body: JSON.stringify({ email }),
-    });
-  },
+    }),
 
   resetPassword: async (
     resetToken: string,
     newPassword: string,
-  ): Promise<ApiResponse> => {
-    return apiFetch("/auth/reset-password", {
+  ): Promise<ApiResponse> =>
+    apiFetch("/auth/reset-password", {
       method: "POST",
       body: JSON.stringify({ resetToken, newPassword }),
-    });
-  },
+    }),
 
   changePassword: async (
     currentPassword: string,
     newPassword: string,
     confirmNewPassword: string,
-  ): Promise<ApiResponse> => {
-    return apiFetch("/auth/change-password", {
+  ): Promise<ApiResponse> =>
+    apiFetch("/auth/change-password", {
       method: "POST",
       body: JSON.stringify({
         currentPassword,
         newPassword,
         confirmNewPassword,
       }),
-    });
-  },
+    }),
 
   adminResetPassword: async (
     emailAddress: string,
     newPassword: string,
-  ): Promise<ApiResponse> => {
-    return apiFetch("/auth/admin-reset-password", {
+  ): Promise<ApiResponse> =>
+    apiFetch("/auth/admin-reset-password", {
       method: "POST",
       body: JSON.stringify({ emailAddress, newPassword }),
-    });
-  },
-
-  getAuditLogs: async (params?: {
-    page?: number;
-    limit?: number;
-    startDate?: string;
-    endDate?: string;
-  }): Promise<
-    ApiResponse<{
-      auditLogs: any[];
-      pagination: {
-        page: number;
-        limit: number;
-        total: number;
-        totalPages: number;
-        hasNext: boolean;
-        hasPrev: boolean;
-      };
-    }>
-  > => {
-    const query = new URLSearchParams(params as any).toString();
-    return apiFetch(`/auth${query ? `?${query}` : ""}`);
-  },
-
-  getToken: (): string | null => {
-    return localStorage.getItem("token");
-  },
-
-  isAuthenticated: (): boolean => {
-    return !!localStorage.getItem("token");
-  },
-
-  clearAuth: (): void => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-  },
+    }),
 };
 
 // User Service
